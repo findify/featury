@@ -17,4 +17,8 @@ object FeatureValue {
   sealed trait Scalar
   case class Num(value: Double)  extends Scalar
   case class Text(value: String) extends Scalar
+
+  sealed trait ScalarType
+  case object NumType  extends ScalarType
+  case object TextType extends ScalarType
 }

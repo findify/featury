@@ -1,22 +1,24 @@
 package io.findify.featury.feature
 
-import io.findify.featury.model.{Feature, Timestamp}
-import io.findify.featury.model.Feature.{Op, State}
+import cats.effect.IO
+import io.findify.featury.feature.Counter.{CounterConfig, CounterState}
+import io.findify.featury.feature.Feature.State
+import io.findify.featury.model.Key
 import io.findify.featury.model.FeatureValue.{Num, ScalarValue}
+import io.findify.featury.model.Key.FeatureName
 import io.findify.featury.model.Schema.FeatureConfig
 
+trait Counter extends Feature[CounterState, ScalarValue[Num]] {
+  def config: CounterConfig
+  def increment(key: Key, value: Double): IO[Unit]
+  override def empty(): CounterState                               = CounterState(0)
+  override def computeValue(state: CounterState): ScalarValue[Num] = ScalarValue(Num(state.value))
+}
+
 object Counter {
-  case class Increment(value: Double, ts: Timestamp) extends Op
-  case class CounterState(value: Double)             extends State
-  case class CounterConfig()                         extends FeatureConfig
-
-  object CounterFeature extends Feature[CounterState, ScalarValue[Num], Increment, CounterConfig] {
-
-    override def emptyState(conf: CounterConfig): CounterState   = CounterState(0.0)
-    override def value(conf: CounterConfig, state: CounterState) = ScalarValue(Num(state.value))
-
-    override def update(conf: CounterConfig, state: CounterState, op: Increment): CounterState = CounterState(
-      state.value + op.value
-    )
+  case class CounterState(value: Double) extends State {
+    def increment(inc: Double) = CounterState(value + inc)
   }
+  case class CounterConfig(name: FeatureName) extends FeatureConfig
+
 }
