@@ -2,7 +2,7 @@ name := "featury"
 
 version := "0.1"
 
-scalaVersion := "2.13.5"
+scalaVersion := "2.12.12"
 
 lazy val http4sVersion    = "1.0.0-M21"
 lazy val log4catsVersion  = "2.1.0"
