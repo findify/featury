@@ -29,5 +29,8 @@ libraryDependencies ++= Seq(
   "org.scalatestplus"    %% "scalacheck-1-14"      % "3.2.2.0"        % Test,
   "ch.qos.logback"        % "logback-classic"      % "1.2.3",
   "com.github.pathikrit" %% "better-files"         % "3.9.1",
-  "com.github.scopt"     %% "scopt"                % "4.0.1"
+  "com.github.scopt"     %% "scopt"                % "4.0.1",
+  "com.github.fppt"       % "jedis-mock"           % "0.1.19"         % Test,
+  "redis.clients"         % "jedis"                % "3.6.0",
+  "org.scala-lang"        % "scala-reflect"        % scalaVersion.value
 )

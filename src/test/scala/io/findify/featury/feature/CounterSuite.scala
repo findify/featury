@@ -12,7 +12,7 @@ import scala.util.Random
 
 trait CounterSuite extends FixtureAnyFlatSpec with Matchers {
   type FixtureParam = Counter
-  def makeCounter(): Resource[IO, Counter]
+  def makeCounter(): Resource[IO, FixtureParam]
   override def withFixture(test: OneArgTest): Outcome = {
     val (c, shutdownHandle) = (makeCounter().allocated.unsafeRunSync())
     try {
