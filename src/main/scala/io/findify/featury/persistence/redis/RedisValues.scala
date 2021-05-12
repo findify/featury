@@ -5,18 +5,20 @@ import io.findify.featury.model.{BackendError, FeatureValue, Key, ReadResponse}
 import io.findify.featury.model.Key.FeatureName
 import io.findify.featury.model.ReadResponse.ItemFeatures
 import io.findify.featury.persistence.ValueStore
+import io.findify.featury.persistence.ValueStore.{BatchResult, KeyBatch, KeyFeatures}
 import redis.clients.jedis.Jedis
 
 import scala.collection.JavaConverters._
 
 class RedisValues(val redis: Jedis)(implicit c: Codec[FeatureValue]) extends ValueStore {
   import KeyCodec._
-  override def readBatch(keys: List[Key]): IO[List[ReadResponse.ItemFeatures]] = {
+  override def readBatch(batch: KeyBatch): IO[BatchResult] = {
     for {
+      keys    <- IO { batch.asKeys }
       values  <- IO { redis.mget(keys.map(_.toRedisKey("val")): _*) }
       decoded <- parseBatch(keys, values.asScala.toList)
     } yield {
-      decoded
+      BatchResult(batch.ns, batch.group, decoded)
     }
   }
 
@@ -27,17 +29,33 @@ class RedisValues(val redis: Jedis)(implicit c: Codec[FeatureValue]) extends Val
     } yield {}
   }
 
-  def parseBatch(keys: List[Key], values: List[String]): IO[List[ReadResponse.ItemFeatures]] = {
+  def parseBatch(keys: List[Key], values: List[String]): IO[List[KeyFeatures]] = {
     val result =
-      values.map(Option.apply).zip(keys).reverse.foldLeft[Either[Throwable, List[ItemFeatures]]](Right(Nil)) {
-        case (Right(acc), (None, key)) => Right(ItemFeatures(key, None) :: acc)
-        case (Right(acc), (Some(next), key)) =>
-          c.decode(next) match {
-            case Left(err)    => Left(err)
-            case Right(value) => Right(ItemFeatures(key, Some(value)) :: acc)
-          }
-        case (Left(err), _) => Left(err)
-      }
+      values
+        .map(Option.apply)
+        .zip(keys)
+        .foldLeft[Either[Throwable, List[ItemFeatures]]](Right(Nil)) {
+          case (Right(acc), (None, key)) => Right(acc)
+          case (Right(acc), (Some(next), key)) =>
+            c.decode(next) match {
+              case Left(err)    => Left(err)
+              case Right(value) => Right(ItemFeatures(key, value) :: acc)
+            }
+          case (Left(err), _) => Left(err)
+        }
+        .map(
+          _.groupBy(_.key.id)
+            .map { case (id, values) =>
+              KeyFeatures(
+                id = id,
+                features = values.groupBy(_.key.featureName).map { case (name, head :: _) =>
+                  name -> head.value
+                }
+              )
+            }
+            .toList
+            .reverse
+        )
     IO.fromEither(result)
   }
 }

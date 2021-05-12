@@ -7,6 +7,7 @@ import io.findify.featury.persistence.Persistence
 import io.findify.featury.service.FeatureService.{CounterService, NumBoundedListService, TextBoundedListService}
 import cats.implicits._
 import io.findify.featury.model.ReadResponse.ItemFeatures
+import io.findify.featury.persistence.ValueStore.BatchResult
 
 class Service(schema: Schema, store: Persistence) {
   val counters  = CounterService(schema, store)
@@ -23,7 +24,7 @@ class Service(schema: Schema, store: Persistence) {
     result.sequence.map(_ => {})
   }
 
-  def read(keys: List[Key]): IO[List[ItemFeatures]] = {
-    values.readBatch(keys)
+  def read(keys: List[Key]): IO[BatchResult] = {
+    values.readBatch(null)
   }
 }
