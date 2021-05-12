@@ -14,7 +14,7 @@ case object MemPersistence extends Persistence {
   lazy val counters   = Scaffeine().build[Key, CounterState]()
   lazy val textLists  = Scaffeine().build[Key, BoundedListState[Text]]()
   lazy val numLists   = Scaffeine().build[Key, BoundedListState[Num]]()
-  lazy val valueCache = Scaffeine().build[Key, Map[FeatureName, FeatureValue]]()
+  lazy val valueCache = Scaffeine().build[Key, FeatureValue]()
 
   override def counter(config: Counter.CounterConfig): Counter = new MemCounter(config, counters)
 

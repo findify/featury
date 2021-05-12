@@ -12,14 +12,15 @@ import scala.concurrent.duration._
 
 trait BoundedList[T <: Scalar] extends Feature[BoundedListState[T], BoundedListValue[T]] {
   def config: BoundedListConfig
+  def fromItems(list: List[ListItem[T]]): BoundedListValue[T]
   def put(key: Key, value: T, ts: Timestamp): IO[Unit]
   override def empty(): BoundedListState[T] = BoundedListState(Nil)
   override def computeValue(state: BoundedListState[T]): BoundedListValue[T] =
     state.values match {
-      case Nil => BoundedListValue(Nil)
+      case Nil => fromItems(Nil)
       case head :: _ =>
         val timeCutoff = head.ts.minus(config.duration)
-        BoundedListValue(state.values.filter(_.ts.isAfter(timeCutoff)).take(config.count))
+        fromItems(state.values.filter(_.ts.isAfter(timeCutoff)).take(config.count))
     }
 }
 

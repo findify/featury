@@ -2,7 +2,7 @@ package io.findify.featury.feature
 
 import cats.effect.unsafe.implicits.global
 import cats.effect.{IO, Resource}
-import io.findify.featury.model.FeatureValue.{Num, ScalarValue}
+import io.findify.featury.model.FeatureValue.{Num, NumScalarValue, ScalarValue}
 import io.findify.featury.util.TestKey
 import org.scalatest.Outcome
 import org.scalatest.flatspec.{AnyFlatSpec, FixtureAnyFlatSpec}
@@ -41,12 +41,12 @@ trait CounterSuite extends FixtureAnyFlatSpec with Matchers {
     val key = TestKey(id = "p12")
     counter.increment(key, 1.0).unsafeRunSync()
     val value = counter.computeValue(counter.readState(key).unsafeRunSync())
-    value shouldBe ScalarValue(Num(1.0))
+    value shouldBe NumScalarValue(Num(1.0))
   }
 
   it should "read zero on empty state" in { counter =>
     val key   = TestKey(id = "p13")
     val value = counter.computeValue(counter.readState(key).unsafeRunSync())
-    value shouldBe ScalarValue(Num(0.0))
+    value shouldBe NumScalarValue(Num(0.0))
   }
 }

@@ -4,7 +4,7 @@ import cats.effect.IO
 import com.github.blemale.scaffeine.{Cache, Scaffeine}
 import io.findify.featury.feature.BoundedList
 import io.findify.featury.feature.BoundedList.{BoundedListConfig, BoundedListState}
-import io.findify.featury.model.FeatureValue.{ListItem, Num, Scalar, Text, TextValue}
+import io.findify.featury.model.FeatureValue.{ListItem, Num, NumBoundedListValue, Scalar, Text, TextBoundedListValue}
 import io.findify.featury.model.Key.FeatureName
 import io.findify.featury.model.{FeatureValue, Key, Timestamp}
 
@@ -27,8 +27,12 @@ object MemBoundedList {
   class MemTextBoundedList(
       val config: BoundedListConfig,
       override val listCache: Cache[Key, BoundedListState[Text]]
-  ) extends MemBoundedList[Text]
+  ) extends MemBoundedList[Text] {
+    override def fromItems(list: List[ListItem[Text]]): FeatureValue.BoundedListValue[Text] = TextBoundedListValue(list)
+  }
 
   class MemNumBoundedList(val config: BoundedListConfig, override val listCache: Cache[Key, BoundedListState[Num]])
-      extends MemBoundedList[Num]
+      extends MemBoundedList[Num] {
+    override def fromItems(list: List[ListItem[Num]]): FeatureValue.BoundedListValue[Num] = NumBoundedListValue(list)
+  }
 }
