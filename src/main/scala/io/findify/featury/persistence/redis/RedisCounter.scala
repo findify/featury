@@ -10,6 +10,7 @@ import scala.util.{Failure, Success, Try}
 
 class RedisCounter(val config: CounterConfig, val redis: Jedis) extends Counter {
   import KeyCodec._
+
   override def increment(key: Key, value: Double): IO[Unit] = IO { redis.incrByFloat(key.toRedisKey("state"), value) }
 
   override def readState(key: Key): IO[Counter.CounterState] = for {

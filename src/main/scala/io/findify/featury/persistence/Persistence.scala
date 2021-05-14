@@ -1,8 +1,9 @@
 package io.findify.featury.persistence
 
 import io.findify.featury.feature.BoundedList.BoundedListConfig
-import io.findify.featury.feature.{BoundedList, Counter}
+import io.findify.featury.feature.{BoundedList, Counter, PeriodicCounter}
 import io.findify.featury.feature.Counter.CounterConfig
+import io.findify.featury.feature.PeriodicCounter.PeriodicCounterConfig
 import io.findify.featury.model.FeatureValue.{Num, Text}
 
 trait Persistence {
@@ -10,4 +11,5 @@ trait Persistence {
   def counter(config: CounterConfig): Counter
   def textBoundedList(config: BoundedListConfig): BoundedList[Text]
   def numBoundedList(config: BoundedListConfig): BoundedList[Num]
+  def periodicCounter(config: PeriodicCounterConfig): PeriodicCounter
 }

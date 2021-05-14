@@ -20,5 +20,4 @@ object Counter {
     def increment(inc: Double) = CounterState(value + inc)
   }
   case class CounterConfig(name: FeatureName) extends FeatureConfig
-
 }
