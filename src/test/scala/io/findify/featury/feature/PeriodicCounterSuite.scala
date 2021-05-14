@@ -32,14 +32,16 @@ trait PeriodicCounterSuite extends FixtureAnyFlatSpec with Matchers {
     val now = Timestamp.now
     c.increment(k, now, 1.0).unsafeRunSync()
     val result = c.computeValue(c.readState(k).unsafeRunSync())
-    result shouldBe PeriodicNumValue(
-      List(
-        PeriodicValue(now.toStartOfPeriod(config.period), now, 1, 1.0),
-        PeriodicValue(
-          now.toStartOfPeriod(config.period).minus(config.period * 7),
-          now,
-          8,
-          1.0
+    result shouldBe Some(
+      PeriodicNumValue(
+        List(
+          PeriodicValue(now.toStartOfPeriod(config.period), now, 1, 1.0),
+          PeriodicValue(
+            now.toStartOfPeriod(config.period).minus(config.period * 7),
+            now,
+            8,
+            1.0
+          )
         )
       )
     )
@@ -55,14 +57,16 @@ trait PeriodicCounterSuite extends FixtureAnyFlatSpec with Matchers {
       c.increment(k, ts, 1.0).unsafeRunSync()
     }
     val result = c.computeValue(c.readState(k).unsafeRunSync())
-    result shouldBe PeriodicNumValue(
-      List(
-        PeriodicValue(now.toStartOfPeriod(config.period), now, 1, 10.0),
-        PeriodicValue(
-          now.toStartOfPeriod(config.period).minus(config.period * 7),
-          now,
-          8,
-          10.0
+    result shouldBe Some(
+      PeriodicNumValue(
+        List(
+          PeriodicValue(now.toStartOfPeriod(config.period), now, 1, 10.0),
+          PeriodicValue(
+            now.toStartOfPeriod(config.period).minus(config.period * 7),
+            now,
+            8,
+            10.0
+          )
         )
       )
     )
@@ -79,14 +83,16 @@ trait PeriodicCounterSuite extends FixtureAnyFlatSpec with Matchers {
       c.increment(k, ts, 1.0).unsafeRunSync()
     }
     val result = c.computeValue(c.readState(k).unsafeRunSync())
-    result shouldBe PeriodicNumValue(
-      List(
-        PeriodicValue(now.toStartOfPeriod(config.period), now, 1, 1.0),
-        PeriodicValue(
-          now.toStartOfPeriod(config.period).minus(config.period * 7),
-          now,
-          8,
-          8.0
+    result shouldBe Some(
+      PeriodicNumValue(
+        List(
+          PeriodicValue(now.toStartOfPeriod(config.period), now, 1, 1.0),
+          PeriodicValue(
+            now.toStartOfPeriod(config.period).minus(config.period * 7),
+            now,
+            8,
+            8.0
+          )
         )
       )
     )

@@ -15,12 +15,12 @@ trait BoundedList[T <: Scalar] extends Feature[BoundedListState[T], BoundedListV
   def fromItems(list: List[ListItem[T]]): BoundedListValue[T]
   def put(key: Key, value: T, ts: Timestamp): IO[Unit]
   override def empty(): BoundedListState[T] = BoundedListState(Nil)
-  override def computeValue(state: BoundedListState[T]): BoundedListValue[T] =
+  override def computeValue(state: BoundedListState[T]): Option[BoundedListValue[T]] =
     state.values match {
-      case Nil => fromItems(Nil)
+      case Nil => Some(fromItems(Nil))
       case head :: _ =>
         val timeCutoff = head.ts.minus(config.duration)
-        fromItems(state.values.filter(_.ts.isAfter(timeCutoff)).take(config.count))
+        Some(fromItems(state.values.filter(_.ts.isAfter(timeCutoff)).take(config.count)))
     }
 }
 

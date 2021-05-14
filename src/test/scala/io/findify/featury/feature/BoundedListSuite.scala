@@ -56,8 +56,8 @@ trait BoundedListSuite[T <: Scalar] extends FixtureAnyFlatSpec with Matchers {
     }
     val state        = bl.readState(key).unsafeRunSync()
     val featureValue = bl.computeValue(state)
-    featureValue.values.size shouldBe config.count
-    featureValue.values shouldBe values.reverse.take(config.count)
+    featureValue.map(_.values.size) shouldBe Some(config.count)
+    featureValue.map(_.values) shouldBe Some(values.reverse.take(config.count))
   }
 
   it should "be bounded by time" in { bl =>
@@ -69,8 +69,10 @@ trait BoundedListSuite[T <: Scalar] extends FixtureAnyFlatSpec with Matchers {
     }
     val state        = bl.readState(key).unsafeRunSync()
     val featureValue = bl.computeValue(state)
-    featureValue.values.size shouldBe 5
+    featureValue.map(_.values.size) shouldBe Some(5)
     val cutoff = now.minus(config.duration)
-    featureValue.values shouldBe values.sortBy(_.ts.ts).reverse.filter(_.ts.isAfter(cutoff)).take(config.count)
+    featureValue.map(_.values) shouldBe Some(
+      values.sortBy(_.ts.ts).reverse.filter(_.ts.isAfter(cutoff)).take(config.count)
+    )
   }
 }

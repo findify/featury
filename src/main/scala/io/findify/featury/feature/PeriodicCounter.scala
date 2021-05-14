@@ -14,7 +14,7 @@ trait PeriodicCounter extends Feature[PeriodicCounterState, PeriodicNumValue] {
   def config: PeriodicCounterConfig
   def increment(key: Key, ts: Timestamp, value: Double): IO[Unit]
   override def empty(): PeriodicCounterState = PeriodicCounterState(Timestamp(0L))
-  override def computeValue(state: PeriodicCounterState): PeriodicNumValue = {
+  override def computeValue(state: PeriodicCounterState): Option[PeriodicNumValue] = {
     val result = for {
       range <- config.sumPeriodRanges
     } yield {
@@ -27,7 +27,7 @@ trait PeriodicCounter extends Feature[PeriodicCounterState, PeriodicNumValue] {
         }
       PeriodicValue(start, end, range.startOffset - range.endOffset + 1, sum)
     }
-    PeriodicNumValue(result)
+    Some(PeriodicNumValue(result))
   }
 
 }

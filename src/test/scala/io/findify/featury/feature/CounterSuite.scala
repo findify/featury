@@ -41,12 +41,12 @@ trait CounterSuite extends FixtureAnyFlatSpec with Matchers {
     val key = TestKey(id = "p12")
     counter.increment(key, 1.0).unsafeRunSync()
     val value = counter.computeValue(counter.readState(key).unsafeRunSync())
-    value shouldBe NumScalarValue(Num(1.0))
+    value shouldBe Some(NumScalarValue(Num(1.0)))
   }
 
   it should "read zero on empty state" in { counter =>
     val key   = TestKey(id = "p13")
     val value = counter.computeValue(counter.readState(key).unsafeRunSync())
-    value shouldBe NumScalarValue(Num(0.0))
+    value shouldBe Some(NumScalarValue(Num(0.0)))
   }
 }

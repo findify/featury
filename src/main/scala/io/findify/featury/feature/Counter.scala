@@ -11,8 +11,8 @@ import io.findify.featury.model.Schema.FeatureConfig
 trait Counter extends Feature[CounterState, NumScalarValue] {
   def config: CounterConfig
   def increment(key: Key, value: Double): IO[Unit]
-  override def empty(): CounterState                             = CounterState(0)
-  override def computeValue(state: CounterState): NumScalarValue = NumScalarValue(Num(state.value))
+  override def empty(): CounterState                                     = CounterState(0)
+  override def computeValue(state: CounterState): Option[NumScalarValue] = Some(NumScalarValue(Num(state.value)))
 }
 
 object Counter {
