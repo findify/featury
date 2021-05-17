@@ -4,7 +4,7 @@ import cats.effect.unsafe.implicits.global
 import cats.effect.{IO, Resource}
 import io.findify.featury.feature.StatsEstimator.StatsEstimatorConfig
 import io.findify.featury.model.FeatureValue.NumStatsValue
-import io.findify.featury.model.Key.FeatureName
+import io.findify.featury.model.Key.{FeatureName, GroupName, Namespace}
 import io.findify.featury.util.TestKey
 import org.scalatest.Outcome
 import org.scalatest.flatspec.FixtureAnyFlatSpec
@@ -13,7 +13,8 @@ import org.scalatest.matchers.should.Matchers
 trait StatsEstimatorSuite extends FixtureAnyFlatSpec with Matchers {
   type FixtureParam = StatsEstimator
 
-  def config: StatsEstimatorConfig = StatsEstimatorConfig(FeatureName("f1"), 100, 1, List(50, 90))
+  def config: StatsEstimatorConfig =
+    StatsEstimatorConfig(FeatureName("f1"), ns = Namespace("a"), group = GroupName("b"), 100, 1, List(50, 90))
   def makeCounter(): Resource[IO, FixtureParam]
 
   override def withFixture(test: OneArgTest): Outcome = {

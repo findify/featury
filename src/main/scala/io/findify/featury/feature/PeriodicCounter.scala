@@ -5,7 +5,7 @@ import io.findify.featury.feature.Counter.{CounterConfig, CounterState}
 import io.findify.featury.feature.Feature.State
 import io.findify.featury.feature.PeriodicCounter.{PeriodicCounterConfig, PeriodicCounterState}
 import io.findify.featury.model.FeatureValue.{Num, NumScalarValue, PeriodicNumValue, PeriodicValue}
-import io.findify.featury.model.Key.FeatureName
+import io.findify.featury.model.Key.{FeatureName, GroupName, Namespace}
 import io.findify.featury.model.Schema.FeatureConfig
 import io.findify.featury.model.{Key, Timestamp}
 
@@ -39,6 +39,8 @@ object PeriodicCounter {
   case class PeriodicCounterState(now: Timestamp, periods: Map[Timestamp, Double] = Map.empty) extends State
   case class PeriodicCounterConfig(
       name: FeatureName,
+      ns: Namespace,
+      group: GroupName,
       period: FiniteDuration,
       count: Int,
       sumPeriodRanges: List[PeriodRange]

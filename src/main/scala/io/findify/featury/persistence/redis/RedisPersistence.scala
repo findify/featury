@@ -8,26 +8,26 @@ import io.findify.featury.persistence.{Persistence, ValueStore}
 import redis.clients.jedis.Jedis
 
 class RedisPersistence(val redis: Jedis) extends Persistence {
-  override def periodicCounter(config: PeriodicCounter.PeriodicCounterConfig): PeriodicCounter =
-    ???
+  override def periodicCounter(config: PeriodicCounter.PeriodicCounterConfig): IO[PeriodicCounter] =
+    IO.pure(new RedisPeriodicCounter(config, redis))
 
-  override def numBoundedList(config: BoundedList.BoundedListConfig): BoundedList[FeatureValue.Num] =
-    new RedisBoundedList.RedisNumBoundedList(redis, config)
+  override def numBoundedList(config: BoundedList.BoundedListConfig): IO[BoundedList[FeatureValue.Num]] =
+    IO.pure(new RedisBoundedList.RedisNumBoundedList(redis, config))
 
-  override def textBoundedList(config: BoundedList.BoundedListConfig): BoundedList[FeatureValue.Text] =
-    new RedisBoundedList.RedisTextBoundedList(redis, config)
+  override def textBoundedList(config: BoundedList.BoundedListConfig): IO[BoundedList[FeatureValue.Text]] =
+    IO.pure(new RedisBoundedList.RedisTextBoundedList(redis, config))
 
-  override def statsEstimator(config: StatsEstimator.StatsEstimatorConfig): StatsEstimator =
-    new RedisStatsEstimator(config, redis)
+  override def statsEstimator(config: StatsEstimator.StatsEstimatorConfig): IO[StatsEstimator] =
+    IO.pure(new RedisStatsEstimator(config, redis))
 
-  override def counter(config: Counter.CounterConfig): Counter =
-    new RedisCounter(config, redis)
+  override def counter(config: Counter.CounterConfig): IO[Counter] =
+    IO.pure(new RedisCounter(config, redis))
 
-  override def freqEstimator(config: FreqEstimator.FreqEstimatorConfig): FreqEstimator =
-    new RedisFreqEstimator(config, redis)
+  override def freqEstimator(config: FreqEstimator.FreqEstimatorConfig): IO[FreqEstimator] =
+    IO.pure(new RedisFreqEstimator(config, redis))
 
-  override def values(): ValueStore =
-    new RedisValues(redis)
+  override def values(): IO[ValueStore] =
+    IO.pure(new RedisValues(redis))
 }
 
 object RedisPersistence {

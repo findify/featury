@@ -6,7 +6,6 @@ import io.findify.featury.model.Schema.FeatureConfig
 import io.findify.featury.model.{FeatureValue, Key}
 
 trait Feature[S <: State, T <: FeatureValue, C <: FeatureConfig] {
-  def init(): IO[Unit] = IO.unit
   def config: C
   def empty(): S
   def readState(key: Key): IO[S]

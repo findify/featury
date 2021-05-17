@@ -4,7 +4,7 @@ import cats.effect.unsafe.implicits.global
 import cats.effect.{IO, Resource}
 import io.findify.featury.feature.BoundedList.{BoundedListConfig, BoundedListState}
 import io.findify.featury.model.FeatureValue.{ListItem, Scalar, ScalarType, Text}
-import io.findify.featury.model.Key.FeatureName
+import io.findify.featury.model.Key.{FeatureName, GroupName, Namespace}
 import io.findify.featury.model.Timestamp
 import io.findify.featury.util.TestKey
 import org.scalatest.Outcome
@@ -17,7 +17,14 @@ trait BoundedListSuite[T <: Scalar] extends FixtureAnyFlatSpec with Matchers {
   type FixtureParam = BoundedList[T]
 
   val config: BoundedListConfig =
-    BoundedListConfig(name = FeatureName("example"), count = 10, duration = 5.hour, contentType = contentType)
+    BoundedListConfig(
+      name = FeatureName("example"),
+      ns = Namespace("a"),
+      group = GroupName("b"),
+      count = 10,
+      duration = 5.hour,
+      contentType = contentType
+    )
 
   def contentType: ScalarType
   def makeList(conf: BoundedListConfig): Resource[IO, BoundedList[T]]

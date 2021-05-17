@@ -5,7 +5,7 @@ import io.findify.featury.feature.Feature.State
 import io.findify.featury.feature.FreqEstimator.{FreqEstimatorConfig, FreqEstimatorState}
 import io.findify.featury.model.FeatureValue.StringFrequencyValue
 import io.findify.featury.model.Key
-import io.findify.featury.model.Key.FeatureName
+import io.findify.featury.model.Key.{FeatureName, GroupName, Namespace}
 import io.findify.featury.model.Schema.FeatureConfig
 
 import scala.util.Random
@@ -34,6 +34,7 @@ trait FreqEstimator extends Feature[FreqEstimatorState, StringFrequencyValue, Fr
 }
 
 object FreqEstimator {
-  case class FreqEstimatorState(samples: Vector[String])                            extends State
-  case class FreqEstimatorConfig(name: FeatureName, poolSize: Int, sampleRate: Int) extends FeatureConfig
+  case class FreqEstimatorState(samples: Vector[String]) extends State
+  case class FreqEstimatorConfig(name: FeatureName, ns: Namespace, group: GroupName, poolSize: Int, sampleRate: Int)
+      extends FeatureConfig
 }

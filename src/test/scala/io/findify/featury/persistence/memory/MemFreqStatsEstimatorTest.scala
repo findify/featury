@@ -5,6 +5,6 @@ import io.findify.featury.feature.{FreqEstimator, FreqEstimatorSuite, StatsEstim
 
 class MemFreqStatsEstimatorTest extends FreqEstimatorSuite {
   override def makeCounter(): Resource[IO, FreqEstimator] =
-    Resource.make(IO(MemPersistence.freqEstimator(config)))(_ => IO.unit)
+    Resource.make(MemPersistence.freqEstimator(config))(_ => IO.unit)
 
 }

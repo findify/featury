@@ -9,7 +9,7 @@ import io.findify.featury.model.FeatureValue.{Text, TextType}
 class MemTextBoundedListTest extends BoundedListSuite[Text] {
   override def contentType: FeatureValue.ScalarType = TextType
   override def makeList(config: BoundedListConfig): Resource[IO, BoundedList[Text]] =
-    Resource.make(IO(MemPersistence.textBoundedList(config)))(_ => IO.unit)
+    Resource.make(MemPersistence.textBoundedList(config))(_ => IO.unit)
 
   override def makeValue(i: Int): Text = Text(i.toString)
 }

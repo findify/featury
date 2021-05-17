@@ -11,7 +11,7 @@ import io.findify.featury.persistence.redis.RedisBoundedList.RedisTextBoundedLis
 import org.scalatest.BeforeAndAfterAll
 import redis.clients.jedis.Jedis
 
-class RedisTextBoundedListTest extends BoundedListSuite[Text] with RedisMock {
+class RedisTextBoundedListTest extends BoundedListSuite[Text] with RedisClient {
 
   override def contentType: FeatureValue.ScalarType = TextType
   override def makeList(config: BoundedListConfig): Resource[IO, BoundedList[Text]] =

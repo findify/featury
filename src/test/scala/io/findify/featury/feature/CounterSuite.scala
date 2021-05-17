@@ -2,7 +2,9 @@ package io.findify.featury.feature
 
 import cats.effect.unsafe.implicits.global
 import cats.effect.{IO, Resource}
+import io.findify.featury.feature.Counter.CounterConfig
 import io.findify.featury.model.FeatureValue.{Num, NumScalarValue, ScalarValue}
+import io.findify.featury.model.Key.{FeatureName, GroupName, Namespace}
 import io.findify.featury.util.TestKey
 import org.scalatest.Outcome
 import org.scalatest.flatspec.{AnyFlatSpec, FixtureAnyFlatSpec}
@@ -12,6 +14,7 @@ import scala.util.Random
 
 trait CounterSuite extends FixtureAnyFlatSpec with Matchers {
   type FixtureParam = Counter
+  val config = CounterConfig(FeatureName("counter"), ns = Namespace("a"), group = GroupName("b"))
   def makeCounter(): Resource[IO, FixtureParam]
   override def withFixture(test: OneArgTest): Outcome = {
     val (c, shutdownHandle) = (makeCounter().allocated.unsafeRunSync())
@@ -24,7 +27,7 @@ trait CounterSuite extends FixtureAnyFlatSpec with Matchers {
 
   it should "increment once" in { counter =>
     val key = TestKey(id = "p10")
-    counter.increment(key, 1.0).unsafeRunSync()
+    counter.increment(key, 1).unsafeRunSync()
     val state = counter.readState(key).unsafeRunSync()
     state.value shouldBe 1.0
   }
@@ -39,7 +42,7 @@ trait CounterSuite extends FixtureAnyFlatSpec with Matchers {
 
   it should "compute value" in { counter =>
     val key = TestKey(id = "p12")
-    counter.increment(key, 1.0).unsafeRunSync()
+    counter.increment(key, 1).unsafeRunSync()
     val value = counter.computeValue(counter.readState(key).unsafeRunSync())
     value shouldBe Some(NumScalarValue(Num(1.0)))
   }

@@ -4,7 +4,7 @@ import cats.effect.unsafe.implicits.global
 import cats.effect.{IO, Resource}
 import io.findify.featury.feature.FreqEstimator.FreqEstimatorConfig
 import io.findify.featury.feature.StatsEstimator.StatsEstimatorConfig
-import io.findify.featury.model.Key.FeatureName
+import io.findify.featury.model.Key.{FeatureName, GroupName, Namespace}
 import io.findify.featury.util.TestKey
 import org.scalatest.Outcome
 import org.scalatest.flatspec.FixtureAnyFlatSpec
@@ -15,7 +15,8 @@ import scala.util.Random
 trait FreqEstimatorSuite extends FixtureAnyFlatSpec with Matchers {
   type FixtureParam = FreqEstimator
 
-  def config: FreqEstimatorConfig = FreqEstimatorConfig(FeatureName("f1"), 100, 1)
+  def config: FreqEstimatorConfig =
+    FreqEstimatorConfig(FeatureName("f1"), ns = Namespace("a"), group = GroupName("b"), 100, 1)
   def makeCounter(): Resource[IO, FixtureParam]
 
   override def withFixture(test: OneArgTest): Outcome = {

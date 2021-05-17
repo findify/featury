@@ -7,5 +7,5 @@ import io.findify.featury.model.Key.FeatureName
 
 class MemStatsEstimatorTest extends StatsEstimatorSuite {
   override def makeCounter(): Resource[IO, StatsEstimator] =
-    Resource.make(IO(MemPersistence.statsEstimator(config)))(_ => IO.unit)
+    Resource.make(MemPersistence.statsEstimator(config))(_ => IO.unit)
 }

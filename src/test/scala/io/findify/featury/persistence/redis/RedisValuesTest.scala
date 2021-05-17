@@ -4,6 +4,6 @@ import cats.effect.{IO, Resource}
 import io.findify.featury.feature.ValuesSuite
 import io.findify.featury.persistence.ValueStore
 
-class RedisValuesTest extends ValuesSuite with RedisMock {
+class RedisValuesTest extends ValuesSuite with RedisClient {
   override def makeValues(): Resource[IO, ValueStore] = Resource.make(IO(new RedisValues(redisClient)))(_ => IO.unit)
 }

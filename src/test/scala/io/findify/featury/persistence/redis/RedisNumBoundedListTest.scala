@@ -10,7 +10,7 @@ import io.findify.featury.persistence.redis.RedisBoundedList.{RedisNumBoundedLis
 import org.scalatest.BeforeAndAfterAll
 import redis.clients.jedis.Jedis
 
-class RedisNumBoundedListTest extends BoundedListSuite[Num] with RedisMock {
+class RedisNumBoundedListTest extends BoundedListSuite[Num] with RedisClient {
   override def contentType: FeatureValue.ScalarType = TextType
   override def makeList(config: BoundedListConfig): Resource[IO, BoundedList[Num]] =
     Resource.make(IO(new RedisNumBoundedList(redisClient, config)))(_ => IO.unit)

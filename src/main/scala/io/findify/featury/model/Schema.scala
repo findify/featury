@@ -10,6 +10,8 @@ object Schema {
   case class GroupSchema(name: GroupName, features: List[FeatureConfig])
 
   trait FeatureConfig {
+    def ns: Namespace
+    def group: GroupName
     def name: FeatureName
   }
 }

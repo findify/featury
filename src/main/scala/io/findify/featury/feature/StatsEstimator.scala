@@ -6,7 +6,7 @@ import io.findify.featury.feature.Feature.State
 import io.findify.featury.feature.StatsEstimator.{StatsEstimatorConfig, StatsEstimatorState}
 import io.findify.featury.model.FeatureValue.{Num, NumStatsValue}
 import io.findify.featury.model.Key
-import io.findify.featury.model.Key.FeatureName
+import io.findify.featury.model.Key.{FeatureName, GroupName, Namespace}
 import io.findify.featury.model.Schema.FeatureConfig
 
 import scala.collection.JavaConverters._
@@ -48,7 +48,13 @@ trait StatsEstimator extends Feature[StatsEstimatorState, NumStatsValue, StatsEs
 }
 
 object StatsEstimator {
-  case class StatsEstimatorConfig(name: FeatureName, poolSize: Int, sampleRate: Int, percentiles: List[Int])
-      extends FeatureConfig
+  case class StatsEstimatorConfig(
+      name: FeatureName,
+      ns: Namespace,
+      group: GroupName,
+      poolSize: Int,
+      sampleRate: Int,
+      percentiles: List[Int]
+  )                                                       extends FeatureConfig
   case class StatsEstimatorState(samples: Vector[Double]) extends State
 }

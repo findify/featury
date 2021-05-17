@@ -12,19 +12,19 @@ class RedisCounter(val config: CounterConfig, val redis: Jedis) extends Counter 
   val SUFFIX = "c"
   import KeyCodec._
 
-  override def increment(key: Key, value: Double): IO[Unit] = IO { redis.incrByFloat(key.toRedisKey(SUFFIX), value) }
+  override def increment(key: Key, value: Long): IO[Unit] = IO { redis.incrByFloat(key.toRedisKey(SUFFIX), value) }
 
   override def readState(key: Key): IO[Counter.CounterState] = for {
     bytes <- IO { Option(redis.get(key.toRedisKey(SUFFIX))) }
-    value <- IO.fromEither(parseDouble(bytes))
+    value <- IO.fromEither(parseLong(bytes))
   } yield {
     CounterState(value)
   }
 
-  def parseDouble(bytes: Option[String]): Either[BackendError, Double] = bytes match {
-    case None => Right(0.0)
+  def parseLong(bytes: Option[String]): Either[BackendError, Long] = bytes match {
+    case None => Right(0)
     case Some(b) =>
-      Try(java.lang.Double.parseDouble(b)) match {
+      Try(java.lang.Long.parseLong(b)) match {
         case Failure(exception) => Left(BackendError(exception.getMessage))
         case Success(value)     => Right(value)
       }

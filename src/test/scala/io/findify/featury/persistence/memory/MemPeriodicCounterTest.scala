@@ -7,5 +7,5 @@ import io.findify.featury.feature.{PeriodicCounter, PeriodicCounterSuite}
 import scala.concurrent.duration._
 
 class MemPeriodicCounterTest extends PeriodicCounterSuite {
-  override def makeCounter() = Resource.make(IO(MemPersistence.periodicCounter(config)))(_ => IO.unit)
+  override def makeCounter() = Resource.make(MemPersistence.periodicCounter(config))(_ => IO.unit)
 }

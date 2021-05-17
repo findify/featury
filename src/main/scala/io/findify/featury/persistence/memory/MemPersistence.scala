@@ -1,5 +1,6 @@
 package io.findify.featury.persistence.memory
 
+import cats.effect.IO
 import com.github.blemale.scaffeine.{Cache, Scaffeine}
 import io.findify.featury.feature.BoundedList.BoundedListState
 import io.findify.featury.feature.Counter.CounterState
@@ -22,24 +23,24 @@ case object MemPersistence extends Persistence {
   lazy val statEstimators = Scaffeine().build[Key, StatsEstimatorState]()
   lazy val freqEstimators = Scaffeine().build[Key, FreqEstimatorState]
 
-  override def counter(config: Counter.CounterConfig): Counter = new MemCounter(config, counters)
+  override def counter(config: Counter.CounterConfig): IO[Counter] = IO.pure(new MemCounter(config, counters))
 
   override def textBoundedList(
       config: BoundedList.BoundedListConfig
-  ): BoundedList[FeatureValue.Text] =
-    new MemTextBoundedList(config, textLists)
+  ): IO[BoundedList[FeatureValue.Text]] =
+    IO.pure(new MemTextBoundedList(config, textLists))
 
-  override def numBoundedList(config: BoundedList.BoundedListConfig): BoundedList[FeatureValue.Num] =
-    new MemNumBoundedList(config, numLists)
+  override def numBoundedList(config: BoundedList.BoundedListConfig): IO[BoundedList[FeatureValue.Num]] =
+    IO.pure(new MemNumBoundedList(config, numLists))
 
-  override def periodicCounter(config: PeriodicCounter.PeriodicCounterConfig): PeriodicCounter =
-    new MemPeriodicCounter(config, perCounters)
+  override def periodicCounter(config: PeriodicCounter.PeriodicCounterConfig): IO[PeriodicCounter] =
+    IO.pure(new MemPeriodicCounter(config, perCounters))
 
-  override def statsEstimator(config: StatsEstimator.StatsEstimatorConfig): StatsEstimator =
-    new MemStatsEstimator(config, statEstimators)
+  override def statsEstimator(config: StatsEstimator.StatsEstimatorConfig): IO[StatsEstimator] =
+    IO.pure(new MemStatsEstimator(config, statEstimators))
 
-  override def freqEstimator(config: FreqEstimator.FreqEstimatorConfig): FreqEstimator =
-    new MemFreqEstimator(config, freqEstimators)
+  override def freqEstimator(config: FreqEstimator.FreqEstimatorConfig): IO[FreqEstimator] =
+    IO.pure(new MemFreqEstimator(config, freqEstimators))
 
-  override def values() = new MemValues(valueCache)
+  override def values() = IO.pure(new MemValues(valueCache))
 }
