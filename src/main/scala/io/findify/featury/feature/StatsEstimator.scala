@@ -12,7 +12,7 @@ import io.findify.featury.model.Schema.FeatureConfig
 import scala.collection.JavaConverters._
 import scala.util.Random
 
-trait StatsEstimator extends Feature[StatsEstimatorState, NumStatsValue] {
+trait StatsEstimator extends Feature[StatsEstimatorState, NumStatsValue, StatsEstimatorConfig] {
   def config: StatsEstimatorConfig
   final def put(key: Key, value: Double): IO[Unit] = {
     if (Random.nextInt(config.sampleRate) == 0) {

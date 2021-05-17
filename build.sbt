@@ -32,5 +32,6 @@ libraryDependencies ++= Seq(
   "com.github.scopt"     %% "scopt"                % "4.0.1",
   "com.github.fppt"       % "jedis-mock"           % "0.1.19"         % Test,
   "redis.clients"         % "jedis"                % "3.6.0",
-  "com.google.guava"      % "guava"                % "30.1.1-jre"
+  "com.google.guava"      % "guava"                % "30.1.1-jre",
+  "com.datastax.oss"      % "java-driver-core"     % "4.11.1"
 )

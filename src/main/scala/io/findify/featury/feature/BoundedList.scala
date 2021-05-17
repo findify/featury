@@ -10,7 +10,7 @@ import io.findify.featury.model.Schema.FeatureConfig
 
 import scala.concurrent.duration._
 
-trait BoundedList[T <: Scalar] extends Feature[BoundedListState[T], BoundedListValue[T]] {
+trait BoundedList[T <: Scalar] extends Feature[BoundedListState[T], BoundedListValue[T], BoundedListConfig] {
   def config: BoundedListConfig
   def fromItems(list: List[ListItem[T]]): BoundedListValue[T]
   def put(key: Key, value: T, ts: Timestamp): IO[Unit]

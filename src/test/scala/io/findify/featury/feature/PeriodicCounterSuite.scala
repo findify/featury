@@ -4,6 +4,7 @@ import cats.effect.unsafe.implicits.global
 import cats.effect.{IO, Resource}
 import io.findify.featury.feature.PeriodicCounter.{PeriodRange, PeriodicCounterConfig}
 import io.findify.featury.model.FeatureValue.{PeriodicNumValue, PeriodicValue}
+import io.findify.featury.model.Key.FeatureName
 import io.findify.featury.model.Timestamp
 import io.findify.featury.util.TestKey
 import org.scalatest.Outcome
@@ -15,7 +16,8 @@ import scala.concurrent.duration._
 trait PeriodicCounterSuite extends FixtureAnyFlatSpec with Matchers {
   type FixtureParam = PeriodicCounter
 
-  def config: PeriodicCounterConfig = PeriodicCounterConfig(1.day, 10, List(PeriodRange(0, 0), PeriodRange(7, 0)))
+  def config: PeriodicCounterConfig =
+    PeriodicCounterConfig(FeatureName("f1"), 1.day, 10, List(PeriodRange(0, 0), PeriodRange(7, 0)))
   def makeCounter(): Resource[IO, FixtureParam]
 
   override def withFixture(test: OneArgTest): Outcome = {

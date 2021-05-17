@@ -11,17 +11,18 @@ import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
 trait RedisBoundedList[T <: Scalar] extends BoundedList[T] {
+  val SUFFIX = "bl"
   import KeyCodec._
 
   def redis: Jedis
   def codec: Codec[ListItem[T]]
 
   override def put(key: Key, value: T, ts: Timestamp): IO[Unit] = IO {
-    redis.rpush(key.toRedisKey("state"), codec.encode(ListItem(value, ts)))
+    redis.rpush(key.toRedisKey(SUFFIX), codec.encode(ListItem(value, ts)))
   }
 
   override def readState(key: Key): IO[BoundedList.BoundedListState[T]] = for {
-    list    <- IO { redis.lrange(key.toRedisKey("state"), 0, -1).asScala.toList }
+    list    <- IO { redis.lrange(key.toRedisKey(SUFFIX), 0, -1).asScala.toList }
     decoded <- decodeList(list)
   } yield {
     decoded

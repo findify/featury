@@ -14,7 +14,7 @@ import io.findify.featury.persistence.Persistence
 import io.findify.featury.service.FeatureService.FeatureKey
 import shapeless.syntax.typeable._
 
-trait FeatureService[W <: WriteAction, F <: Feature[_, _]] {
+trait FeatureService[W <: WriteAction, F <: Feature[_, _, _]] {
   def mapping: Map[FeatureKey, F]
   def write(action: W, feature: F): IO[Unit]
   def select(action: WriteAction): Option[W]
@@ -63,7 +63,7 @@ object FeatureService {
     override def select(action: WriteAction): Option[WriteNumList] = action.cast[WriteNumList]
   }
 
-  def load[F <: Feature[_, _]](schema: Schema)(pf: PartialFunction[FeatureConfig, F]): Map[FeatureKey, F] = {
+  def load[F <: Feature[_, _, _]](schema: Schema)(pf: PartialFunction[FeatureConfig, F]): Map[FeatureKey, F] = {
     val result = for {
       ns          <- schema.namespaces
       group       <- ns.groups

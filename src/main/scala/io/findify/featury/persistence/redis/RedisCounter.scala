@@ -9,12 +9,13 @@ import redis.clients.jedis.Jedis
 import scala.util.{Failure, Success, Try}
 
 class RedisCounter(val config: CounterConfig, val redis: Jedis) extends Counter {
+  val SUFFIX = "c"
   import KeyCodec._
 
-  override def increment(key: Key, value: Double): IO[Unit] = IO { redis.incrByFloat(key.toRedisKey("state"), value) }
+  override def increment(key: Key, value: Double): IO[Unit] = IO { redis.incrByFloat(key.toRedisKey(SUFFIX), value) }
 
   override def readState(key: Key): IO[Counter.CounterState] = for {
-    bytes <- IO { Option(redis.get(key.toRedisKey("state"))) }
+    bytes <- IO { Option(redis.get(key.toRedisKey(SUFFIX))) }
     value <- IO.fromEither(parseDouble(bytes))
   } yield {
     CounterState(value)

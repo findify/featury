@@ -10,7 +10,7 @@ import io.findify.featury.model.Schema.FeatureConfig
 
 import scala.util.Random
 
-trait FreqEstimator extends Feature[FreqEstimatorState, StringFrequencyValue] {
+trait FreqEstimator extends Feature[FreqEstimatorState, StringFrequencyValue, FreqEstimatorConfig] {
   def config: FreqEstimatorConfig
   def put(key: Key, value: String): IO[Unit] = if (Random.nextInt(config.sampleRate) == 0) {
     putReal(key, value)
