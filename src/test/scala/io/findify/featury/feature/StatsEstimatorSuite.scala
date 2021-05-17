@@ -37,4 +37,13 @@ trait StatsEstimatorSuite extends FixtureAnyFlatSpec with Matchers {
       )
     )
   }
+
+  it should "measure a 1-1000 range" in { s =>
+    val k = TestKey(id = "p2")
+    for { i <- 0 until 1000 } { s.put(k, i.toDouble).unsafeRunSync() }
+    val result = s.computeValue(s.readState(k).unsafeRunSync()).get
+    result.min should be > 100.0
+    result.max should be > 100.0
+    result.quantiles.values.toList.forall(_ > 100) shouldBe true
+  }
 }

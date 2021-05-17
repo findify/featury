@@ -35,7 +35,7 @@ class RedisValues(val redis: Jedis)(implicit c: Codec[FeatureValue]) extends Val
         .map(Option.apply)
         .zip(keys)
         .foldLeft[Either[Throwable, List[ItemFeatures]]](Right(Nil)) {
-          case (Right(acc), (None, key)) => Right(acc)
+          case (Right(acc), (None, _)) => Right(acc)
           case (Right(acc), (Some(next), key)) =>
             c.decode(next) match {
               case Left(err)    => Left(err)
@@ -48,9 +48,12 @@ class RedisValues(val redis: Jedis)(implicit c: Codec[FeatureValue]) extends Val
             .map { case (id, values) =>
               KeyFeatures(
                 id = id,
-                features = values.groupBy(_.key.featureName).map { case (name, head :: _) =>
-                  name -> head.value
-                }
+                features = values
+                  .groupBy(_.key.featureName)
+                  .flatMap {
+                    case (name, head :: _) => Some(name -> head.value)
+                    case (_, Nil)          => None
+                  }
               )
             }
             .toList
