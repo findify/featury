@@ -19,7 +19,8 @@ trait BoundedList[T <: Scalar] extends Feature[BoundedListState[T], BoundedListV
     state.values match {
       case Nil => Some(fromItems(Nil))
       case head :: _ =>
-        val timeCutoff = head.ts.minus(config.duration)
+        val maxTs      = state.values.map(_.ts).maxBy(_.ts)
+        val timeCutoff = maxTs.minus(config.duration)
         Some(fromItems(state.values.filter(_.ts.isAfter(timeCutoff)).take(config.count)))
     }
 }

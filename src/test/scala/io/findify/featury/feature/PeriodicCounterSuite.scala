@@ -1,5 +1,6 @@
 package io.findify.featury.feature
 
+import cats.data.NonEmptyList
 import cats.effect.unsafe.implicits.global
 import cats.effect.{IO, Resource}
 import io.findify.featury.feature.PeriodicCounter.{PeriodRange, PeriodicCounterConfig}
@@ -23,7 +24,7 @@ trait PeriodicCounterSuite extends FixtureAnyFlatSpec with Matchers {
       group = GroupName("b"),
       1.day,
       10,
-      List(PeriodRange(0, 0), PeriodRange(7, 0))
+      NonEmptyList.of(PeriodRange(0, 0), PeriodRange(7, 0))
     )
   def makeCounter(): Resource[IO, FixtureParam]
 
@@ -39,15 +40,20 @@ trait PeriodicCounterSuite extends FixtureAnyFlatSpec with Matchers {
   it should "increment once" in { c =>
     val k   = TestKey(id = "p1")
     val now = Timestamp.now
-    c.increment(k, now, 1.0).unsafeRunSync()
+    c.increment(k, now, 1).unsafeRunSync()
     val result = c.computeValue(c.readState(k).unsafeRunSync())
     result shouldBe Some(
       PeriodicNumValue(
         List(
-          PeriodicValue(now.toStartOfPeriod(config.period), now, 1, 1.0),
+          PeriodicValue(
+            now.toStartOfPeriod(config.period),
+            now.toStartOfPeriod(config.period).plus(config.period),
+            1,
+            1.0
+          ),
           PeriodicValue(
             now.toStartOfPeriod(config.period).minus(config.period * 7),
-            now,
+            now.toStartOfPeriod(config.period).plus(config.period),
             8,
             1.0
           )
@@ -63,16 +69,21 @@ trait PeriodicCounterSuite extends FixtureAnyFlatSpec with Matchers {
       offset <- 1 to 10
     } {
       val ts = start.plus(offset.hours)
-      c.increment(k, ts, 1.0).unsafeRunSync()
+      c.increment(k, ts, 1).unsafeRunSync()
     }
     val result = c.computeValue(c.readState(k).unsafeRunSync())
     result shouldBe Some(
       PeriodicNumValue(
         List(
-          PeriodicValue(now.toStartOfPeriod(config.period), now, 1, 10.0),
+          PeriodicValue(
+            now.toStartOfPeriod(config.period),
+            now.toStartOfPeriod(config.period).plus(config.period),
+            1,
+            10.0
+          ),
           PeriodicValue(
             now.toStartOfPeriod(config.period).minus(config.period * 7),
-            now,
+            now.toStartOfPeriod(config.period).plus(config.period),
             8,
             10.0
           )
@@ -82,25 +93,61 @@ trait PeriodicCounterSuite extends FixtureAnyFlatSpec with Matchers {
   }
 
   it should "increment once in a day" in { c =>
-    val k     = TestKey(id = "p2")
+    val k     = TestKey(id = "p3")
     val now   = Timestamp.now
     val start = now.minus(10.days)
     for {
       offset <- 1 to 10
     } {
       val ts = start.plus(offset.days)
-      c.increment(k, ts, 1.0).unsafeRunSync()
+      c.increment(k, ts, 1).unsafeRunSync()
     }
     val result = c.computeValue(c.readState(k).unsafeRunSync())
     result shouldBe Some(
       PeriodicNumValue(
         List(
-          PeriodicValue(now.toStartOfPeriod(config.period), now, 1, 1.0),
+          PeriodicValue(
+            now.toStartOfPeriod(config.period),
+            now.toStartOfPeriod(config.period).plus(config.period),
+            1,
+            1.0
+          ),
           PeriodicValue(
             now.toStartOfPeriod(config.period).minus(config.period * 7),
-            now,
+            now.toStartOfPeriod(config.period).plus(config.period),
             8,
             8.0
+          )
+        )
+      )
+    )
+  }
+
+  it should "increment once in a week" in { c =>
+    val k     = TestKey(id = "p4")
+    val now   = Timestamp.now
+    val start = now.minus(10 * 7.days)
+    for {
+      offset <- 1 to 10
+    } {
+      val ts = start.plus((7 * offset).days)
+      c.increment(k, ts, 1).unsafeRunSync()
+    }
+    val result = c.computeValue(c.readState(k).unsafeRunSync())
+    result shouldBe Some(
+      PeriodicNumValue(
+        List(
+          PeriodicValue(
+            now.toStartOfPeriod(config.period),
+            now.toStartOfPeriod(config.period).plus(config.period),
+            1,
+            1.0
+          ),
+          PeriodicValue(
+            now.toStartOfPeriod(config.period).minus(config.period * 7),
+            now.toStartOfPeriod(config.period).plus(config.period),
+            8,
+            2.0
           )
         )
       )

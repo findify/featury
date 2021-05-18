@@ -37,6 +37,13 @@ trait ValuesSuite extends FixtureAnyFlatSpec with Matchers {
     result.values shouldBe List(KeyFeatures(key.id, Map(key.featureName -> TextScalarValue(Text("foo")))))
   }
 
+  it should "write and read into different namespaces" in { v =>
+    val key = TestKey(id = "p11", fname = "f1")
+    v.write(key, TextScalarValue(Text("foo"))).unsafeRunSync()
+    val result = v.readBatch(TestKeyBatch(key)).unsafeRunSync()
+    result.values shouldBe List(KeyFeatures(key.id, Map(key.featureName -> TextScalarValue(Text("foo")))))
+  }
+
   it should "update and read" in { v =>
     val key = TestKey(id = "p12")
     v.write(key, TextScalarValue(Text("foo"))).unsafeRunSync()
