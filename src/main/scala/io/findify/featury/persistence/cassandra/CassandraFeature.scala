@@ -1,10 +1,11 @@
 package io.findify.featury.persistence.cassandra
 
+import cats.data.NonEmptyList
 import cats.effect.IO
 import com.datastax.oss.driver.api.core.cql.{AsyncResultSet, Row}
 import io.findify.featury.model.Schema.FeatureConfig
-import io.findify.featury.model.Timestamp
 import io.findify.featury.persistence.cassandra.CassandraPersistence.CassandraConfig
+
 import scala.collection.JavaConverters._
 import scala.compat.java8.FutureConverters._
 

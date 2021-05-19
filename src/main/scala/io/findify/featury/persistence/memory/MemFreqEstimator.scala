@@ -11,7 +11,7 @@ import scala.util.Random
 
 class MemFreqEstimator(val config: FreqEstimatorConfig, cache: Cache[Key, FreqEstimatorState]) extends FreqEstimator {
   override def putReal(key: Key, value: String): IO[Unit] = IO {
-    val current = cache.getIfPresent(key).getOrElse(empty())
+    val current = cache.getIfPresent(key).getOrElse(FreqEstimatorState(Vector.empty))
     val updated = if (current.samples.size < config.poolSize) {
       FreqEstimatorState(value +: current.samples)
     } else {
@@ -21,7 +21,7 @@ class MemFreqEstimator(val config: FreqEstimatorConfig, cache: Cache[Key, FreqEs
     cache.put(key, updated)
   }
 
-  override def readState(key: Key): IO[FreqEstimator.FreqEstimatorState] = IO {
-    cache.getIfPresent(key).getOrElse(empty())
+  override def readState(key: Key): IO[Option[FreqEstimatorState]] = IO {
+    cache.getIfPresent(key)
   }
 }

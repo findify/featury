@@ -24,8 +24,6 @@ trait StatsEstimator extends Feature[StatsEstimatorState, NumStatsValue, StatsEs
 
   def putReal(key: Key, value: Double): IO[Unit]
 
-  override def empty(): StatsEstimatorState = StatsEstimatorState(Vector.empty)
-
   override def computeValue(state: StatsEstimatorState): Option[NumStatsValue] = if (state.samples.isEmpty) {
     None
   } else {

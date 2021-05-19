@@ -11,8 +11,8 @@ import io.findify.featury.model.{FeatureValue, Key, Timestamp}
 trait MemBoundedList[T <: Scalar] extends BoundedList[T] {
   def listCache: Cache[Key, BoundedListState[T]] = Scaffeine().build()
 
-  override def readState(key: Key): IO[BoundedListState[T]] = IO {
-    listCache.getIfPresent(key).getOrElse(empty())
+  override def readState(key: Key): IO[Option[BoundedListState[T]]] = IO {
+    listCache.getIfPresent(key)
   }
 
   override def put(key: Key, value: T, ts: Timestamp): IO[Unit] = IO {

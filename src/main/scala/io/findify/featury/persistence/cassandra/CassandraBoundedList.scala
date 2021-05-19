@@ -54,13 +54,13 @@ trait CassandraBoundedList[T <: Scalar] extends BoundedList[T] with CassandraFea
     _ <- logger.debug(s"wrote [${key.tenant.value},${key.id.value},$ts] = $value")
   } yield {}
 
-  override def readState(key: Key): IO[BoundedList.BoundedListState[T]] = for {
+  override def readState(key: Key): IO[Option[BoundedListState[T]]] = for {
     _         <- logger.debug(s"reading ${config.count} buckets from key [${key.tenant.value},${key.id.value}]")
     bound     <- IO { readStatement.bind(Integer.valueOf(key.tenant.value), key.id.value, Integer.valueOf(config.count)) }
     resultSet <- IO.fromFuture(IO { session.executeAsync(bound).toScala })
     samples   <- fetchPages(resultSet, row => IO(decodeValue(row)))
   } yield {
-    BoundedListState(samples)
+    if (samples.isEmpty) None else Some(BoundedListState(samples))
   }
 }
 

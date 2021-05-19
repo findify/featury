@@ -47,13 +47,13 @@ class CassandraStatsEstimator(val config: StatsEstimatorConfig, session: CqlSess
     _ <- logger.debug(s"wrote [${key.tenant.value},${key.id.value},$bucket] = $value")
   } yield {}
 
-  override def readState(key: Key): IO[StatsEstimator.StatsEstimatorState] = for {
+  override def readState(key: Key): IO[Option[StatsEstimatorState]] = for {
     _         <- logger.debug(s"reading ${config.poolSize} buckets from key [${key.tenant.value},${key.id.value}]")
     bound     <- IO { readStatement.bind(Integer.valueOf(key.tenant.value), key.id.value) }
     resultSet <- IO.fromFuture(IO { session.executeAsync(bound).toScala })
     samples   <- fetchPages(resultSet, parseRow)
   } yield {
-    StatsEstimatorState(samples.toVector)
+    if (samples.nonEmpty) Some(StatsEstimatorState(samples.toVector)) else None
   }
 
   private def parseRow(row: Row): IO[Double] = IO { row.getDouble("value") }

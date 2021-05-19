@@ -52,7 +52,7 @@ class CassandraPeriodicCounter(val config: PeriodicCounterConfig, session: CqlSe
     } yield {}
   }
 
-  override def readState(key: Key): IO[PeriodicCounter.PeriodicCounterState] = {
+  override def readState(key: Key): IO[Option[PeriodicCounterState]] = {
     val periods = config.earliestPeriodOffset + 1
     for {
       _         <- logger.debug(s"reading last $periods from key [${key.tenant.value},${key.id.value}]")
@@ -60,7 +60,8 @@ class CassandraPeriodicCounter(val config: PeriodicCounterConfig, session: CqlSe
       resultSet <- IO.fromFuture(IO { session.executeAsync(bound).toScala })
       counters  <- fetchPages(resultSet, parseRow)
     } yield {
-      PeriodicCounterState(filterCounters(counters).toMap)
+      val filtered = filterCounters(counters).toMap
+      if (filtered.nonEmpty) Some(PeriodicCounterState(filtered)) else None
     }
   }
 

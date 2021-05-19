@@ -20,7 +20,6 @@ trait FreqEstimator extends Feature[FreqEstimatorState, StringFrequencyValue, Fr
 
   def putReal(key: Key, value: String): IO[Unit]
 
-  override def empty(): FreqEstimatorState = FreqEstimatorState(Vector.empty)
   override def computeValue(state: FreqEstimatorState): Option[StringFrequencyValue] = {
     if (state.samples.isEmpty) {
       None

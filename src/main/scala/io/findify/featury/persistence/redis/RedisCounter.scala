@@ -14,11 +14,11 @@ class RedisCounter(val config: CounterConfig, val redis: Jedis) extends Counter 
 
   override def increment(key: Key, value: Long): IO[Unit] = IO { redis.incrByFloat(key.toRedisKey(SUFFIX), value) }
 
-  override def readState(key: Key): IO[Counter.CounterState] = for {
+  override def readState(key: Key): IO[Option[CounterState]] = for {
     bytes <- IO { Option(redis.get(key.toRedisKey(SUFFIX))) }
     value <- IO.fromEither(parseLong(bytes))
   } yield {
-    CounterState(value)
+    if (value != 0) Some(CounterState(value)) else None
   }
 
   def parseLong(bytes: Option[String]): Either[BackendError, Long] = bytes match {

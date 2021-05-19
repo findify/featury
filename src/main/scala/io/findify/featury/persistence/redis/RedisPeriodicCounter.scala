@@ -17,12 +17,13 @@ class RedisPeriodicCounter(val config: PeriodicCounterConfig, redis: Jedis) exte
     _ <- IO { redis.hincrByFloat(key.toRedisKey(SUFFIX), ts.toStartOfPeriod(config.period).ts.toString, value) }
   } yield {}
 
-  override def readState(key: Key): IO[PeriodicCounter.PeriodicCounterState] = for {
+  override def readState(key: Key): IO[Option[PeriodicCounterState]] = for {
     responseOption <- IO { Option(redis.hgetAll(key.toRedisKey(SUFFIX))).map(_.asScala.toList) }
     decoded <- responseOption match {
-      case None           => IO.pure(empty())
-      case Some(Nil)      => IO.pure(empty())
-      case Some(response) => parseResponse(response).map(PeriodicCounterState.apply)
+      case None      => IO.pure(None)
+      case Some(Nil) => IO.pure(None)
+      case Some(response) =>
+        parseResponse(response).map(parsed => if (parsed.nonEmpty) Some(PeriodicCounterState(parsed)) else None)
     }
   } yield {
     decoded

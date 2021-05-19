@@ -10,7 +10,7 @@ class MemPeriodicCounter(val config: PeriodicCounterConfig, cache: Cache[Key, Pe
     extends PeriodicCounter {
   override def increment(key: Key, ts: Timestamp, value: Long): IO[Unit] = IO {
     val periodStart = ts.toStartOfPeriod(config.period)
-    val prev        = cache.getIfPresent(key).getOrElse(empty())
+    val prev        = cache.getIfPresent(key).getOrElse(PeriodicCounterState())
     val updated = prev.periods.get(periodStart) match {
       case Some(oldCounter) => prev.periods + (periodStart -> (value + oldCounter))
       case None             => prev.periods + (periodStart -> (value))
@@ -18,7 +18,7 @@ class MemPeriodicCounter(val config: PeriodicCounterConfig, cache: Cache[Key, Pe
     cache.put(key, PeriodicCounterState(updated))
   }
 
-  override def readState(key: Key): IO[PeriodicCounterState] = IO {
-    cache.getIfPresent(key).getOrElse(empty())
+  override def readState(key: Key): IO[Option[PeriodicCounterState]] = IO {
+    cache.getIfPresent(key)
   }
 }

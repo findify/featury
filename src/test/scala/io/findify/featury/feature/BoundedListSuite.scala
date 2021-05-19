@@ -42,7 +42,7 @@ trait BoundedListSuite[T <: Scalar] extends FixtureAnyFlatSpec with Matchers {
   it should "be empty" in { bl =>
     val key   = TestKey(id = "p10")
     val state = bl.readState(key).unsafeRunSync()
-    state.values.isEmpty shouldBe true
+    state shouldBe None
   }
 
   it should "push elements" in { bl =>
@@ -51,7 +51,7 @@ trait BoundedListSuite[T <: Scalar] extends FixtureAnyFlatSpec with Matchers {
     val value = makeValue(0)
     bl.put(key, value, now).unsafeRunSync()
     val state = bl.readState(key).unsafeRunSync()
-    state shouldBe BoundedListState(List(ListItem(value, now)))
+    state shouldBe Some(BoundedListState(List(ListItem(value, now))))
   }
 
   it should "be bounded by element count" in { bl =>
@@ -61,7 +61,7 @@ trait BoundedListSuite[T <: Scalar] extends FixtureAnyFlatSpec with Matchers {
       bl.put(key, makeValue(i), now).unsafeRunSync()
       ListItem(makeValue(i), now)
     }
-    val state        = bl.readState(key).unsafeRunSync()
+    val state        = bl.readState(key).unsafeRunSync().get
     val featureValue = bl.computeValue(state)
     featureValue.map(_.values.size) shouldBe Some(config.count)
   }
@@ -73,7 +73,7 @@ trait BoundedListSuite[T <: Scalar] extends FixtureAnyFlatSpec with Matchers {
       bl.put(key, makeValue(i), now.minus(i.hours)).unsafeRunSync()
       ListItem(makeValue(i), now.minus(i.hours))
     }
-    val state        = bl.readState(key).unsafeRunSync()
+    val state        = bl.readState(key).unsafeRunSync().get
     val featureValue = bl.computeValue(state)
     featureValue.map(_.values.size) shouldBe Some(5)
     val cutoff = now.minus(config.duration)

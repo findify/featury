@@ -32,7 +32,7 @@ trait FreqEstimatorSuite extends FixtureAnyFlatSpec with Matchers {
     for { i <- 0 until 100 } {
       s.put(k, "p" + math.round(math.abs(Random.nextGaussian() * 10.0)).toString).unsafeRunSync()
     }
-    val result = s.computeValue(s.readState(k).unsafeRunSync()).get
+    val result = s.computeValue(s.readState(k).unsafeRunSync().get).get
     result.values.values.sum shouldBe 1.0 +- 0.01
     result.values.getOrElse("p1", 0.0) should be > 0.01
   }

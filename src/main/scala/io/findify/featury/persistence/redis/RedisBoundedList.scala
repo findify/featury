@@ -21,11 +21,11 @@ trait RedisBoundedList[T <: Scalar] extends BoundedList[T] {
     redis.rpush(key.toRedisKey(SUFFIX), codec.encode(ListItem(value, ts)))
   }
 
-  override def readState(key: Key): IO[BoundedList.BoundedListState[T]] = for {
+  override def readState(key: Key): IO[Option[BoundedListState[T]]] = for {
     list    <- IO { redis.lrange(key.toRedisKey(SUFFIX), 0, -1).asScala.toList }
     decoded <- decodeList(list)
   } yield {
-    decoded
+    if (decoded.values.nonEmpty) Some(decoded) else None
   }
 
   @tailrec

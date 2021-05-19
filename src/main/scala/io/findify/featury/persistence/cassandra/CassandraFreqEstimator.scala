@@ -48,13 +48,13 @@ class CassandraFreqEstimator(val config: FreqEstimatorConfig, session: CqlSessio
     _ <- logger.debug(s"wrote [${key.tenant.value},${key.id.value},$bucket] = $value")
   } yield {}
 
-  override def readState(key: Key): IO[FreqEstimator.FreqEstimatorState] = for {
+  override def readState(key: Key): IO[Option[FreqEstimatorState]] = for {
     _         <- logger.debug(s"reading ${config.poolSize} buckets from key [${key.tenant.value},${key.id.value}]")
     bound     <- IO { readStatement.bind(Integer.valueOf(key.tenant.value), key.id.value) }
     resultSet <- IO.fromFuture(IO { session.executeAsync(bound).toScala })
     samples   <- fetchPages(resultSet, parseRow)
   } yield {
-    FreqEstimatorState(samples.toVector)
+    if (samples.nonEmpty) Some(FreqEstimatorState(samples.toVector)) else None
   }
 
   private def parseRow(row: Row): IO[String] = IO { row.getString("value") }

@@ -3,7 +3,7 @@ package io.findify.featury.feature
 import cats.effect.unsafe.implicits.global
 import cats.effect.{IO, Resource}
 import io.findify.featury.model.FeatureValue.{ScalarValue, Text, TextScalarValue}
-import io.findify.featury.model.Key.FeatureName
+import io.findify.featury.model.Key.{FeatureName, Namespace}
 import io.findify.featury.model.ReadResponse.ItemFeatures
 import io.findify.featury.persistence.ValueStore
 import io.findify.featury.persistence.ValueStore.{BatchResult, KeyBatch, KeyFeatures}
@@ -38,10 +38,14 @@ trait ValuesSuite extends FixtureAnyFlatSpec with Matchers {
   }
 
   it should "write and read into different namespaces" in { v =>
-    val key = TestKey(id = "p11", fname = "f1")
-    v.write(key, TextScalarValue(Text("foo"))).unsafeRunSync()
-    val result = v.readBatch(TestKeyBatch(key)).unsafeRunSync()
-    result.values shouldBe List(KeyFeatures(key.id, Map(key.featureName -> TextScalarValue(Text("foo")))))
+    val key1 = TestKey(id = "p11", fname = "f1").copy(ns = Namespace("n1"))
+    val key2 = TestKey(id = "p11", fname = "f1").copy(ns = Namespace("n2"))
+    v.write(key1, TextScalarValue(Text("foo"))).unsafeRunSync()
+    v.write(key2, TextScalarValue(Text("bar"))).unsafeRunSync()
+    val result1 = v.readBatch(TestKeyBatch(key1)).unsafeRunSync()
+    result1.values shouldBe List(KeyFeatures(key1.id, Map(key1.featureName -> TextScalarValue(Text("foo")))))
+    val result2 = v.readBatch(TestKeyBatch(key2)).unsafeRunSync()
+    result2.values shouldBe List(KeyFeatures(key2.id, Map(key2.featureName -> TextScalarValue(Text("bar")))))
   }
 
   it should "update and read" in { v =>

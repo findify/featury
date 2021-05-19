@@ -18,9 +18,9 @@ class RedisFreqEstimator(val config: FreqEstimatorConfig, redis: Jedis) extends 
     IO { multi.exec() }
   }
 
-  override def readState(key: Key): IO[FreqEstimator.FreqEstimatorState] = for {
+  override def readState(key: Key): IO[Option[FreqEstimatorState]] = for {
     response <- IO { redis.lrange(key.toRedisKey(SUFFIX), 0, -1) }
   } yield {
-    FreqEstimatorState(response.asScala.toVector)
+    if (response.isEmpty) None else Some(FreqEstimatorState(response.asScala.toVector))
   }
 }

@@ -16,7 +16,6 @@ import scala.concurrent.duration.FiniteDuration
 trait PeriodicCounter extends Feature[PeriodicCounterState, PeriodicNumValue, PeriodicCounterConfig] {
   def config: PeriodicCounterConfig
   def increment(key: Key, ts: Timestamp, value: Long): IO[Unit]
-  override def empty(): PeriodicCounterState = PeriodicCounterState()
   override def computeValue(state: PeriodicCounterState): Option[PeriodicNumValue] = {
     val result = for {
       range         <- config.sumPeriodRanges.toList

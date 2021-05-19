@@ -7,7 +7,7 @@ import io.findify.featury.feature.Counter.{CounterConfig, CounterState}
 import io.findify.featury.model.{FeatureValue, Key}
 
 class MemCounter(val config: CounterConfig, counterCache: Cache[Key, CounterState]) extends Counter {
-  override def readState(key: Key): IO[Counter.CounterState] = IO { counterCache.getIfPresent(key).getOrElse(empty()) }
+  override def readState(key: Key): IO[Option[CounterState]] = IO { counterCache.getIfPresent(key) }
 
   override def increment(key: Key, value: Long): IO[Unit] = IO {
     counterCache.getIfPresent(key) match {

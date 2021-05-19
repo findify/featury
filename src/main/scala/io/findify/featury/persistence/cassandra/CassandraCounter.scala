@@ -37,11 +37,11 @@ class CassandraCounter(val config: CounterConfig, session: CqlSession, cc: Cassa
     _ <- IO.fromFuture(IO { session.executeAsync(bound).toScala })
   } yield {}
 
-  override def readState(key: Key): IO[Counter.CounterState] = for {
+  override def readState(key: Key): IO[Option[Counter.CounterState]] = for {
     bound   <- IO { readStatement.bind(java.lang.Integer.valueOf(key.tenant.value), key.id.value) }
     results <- IO.fromFuture(IO { session.executeAsync(bound).toScala })
     count   <- IO { results.currentPage().asScala.headOption.map(_.getLong("value")) }
   } yield {
-    CounterState(count.getOrElse(0L))
+    count.map(CounterState.apply)
   }
 }

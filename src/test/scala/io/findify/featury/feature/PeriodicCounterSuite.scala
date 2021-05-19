@@ -41,7 +41,7 @@ trait PeriodicCounterSuite extends FixtureAnyFlatSpec with Matchers {
     val k   = TestKey(id = "p1")
     val now = Timestamp.now
     c.increment(k, now, 1).unsafeRunSync()
-    val result = c.computeValue(c.readState(k).unsafeRunSync())
+    val result = c.computeValue(c.readState(k).unsafeRunSync().get)
     result shouldBe Some(
       PeriodicNumValue(
         List(
@@ -71,7 +71,7 @@ trait PeriodicCounterSuite extends FixtureAnyFlatSpec with Matchers {
       val ts = start.plus(offset.hours)
       c.increment(k, ts, 1).unsafeRunSync()
     }
-    val result = c.computeValue(c.readState(k).unsafeRunSync())
+    val result = c.computeValue(c.readState(k).unsafeRunSync().get)
     result shouldBe Some(
       PeriodicNumValue(
         List(
@@ -102,7 +102,7 @@ trait PeriodicCounterSuite extends FixtureAnyFlatSpec with Matchers {
       val ts = start.plus(offset.days)
       c.increment(k, ts, 1).unsafeRunSync()
     }
-    val result = c.computeValue(c.readState(k).unsafeRunSync())
+    val result = c.computeValue(c.readState(k).unsafeRunSync().get)
     result shouldBe Some(
       PeriodicNumValue(
         List(
@@ -133,7 +133,7 @@ trait PeriodicCounterSuite extends FixtureAnyFlatSpec with Matchers {
       val ts = start.plus((7 * offset).days)
       c.increment(k, ts, 1).unsafeRunSync()
     }
-    val result = c.computeValue(c.readState(k).unsafeRunSync())
+    val result = c.computeValue(c.readState(k).unsafeRunSync().get)
     result shouldBe Some(
       PeriodicNumValue(
         List(

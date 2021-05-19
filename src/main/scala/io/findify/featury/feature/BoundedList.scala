@@ -14,7 +14,6 @@ trait BoundedList[T <: Scalar] extends Feature[BoundedListState[T], BoundedListV
   def config: BoundedListConfig
   def fromItems(list: List[ListItem[T]]): BoundedListValue[T]
   def put(key: Key, value: T, ts: Timestamp): IO[Unit]
-  override def empty(): BoundedListState[T] = BoundedListState(Nil)
   override def computeValue(state: BoundedListState[T]): Option[BoundedListValue[T]] =
     state.values match {
       case Nil => Some(fromItems(Nil))

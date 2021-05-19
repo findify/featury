@@ -9,9 +9,7 @@ import io.findify.featury.model.Key.{FeatureName, GroupName, Namespace}
 import io.findify.featury.model.Schema.FeatureConfig
 
 trait Counter extends Feature[CounterState, NumScalarValue, CounterConfig] {
-  def config: CounterConfig
   def increment(key: Key, value: Long): IO[Unit]
-  override def empty(): CounterState                                     = CounterState(0)
   override def computeValue(state: CounterState): Option[NumScalarValue] = Some(NumScalarValue(Num(state.value)))
 }
 

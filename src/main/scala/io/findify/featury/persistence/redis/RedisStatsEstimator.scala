@@ -19,11 +19,11 @@ class RedisStatsEstimator(val config: StatsEstimatorConfig, redis: Jedis) extend
     IO { multi.exec() }
   }
 
-  override def readState(key: Key): IO[StatsEstimator.StatsEstimatorState] = for {
+  override def readState(key: Key): IO[Option[StatsEstimatorState]] = for {
     response <- IO { redis.lrange(key.toRedisKey(SUFFIX), 0, -1) }
     decoded  <- parseRecursive(response.asScala.toList)
   } yield {
-    StatsEstimatorState(decoded.toVector)
+    if (decoded.nonEmpty) Some(StatsEstimatorState(decoded.toVector)) else None
   }
 
   def parseRecursive(strings: List[String], doubles: List[Double] = Nil): IO[List[Double]] = strings match {
