@@ -7,9 +7,18 @@ import io.findify.featury.persistence.{Persistence, ValueStore}
 import cats.implicits._
 import io.findify.featury.feature.BoundedList.BoundedListConfig
 import io.findify.featury.feature.Counter.CounterConfig
-import io.findify.featury.feature.{BoundedList, Counter, Feature, FreqEstimator, PeriodicCounter, StatsEstimator}
+import io.findify.featury.feature.{
+  BoundedList,
+  Counter,
+  Feature,
+  FreqEstimator,
+  PeriodicCounter,
+  ScalarFeature,
+  StatsEstimator
+}
 import io.findify.featury.feature.FreqEstimator.FreqEstimatorConfig
 import io.findify.featury.feature.PeriodicCounter.PeriodicCounterConfig
+import io.findify.featury.feature.ScalarFeature.ScalarConfig
 import io.findify.featury.feature.StatsEstimator.StatsEstimatorConfig
 import io.findify.featury.model.FeatureValue.{Num, NumType, Text, TextType}
 import io.findify.featury.model.Key.FeatureKey
@@ -23,10 +32,18 @@ class Service(
     numLists: Map[FeatureKey, BoundedList[Num]],
     freqs: Map[FeatureKey, FreqEstimator],
     stats: Map[FeatureKey, StatsEstimator],
+    texts: Map[FeatureKey, ScalarFeature[Text]],
+    nums: Map[FeatureKey, ScalarFeature[Num]],
     values: ValueStore
 ) {
 
   def write(action: WriteAction) = action match {
+    case WriteRequest.SetText(key, value) =>
+      dispatch[ScalarFeature[Text]](key, texts, _.put(key, Text(value)))
+
+    case WriteRequest.SetNum(key, value) =>
+      dispatch[ScalarFeature[Num]](key, nums, _.put(key, Num(value)))
+
     case WriteRequest.Increment(key, inc) =>
       dispatch[Counter](key, counters, _.increment(key, inc))
 
@@ -66,9 +83,11 @@ object Service {
     numList  <- collect(schema) { case c @ BoundedListConfig(_, _, _, _, _, NumType) => store.numBoundedList(c) }
     freqs    <- collect(schema) { case c: FreqEstimatorConfig => store.freqEstimator(c) }
     stats    <- collect(schema) { case c: StatsEstimatorConfig => store.statsEstimator(c) }
+    texts    <- collect(schema) { case c @ ScalarConfig(_, _, _, TextType) => store.textScalar(c) }
+    nums     <- collect(schema) { case c @ ScalarConfig(_, _, _, NumType) => store.numScalar(c) }
     values   <- store.values()
   } yield {
-    new Service(counters, periodic, textList, numList, freqs, stats, values)
+    new Service(counters, periodic, textList, numList, freqs, stats, texts, nums, values)
   }
 
   def collect[F <: Feature[_, _, _]](

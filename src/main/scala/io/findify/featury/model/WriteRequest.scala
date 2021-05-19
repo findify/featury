@@ -8,6 +8,8 @@ object WriteRequest {
   sealed trait WriteAction {
     def key: Key
   }
+  case class SetText(key: Key, value: String)                     extends WriteAction
+  case class SetNum(key: Key, value: Double)                      extends WriteAction
   case class Increment(key: Key, inc: Int)                        extends WriteAction
   case class PeriodicIncrement(key: Key, ts: Timestamp, inc: Int) extends WriteAction
 

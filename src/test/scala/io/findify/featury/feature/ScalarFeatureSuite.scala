@@ -4,7 +4,7 @@ import cats.effect.unsafe.implicits.global
 import cats.effect.{IO, Resource}
 import io.findify.featury.feature.Counter.CounterConfig
 import io.findify.featury.feature.ScalarFeature.{ScalarConfig, ScalarState}
-import io.findify.featury.model.FeatureValue.Scalar
+import io.findify.featury.model.FeatureValue.{Scalar, TextType}
 import io.findify.featury.model.Key.{FeatureName, GroupName, Namespace}
 import io.findify.featury.util.TestKey
 import org.scalatest.Outcome
@@ -13,7 +13,7 @@ import org.scalatest.matchers.should.Matchers
 
 trait ScalarFeatureSuite[T <: Scalar] extends FixtureAnyFlatSpec with Matchers {
   type FixtureParam = ScalarFeature[T]
-  val config = ScalarConfig(FeatureName("counter"), ns = Namespace("a"), group = GroupName("b"))
+  val config = ScalarConfig(FeatureName("counter"), ns = Namespace("a"), group = GroupName("b"), TextType)
   def makeValue: T
   def makeCounter(): Resource[IO, FixtureParam]
   override def withFixture(test: OneArgTest): Outcome = {
