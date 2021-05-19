@@ -7,6 +7,10 @@ object FeatureValue {
   sealed trait ScalarValue[T <: Scalar] extends FeatureValue {
     def value: T
   }
+  object ScalarValue {
+    def apply(value: Text) = TextScalarValue(value)
+    def apply(value: Num)  = NumScalarValue(value)
+  }
   case class TextScalarValue(value: Text)                                         extends ScalarValue[Text]
   case class NumScalarValue(value: Num)                                           extends ScalarValue[Num]
   case class NumStatsValue(min: Double, max: Double, quantiles: Map[Int, Double]) extends FeatureValue

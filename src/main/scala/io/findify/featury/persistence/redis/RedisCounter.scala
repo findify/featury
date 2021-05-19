@@ -8,14 +8,14 @@ import redis.clients.jedis.Jedis
 
 import scala.util.{Failure, Success, Try}
 
-class RedisCounter(val config: CounterConfig, val redis: Jedis) extends Counter {
-  val SUFFIX = "c"
+case class RedisCounter(config: CounterConfig, redis: Jedis) extends Counter with RedisFeature {
+  override val keySuffix = "c"
   import KeyCodec._
 
-  override def increment(key: Key, value: Long): IO[Unit] = IO { redis.incrByFloat(key.toRedisKey(SUFFIX), value) }
+  override def increment(key: Key, value: Long): IO[Unit] = IO { redis.incrByFloat(key.toRedisKey(keySuffix), value) }
 
   override def readState(key: Key): IO[Option[CounterState]] = for {
-    bytes <- IO { Option(redis.get(key.toRedisKey(SUFFIX))) }
+    bytes <- IO { Option(redis.get(key.toRedisKey(keySuffix))) }
     value <- IO.fromEither(parseLong(bytes))
   } yield {
     if (value != 0) Some(CounterState(value)) else None

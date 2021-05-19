@@ -3,7 +3,7 @@ package io.findify.featury.feature
 import cats.effect.unsafe.implicits.global
 import cats.effect.{IO, Resource}
 import io.findify.featury.feature.Counter.{CounterConfig, CounterState}
-import io.findify.featury.model.FeatureValue.{Num, NumScalarValue, ScalarValue}
+import io.findify.featury.model.FeatureValue.{Num, NumScalarValue}
 import io.findify.featury.model.Key.{FeatureName, GroupName, Namespace}
 import io.findify.featury.util.TestKey
 import org.scalatest.Outcome

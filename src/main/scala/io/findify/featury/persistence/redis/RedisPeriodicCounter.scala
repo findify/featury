@@ -10,15 +10,15 @@ import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
-class RedisPeriodicCounter(val config: PeriodicCounterConfig, redis: Jedis) extends PeriodicCounter {
-  val SUFFIX = "pc"
+case class RedisPeriodicCounter(config: PeriodicCounterConfig, redis: Jedis) extends PeriodicCounter with RedisFeature {
+  val keySuffix = "pc"
   import KeyCodec._
   override def increment(key: Key, ts: Timestamp, value: Long): IO[Unit] = for {
-    _ <- IO { redis.hincrByFloat(key.toRedisKey(SUFFIX), ts.toStartOfPeriod(config.period).ts.toString, value) }
+    _ <- IO { redis.hincrByFloat(key.toRedisKey(keySuffix), ts.toStartOfPeriod(config.period).ts.toString, value) }
   } yield {}
 
   override def readState(key: Key): IO[Option[PeriodicCounterState]] = for {
-    responseOption <- IO { Option(redis.hgetAll(key.toRedisKey(SUFFIX))).map(_.asScala.toList) }
+    responseOption <- IO { Option(redis.hgetAll(key.toRedisKey(keySuffix))).map(_.asScala.toList) }
     decoded <- responseOption match {
       case None      => IO.pure(None)
       case Some(Nil) => IO.pure(None)

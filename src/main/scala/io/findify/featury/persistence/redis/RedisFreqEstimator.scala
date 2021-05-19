@@ -8,18 +8,18 @@ import redis.clients.jedis.Jedis
 
 import scala.collection.JavaConverters._
 
-class RedisFreqEstimator(val config: FreqEstimatorConfig, redis: Jedis) extends FreqEstimator {
-  val SUFFIX = "f"
+case class RedisFreqEstimator(config: FreqEstimatorConfig, redis: Jedis) extends FreqEstimator with RedisFeature {
+  val keySuffix = "f"
   import KeyCodec._
   override def putReal(key: Key, value: String): IO[Unit] = {
     val multi = redis.multi()
-    multi.lpush(key.toRedisKey(SUFFIX), value)
-    multi.ltrim(key.toRedisKey(SUFFIX), 0, config.poolSize)
+    multi.lpush(key.toRedisKey(keySuffix), value)
+    multi.ltrim(key.toRedisKey(keySuffix), 0, config.poolSize)
     IO { multi.exec() }
   }
 
   override def readState(key: Key): IO[Option[FreqEstimatorState]] = for {
-    response <- IO { redis.lrange(key.toRedisKey(SUFFIX), 0, -1) }
+    response <- IO { redis.lrange(key.toRedisKey(keySuffix), 0, -1) }
   } yield {
     if (response.isEmpty) None else Some(FreqEstimatorState(response.asScala.toVector))
   }

@@ -5,5 +5,5 @@ import io.findify.featury.feature.{FreqEstimator, FreqEstimatorSuite, StatsEstim
 
 class RedisFreqEstimatorTest extends FreqEstimatorSuite with RedisClient {
   override def makeCounter(): Resource[IO, FreqEstimator] =
-    Resource.make(IO(new RedisFreqEstimator(config, redisClient)))(_ => IO.unit)
+    Resource.make(IO(RedisFreqEstimator(config, redisClient)))(_ => IO.unit)
 }

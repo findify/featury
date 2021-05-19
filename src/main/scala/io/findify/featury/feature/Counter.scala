@@ -4,13 +4,13 @@ import cats.effect.IO
 import io.findify.featury.feature.Counter.{CounterConfig, CounterState}
 import io.findify.featury.feature.Feature.State
 import io.findify.featury.model.Key
-import io.findify.featury.model.FeatureValue.{Num, NumScalarValue}
+import io.findify.featury.model.FeatureValue.{Num, ScalarValue}
 import io.findify.featury.model.Key.{FeatureName, GroupName, Namespace}
 import io.findify.featury.model.Schema.FeatureConfig
 
-trait Counter extends Feature[CounterState, NumScalarValue, CounterConfig] {
+trait Counter extends Feature[CounterState, ScalarValue[Num], CounterConfig] {
   def increment(key: Key, value: Long): IO[Unit]
-  override def computeValue(state: CounterState): Option[NumScalarValue] = Some(NumScalarValue(Num(state.value)))
+  override def computeValue(state: CounterState): Option[ScalarValue[Num]] = Some(ScalarValue(Num(state.value)))
 }
 
 object Counter {

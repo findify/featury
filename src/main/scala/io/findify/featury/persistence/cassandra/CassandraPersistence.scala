@@ -5,10 +5,22 @@ import cats.effect.kernel.Resource
 import cats.implicits._
 import com.datastax.oss.driver.api.core.{CqlSession, CqlSessionBuilder}
 import com.datastax.oss.driver.api.core.session.Session
-import io.findify.featury.feature.{BoundedList, Counter, Feature, FreqEstimator, PeriodicCounter, StatsEstimator}
+import io.findify.featury.feature.{
+  BoundedList,
+  Counter,
+  Feature,
+  FreqEstimator,
+  PeriodicCounter,
+  ScalarFeature,
+  StatsEstimator
+}
 import io.findify.featury.model.FeatureValue
 import io.findify.featury.persistence.cassandra.CassandraBoundedList.{CassandraNumBoundedList, CassandraTextBoundedList}
 import io.findify.featury.persistence.cassandra.CassandraPersistence.CassandraConfig
+import io.findify.featury.persistence.cassandra.CassandraScalarFeature.{
+  CassandraNumScalarFeature,
+  CassandraTextScalarFeature
+}
 import io.findify.featury.persistence.{Persistence, ValueStore}
 import org.typelevel.log4cats.Logger
 
@@ -38,6 +50,12 @@ class CassandraPersistence(val session: CqlSession, driverConfig: CassandraConfi
 
   override def freqEstimator(config: FreqEstimator.FreqEstimatorConfig): IO[FreqEstimator] =
     makeFeature { new CassandraFreqEstimator(config, session, driverConfig) }
+
+  override def textScalar(config: ScalarFeature.ScalarConfig): IO[ScalarFeature[FeatureValue.Text]] =
+    makeFeature { CassandraTextScalarFeature(config, session, driverConfig) }
+
+  override def numScalar(config: ScalarFeature.ScalarConfig): IO[ScalarFeature[FeatureValue.Num]] =
+    makeFeature { CassandraNumScalarFeature(config, session, driverConfig) }
 
   override def values(): IO[ValueStore] = ???
 

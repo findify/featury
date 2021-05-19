@@ -9,18 +9,18 @@ import redis.clients.jedis.Jedis
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
-class RedisStatsEstimator(val config: StatsEstimatorConfig, redis: Jedis) extends StatsEstimator {
-  val SUFFIX = "s"
+case class RedisStatsEstimator(config: StatsEstimatorConfig, redis: Jedis) extends StatsEstimator with RedisFeature {
+  val keySuffix = "s"
   import KeyCodec._
   override def putReal(key: Key, value: Double): IO[Unit] = {
     val multi = redis.multi()
-    multi.lpush(key.toRedisKey(SUFFIX), value.toString)
-    multi.ltrim(key.toRedisKey(SUFFIX), 0, config.poolSize)
+    multi.lpush(key.toRedisKey(keySuffix), value.toString)
+    multi.ltrim(key.toRedisKey(keySuffix), 0, config.poolSize)
     IO { multi.exec() }
   }
 
   override def readState(key: Key): IO[Option[StatsEstimatorState]] = for {
-    response <- IO { redis.lrange(key.toRedisKey(SUFFIX), 0, -1) }
+    response <- IO { redis.lrange(key.toRedisKey(keySuffix), 0, -1) }
     decoded  <- parseRecursive(response.asScala.toList)
   } yield {
     if (decoded.nonEmpty) Some(StatsEstimatorState(decoded.toVector)) else None

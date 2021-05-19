@@ -60,15 +60,15 @@ object Codec {
 
   sealed trait ValueCodec[T <: FeatureValue] extends Codec[T]
 
-  implicit val scalarTextCodec: ValueCodec[TextScalarValue] = new ValueCodec[TextScalarValue] {
-    override def encode(value: TextScalarValue): String = textCodec.encode(value.value)
-    override def decode(in: String): Either[DecodingError, TextScalarValue] =
-      textCodec.decode(in).map(TextScalarValue.apply)
+  implicit val scalarTextCodec: ValueCodec[ScalarValue[Text]] = new ValueCodec[ScalarValue[Text]] {
+    override def encode(value: ScalarValue[Text]): String = textCodec.encode(value.value)
+    override def decode(in: String): Either[DecodingError, ScalarValue[Text]] =
+      textCodec.decode(in).map(ScalarValue.apply)
   }
-  implicit val scalarNumCodec: ValueCodec[NumScalarValue] = new ValueCodec[NumScalarValue] {
-    override def encode(value: NumScalarValue): String = numCodec.encode(value.value)
-    override def decode(in: String): Either[DecodingError, NumScalarValue] =
-      numCodec.decode(in).map(NumScalarValue.apply)
+  implicit val scalarNumCodec: ValueCodec[ScalarValue[Num]] = new ValueCodec[ScalarValue[Num]] {
+    override def encode(value: ScalarValue[Num]): String = numCodec.encode(value.value)
+    override def decode(in: String): Either[DecodingError, ScalarValue[Num]] =
+      numCodec.decode(in).map(ScalarValue.apply)
   }
 
   def listValueCodec[T <: Scalar, F <: BoundedListValue[T]](
