@@ -1,9 +1,9 @@
-package io.findify.featury.persistence.memory
+package io.findify.featury.state.memory
 
 import com.github.blemale.scaffeine.Scaffeine
 import io.findify.featury.features.PeriodicCounterSuite
 import io.findify.featury.model.Feature
-import io.findify.featury.persistence.mem.MemPeriodicCounter
+import io.findify.featury.state.mem.MemPeriodicCounter
 
 class MemPeriodicCounterTest extends PeriodicCounterSuite {
   override val feature: Feature.PeriodicCounter = MemPeriodicCounter(config, Scaffeine().build())

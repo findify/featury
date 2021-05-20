@@ -1,4 +1,4 @@
-package io.findify.featury.persistence.mem
+package io.findify.featury.state.mem
 
 import com.github.blemale.scaffeine.Cache
 import com.google.common.math.Quantiles

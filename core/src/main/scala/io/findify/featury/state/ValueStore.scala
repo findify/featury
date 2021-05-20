@@ -1,4 +1,4 @@
-package io.findify.featury.persistence
+package io.findify.featury.state
 
 import io.findify.featury.model.Key._
 import io.findify.featury.model._
