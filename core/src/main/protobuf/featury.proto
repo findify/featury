@@ -1,0 +1,26 @@
+syntax = "proto2";
+
+import "scalapb/scalapb.proto";
+
+option (scalapb.options) = {
+  scope: FILE
+  package_name: "io.findify.featury.model"
+  flat_package: true
+  single_file: true
+  no_default_values_in_constructor: true
+  preamble: "sealed trait Scalar"
+};
+
+message SString {
+    option (scalapb.message).extends = "io.findify.featury.model.Scalar";
+    required string value = 1;
+}
+message SDouble {
+    option (scalapb.message).extends = "io.findify.featury.model.Scalar";
+    required double value = 1;
+}
+message SLong {
+    option (scalapb.message).extends = "io.findify.featury.model.Scalar";
+    required int64 value = 1;
+}
+

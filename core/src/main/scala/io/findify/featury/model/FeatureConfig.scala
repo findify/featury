@@ -9,13 +9,21 @@ sealed trait FeatureConfig {
   def ns: Namespace
   def group: GroupName
   def name: FeatureName
+  def ttl: FiniteDuration
+  def fqdn = s"${ns.value}.${group.value}.${name.value}"
 }
 
 object FeatureConfig {
-  case class CounterConfig(name: FeatureName, ns: Namespace, group: GroupName) extends FeatureConfig
-
-  case class ScalarConfig(name: FeatureName, ns: Namespace, group: GroupName, contentType: ScalarType)
+  case class CounterConfig(name: FeatureName, ns: Namespace, group: GroupName, ttl: FiniteDuration = 365.days)
       extends FeatureConfig
+
+  case class ScalarConfig(
+      name: FeatureName,
+      ns: Namespace,
+      group: GroupName,
+      contentType: ScalarType,
+      ttl: FiniteDuration = 365.days
+  ) extends FeatureConfig
 
   case class BoundedListConfig(
       name: FeatureName,
@@ -23,11 +31,18 @@ object FeatureConfig {
       group: GroupName,
       count: Int = Int.MaxValue,
       duration: FiniteDuration = Long.MaxValue.nanos,
-      contentType: ScalarType
+      contentType: ScalarType,
+      ttl: FiniteDuration = 365.days
   ) extends FeatureConfig
 
-  case class FreqEstimatorConfig(name: FeatureName, ns: Namespace, group: GroupName, poolSize: Int, sampleRate: Int)
-      extends FeatureConfig
+  case class FreqEstimatorConfig(
+      name: FeatureName,
+      ns: Namespace,
+      group: GroupName,
+      poolSize: Int,
+      sampleRate: Int,
+      ttl: FiniteDuration = 365.days
+  ) extends FeatureConfig
 
   case class PeriodRange(startOffset: Int, endOffset: Int)
   case class PeriodicCounterConfig(
@@ -36,7 +51,8 @@ object FeatureConfig {
       group: GroupName,
       period: FiniteDuration,
       count: Int,
-      sumPeriodRanges: List[PeriodRange]
+      sumPeriodRanges: List[PeriodRange],
+      ttl: FiniteDuration = 365.days
   ) extends FeatureConfig {
     private val periods      = (sumPeriodRanges.map(_.startOffset) ++ sumPeriodRanges.map(_.endOffset)).sorted
     val latestPeriodOffset   = periods.head
@@ -49,7 +65,8 @@ object FeatureConfig {
       group: GroupName,
       poolSize: Int,
       sampleRate: Int,
-      percentiles: List[Int]
+      percentiles: List[Int],
+      ttl: FiniteDuration = 365.days
   ) extends FeatureConfig
 
 }

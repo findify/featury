@@ -2,10 +2,10 @@ package io.findify.featury.features
 
 import io.findify.featury.model.Feature.BoundedList
 import io.findify.featury.model.FeatureConfig.BoundedListConfig
-import io.findify.featury.model.FeatureValue.{BoundedListValue, ListItem, Scalar, ScalarType}
+import io.findify.featury.model.FeatureValue.{BoundedListValue, ListItem, ScalarType}
 import io.findify.featury.model.Key._
-import io.findify.featury.model.Timestamp
-import io.findify.featury.model.WriteRequest.Append
+import io.findify.featury.model.{Scalar, Timestamp}
+import io.findify.featury.model.Write.Append
 import io.findify.featury.utils.TestKey
 
 import scala.concurrent.duration._

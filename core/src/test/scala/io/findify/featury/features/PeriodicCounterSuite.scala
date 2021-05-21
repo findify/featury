@@ -5,7 +5,7 @@ import io.findify.featury.model.FeatureConfig.{PeriodRange, PeriodicCounterConfi
 import io.findify.featury.model.FeatureValue.{PeriodicCounterValue, PeriodicValue}
 import io.findify.featury.model.Key._
 import io.findify.featury.model.Timestamp
-import io.findify.featury.model.WriteRequest.{Increment, PeriodicIncrement}
+import io.findify.featury.model.Write.PeriodicIncrement
 import io.findify.featury.utils.TestKey
 
 import scala.concurrent.duration._

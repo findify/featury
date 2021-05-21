@@ -10,7 +10,8 @@ lazy val shared = Seq(
   scalacOptions ++= Seq("-feature", "-deprecation"),
   libraryDependencies ++= Seq(
     "com.github.blemale" %% "scaffeine" % "4.0.2"
-  )
+  ),
+  version := "0.1"
 )
 
 scalaVersion := "2.12.12"
@@ -21,18 +22,19 @@ lazy val flink = (project in file("connector/flink"))
   .settings(shared: _*)
   .dependsOn(core % "test->test;it->it;compile->compile")
 
-lazy val spark = (project in file("connector/spark"))
-  .settings(shared: _*)
-  .dependsOn(core % "test->test;it->it;compile->compile")
+//lazy val spark = (project in file("connector/spark"))
+//  .settings(shared: _*)
+//  .dependsOn(core % "test->test;it->it;compile->compile")
 
-lazy val cassandra = (project in file("connector/cassandra"))
-  .settings(shared: _*)
-  .dependsOn(core % "test->test;it->it;compile->compile")
+//lazy val cassandra = (project in file("connector/cassandra"))
+//  .settings(shared: _*)
+//  .dependsOn(core % "test->test;it->it;compile->compile")
 
-lazy val redis = (project in file("connector/redis"))
-  .settings(shared: _*)
-  .dependsOn(core % "test->test;it->it;compile->compile")
+//lazy val redis = (project in file("connector/redis"))
+//  .settings(shared: _*)
+//  .dependsOn(core % "test->test;it->it;compile->compile")
 
 lazy val api = (project in file("api"))
   .settings(shared: _*)
   .dependsOn(core % "test->test;it->it;compile->compile")
+

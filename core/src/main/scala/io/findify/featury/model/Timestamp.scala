@@ -3,6 +3,7 @@ package io.findify.featury.model
 import java.text.SimpleDateFormat
 import java.time.{Instant, LocalDateTime, ZoneId, ZoneOffset}
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.FiniteDuration
 
 case class Timestamp(ts: Long) {
@@ -15,6 +16,10 @@ case class Timestamp(ts: Long) {
   def toStartOfPeriod(period: FiniteDuration) = {
     val p = math.floor(ts.toDouble / period.toMillis).toLong
     Timestamp(p * period.toMillis)
+  }
+
+  def diff(other: Timestamp): FiniteDuration = {
+    FiniteDuration(math.abs(other.ts - ts), TimeUnit.MILLISECONDS)
   }
 
   override def toString: String = Instant.ofEpochMilli(ts).atOffset(ZoneOffset.UTC).format(Timestamp.format)

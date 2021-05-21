@@ -5,13 +5,14 @@ import com.google.common.math.Quantiles
 import io.findify.featury.model.Feature.StatsEstimator
 import io.findify.featury.model.FeatureConfig.StatsEstimatorConfig
 import io.findify.featury.model.FeatureValue.NumStatsValue
-import io.findify.featury.model.{FeatureValue, Key, WriteRequest}
+import io.findify.featury.model.Write.PutStatSample
+import io.findify.featury.model.{FeatureValue, Key}
 
 import scala.collection.JavaConverters._
 import scala.util.Random
 
 case class MemStatsEstimator(config: StatsEstimatorConfig, cache: Cache[Key, Vector[Double]]) extends StatsEstimator {
-  override def putSampled(action: WriteRequest.PutStatSample): Unit = {
+  override def putSampled(action: PutStatSample): Unit = {
     cache.getIfPresent(action.key) match {
       case None =>
         cache.put(action.key, Vector(action.value))

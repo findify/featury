@@ -1,21 +1,24 @@
 package io.findify.featury.model
 
 import io.findify.featury.model.FeatureConfig._
+import io.findify.featury.model.FeatureValue.ScalarValue.LongScalarValue
 import io.findify.featury.model.FeatureValue._
-import io.findify.featury.model.WriteRequest._
+import io.findify.featury.model.Write._
 
 import scala.util.Random
 
-sealed trait Feature[W <: WriteAction, T <: FeatureValue, C <: FeatureConfig] {
+sealed trait Feature[W <: Write, T <: FeatureValue, C <: FeatureConfig] {
   def put(action: W): Unit
   def config: C
   def computeValue(key: Key): Option[T]
 }
 
 object Feature {
-  trait ScalarFeature[T <: Scalar] extends Feature[Put[T], ScalarValue[T], ScalarConfig]
+  trait ScalarFeature[T <: Scalar] extends Feature[Put[T], ScalarValue[T], ScalarConfig] {
+    def makeValue(value: T): ScalarValue[T]
+  }
 
-  trait Counter extends Feature[Increment, ScalarValue[Num], CounterConfig]
+  trait Counter extends Feature[Increment, LongScalarValue, CounterConfig]
 
   trait BoundedList[T <: Scalar] extends Feature[Append[T], BoundedListValue[T], BoundedListConfig]
 

@@ -2,13 +2,13 @@ package io.findify.featury.features
 
 import io.findify.featury.model.Feature.ScalarFeature
 import io.findify.featury.model.FeatureConfig.ScalarConfig
-import io.findify.featury.model.FeatureValue.{Scalar, ScalarValue}
 import io.findify.featury.model.Key._
-import io.findify.featury.model.WriteRequest.Put
+import io.findify.featury.model.{Key, Scalar, Timestamp}
+import io.findify.featury.model.Write.Put
 import io.findify.featury.utils.TestKey
 
 trait ScalarFeatureSuite[T <: Scalar] extends FeatureSuite[ScalarConfig, ScalarFeature[T]] {
-  def makeValue(i: Int): T
+  def makePut(key: Key, ts: Timestamp, i: Int): Put[T]
   override lazy val config = ScalarConfig(FeatureName("counter"), ns = Namespace("a"), group = GroupName("b"), null)
 
   it should "read empty" in withFeature { c =>
@@ -16,19 +16,19 @@ trait ScalarFeatureSuite[T <: Scalar] extends FeatureSuite[ScalarConfig, ScalarF
   }
 
   it should "write and read" in withFeature { c =>
-    val key   = TestKey(id = "p11")
-    val value = makeValue(1)
-    c.put(Put(key, value))
-    c.computeValue(key) shouldBe Some(ScalarValue(value))
+    val key = TestKey(id = "p11")
+    val put = makePut(key, Timestamp.now, 1)
+    c.put(put)
+    c.computeValue(key) shouldBe Some(c.makeValue(put.value))
   }
 
   it should "update and read" in withFeature { c =>
-    val key    = TestKey(id = "p12")
-    val value1 = makeValue(1)
-    val value2 = makeValue(2)
-    c.put(Put(key, value1))
-    c.computeValue(key) shouldBe Some(ScalarValue(value1))
-    c.put(Put(key, value2))
-    c.computeValue(key) shouldBe Some(ScalarValue(value2))
+    val key  = TestKey(id = "p12")
+    val put1 = makePut(key, Timestamp.now, 1)
+    val put2 = makePut(key, Timestamp.now, 2)
+    c.put(put1)
+    c.computeValue(key) shouldBe Some(c.makeValue(put1.value))
+    c.put(put2)
+    c.computeValue(key) shouldBe Some(c.makeValue(put2.value))
   }
 }
