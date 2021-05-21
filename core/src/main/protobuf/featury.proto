@@ -8,8 +8,19 @@ option (scalapb.options) = {
   flat_package: true
   single_file: true
   no_default_values_in_constructor: true
+  preserve_unknown_fields: false
   preamble: "sealed trait Scalar"
+  preamble: "sealed trait ScalarValue[T <: Scalar] extends FeatureValue { def value: T }"
+  preamble: "sealed trait ListItem[T <: Scalar] { def value:T; def ts: Timestamp }"
+  preamble: "sealed trait BoundedListValue[T <: Scalar] extends FeatureValue { def value: List[ListItem[T]]}"
+  preamble: "sealed trait FeatureValue"
 };
+
+message Timestamp {
+    option (scalapb.message).companion_extends = "io.findify.featury.model.TimestampOps.TimestampCompanion";
+    option (scalapb.message).extends = "io.findify.featury.model.TimestampOps";
+    required int64 ts = 1;
+}
 
 message SString {
     option (scalapb.message).extends = "io.findify.featury.model.Scalar";
@@ -24,3 +35,66 @@ message SLong {
     required int64 value = 1;
 }
 
+message StringScalarValue {
+    option (scalapb.message).extends = "io.findify.featury.model.ScalarValue[SString]";
+    required SString value = 1;
+}
+
+message DoubleScalarValue {
+    option (scalapb.message).extends = "io.findify.featury.model.ScalarValue[SDouble]";
+    required SDouble value = 1;
+}
+
+message LongScalarValue {
+    option (scalapb.message).extends = "io.findify.featury.model.ScalarValue[SLong]";
+    required SLong value = 1;
+}
+
+message NumStatsValue {
+    option (scalapb.message).extends = "io.findify.featury.model.FeatureValue";
+    required double min = 1;
+    required double max = 2;
+    map<int32, double> quantiles = 3;
+}
+
+
+message PeriodicCounterValue {
+    message PeriodicValue {
+        required Timestamp start = 1;
+        required Timestamp end = 2;
+        required int32 periods = 3;
+        required double value = 4;
+    }
+    option (scalapb.message).extends = "io.findify.featury.model.FeatureValue";
+    repeated PeriodicValue values = 1 [(scalapb.field).collection_type="List"];
+}
+
+message FrequencyValue {
+    option (scalapb.message).extends = "io.findify.featury.model.FeatureValue";
+    map<string, double> values = 1;
+}
+
+//case class BoundedListValue[T <: Scalar](value: List[ListItem[T]]) extends FeatureValue
+//case class ListItem[T <: Scalar](value: T, ts: Timestamp)
+
+message StringListItem {
+    option (scalapb.message).extends = "io.findify.featury.model.ListItem[SString]";
+    required SString value = 1;
+    required Timestamp ts = 2;
+}
+
+message DoubleListItem {
+    option (scalapb.message).extends = "io.findify.featury.model.ListItem[SDouble]";
+    required SDouble value = 1;
+    required Timestamp ts = 2;
+}
+
+message StringBoundedListValue {
+    option (scalapb.message).extends = "io.findify.featury.model.BoundedListValue[SString]";
+    repeated StringListItem value = 1 [(scalapb.field).collection_type="List"];
+}
+
+message DoubleBoundedListValue {
+    option (scalapb.message).extends = "io.findify.featury.model.BoundedListValue[SDouble]";
+    repeated DoubleListItem value = 1 [(scalapb.field).collection_type="List"];
+}

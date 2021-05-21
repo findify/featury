@@ -2,9 +2,9 @@ package io.findify.featury.features
 
 import io.findify.featury.model.Feature.PeriodicCounter
 import io.findify.featury.model.FeatureConfig.{PeriodRange, PeriodicCounterConfig}
-import io.findify.featury.model.FeatureValue.{PeriodicCounterValue, PeriodicValue}
 import io.findify.featury.model.Key._
-import io.findify.featury.model.Timestamp
+import io.findify.featury.model.PeriodicCounterValue.PeriodicValue
+import io.findify.featury.model.{PeriodicCounterValue, Timestamp}
 import io.findify.featury.model.Write.PeriodicIncrement
 import io.findify.featury.utils.TestKey
 

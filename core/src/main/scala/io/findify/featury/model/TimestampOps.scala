@@ -1,12 +1,11 @@
 package io.findify.featury.model
 
-import java.text.SimpleDateFormat
-import java.time.{Instant, LocalDateTime, ZoneId, ZoneOffset}
 import java.time.format.DateTimeFormatter
+import java.time.{Instant, ZoneOffset}
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.FiniteDuration
 
-case class Timestamp(ts: Long) {
+trait TimestampOps { this: Timestamp =>
   def isBefore(right: Timestamp)         = ts < right.ts
   def isBeforeOrEquals(right: Timestamp) = ts <= right.ts
   def isAfter(right: Timestamp)          = ts > right.ts
@@ -22,11 +21,12 @@ case class Timestamp(ts: Long) {
     FiniteDuration(math.abs(other.ts - ts), TimeUnit.MILLISECONDS)
   }
 
-  override def toString: String = Instant.ofEpochMilli(ts).atOffset(ZoneOffset.UTC).format(Timestamp.format)
+  override def toString: String = Instant.ofEpochMilli(ts).atOffset(ZoneOffset.UTC).format(TimestampOps.format)
 }
 
-object Timestamp {
-  val format        = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-  val MILLIS_IN_DAY = 1000L * 60 * 60 * 24
-  def now           = new Timestamp(System.currentTimeMillis())
+object TimestampOps {
+  trait TimestampCompanion {
+    def now = new Timestamp(System.currentTimeMillis())
+  }
+  val format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 }

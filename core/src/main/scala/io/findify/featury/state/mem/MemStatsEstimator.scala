@@ -4,9 +4,8 @@ import com.github.blemale.scaffeine.Cache
 import com.google.common.math.Quantiles
 import io.findify.featury.model.Feature.StatsEstimator
 import io.findify.featury.model.FeatureConfig.StatsEstimatorConfig
-import io.findify.featury.model.FeatureValue.NumStatsValue
 import io.findify.featury.model.Write.PutStatSample
-import io.findify.featury.model.{FeatureValue, Key}
+import io.findify.featury.model.{FeatureValue, Key, NumStatsValue}
 
 import scala.collection.JavaConverters._
 import scala.util.Random
@@ -24,7 +23,7 @@ case class MemStatsEstimator(config: StatsEstimatorConfig, cache: Cache[Key, Vec
     }
   }
 
-  override def computeValue(key: Key): Option[FeatureValue.NumStatsValue] = for {
+  override def computeValue(key: Key): Option[NumStatsValue] = for {
     pool <- cache.getIfPresent(key) if pool.nonEmpty
   } yield {
     val quantile = Quantiles

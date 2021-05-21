@@ -1,6 +1,5 @@
 package io.findify.featury.model
 
-import io.findify.featury.model.FeatureValue.ScalarType
 import io.findify.featury.model.Key._
 
 import scala.concurrent.duration._

@@ -3,9 +3,8 @@ package io.findify.featury.flink.feature
 import io.findify.featury.flink.StateTTL
 import io.findify.featury.model.Feature.Counter
 import io.findify.featury.model.FeatureConfig.CounterConfig
-import io.findify.featury.model.FeatureValue.ScalarValue.LongScalarValue
 import io.findify.featury.model.Write.Increment
-import io.findify.featury.model.{FeatureValue, Key, SLong}
+import io.findify.featury.model.{FeatureValue, Key, LongScalarValue, SLong}
 import org.apache.flink.api.common.state.{KeyedStateStore, ValueState, ValueStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 

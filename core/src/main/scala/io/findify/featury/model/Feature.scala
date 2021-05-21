@@ -1,8 +1,7 @@
 package io.findify.featury.model
 
 import io.findify.featury.model.FeatureConfig._
-import io.findify.featury.model.FeatureValue.ScalarValue.LongScalarValue
-import io.findify.featury.model.FeatureValue._
+import io.findify.featury.model.PeriodicCounterValue.PeriodicValue
 import io.findify.featury.model.Write._
 
 import scala.util.Random

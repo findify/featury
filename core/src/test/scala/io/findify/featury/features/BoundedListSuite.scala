@@ -2,7 +2,6 @@ package io.findify.featury.features
 
 import io.findify.featury.model.Feature.BoundedList
 import io.findify.featury.model.FeatureConfig.BoundedListConfig
-import io.findify.featury.model.FeatureValue.{BoundedListValue, ListItem, ScalarType}
 import io.findify.featury.model.Key._
 import io.findify.featury.model.{Scalar, Timestamp}
 import io.findify.featury.model.Write.Append
@@ -30,7 +29,7 @@ trait BoundedListSuite[T <: Scalar] extends FeatureSuite[BoundedListConfig, Boun
     val key   = TestKey(id = "p11")
     val value = makeValue(0)
     bl.put(Append(key, value, now))
-    bl.computeValue(key) shouldBe Some(BoundedListValue(List(ListItem(value, now))))
+    bl.computeValue(key).flatMap(_.value.headOption.map(_.value)) shouldBe Some(value)
   }
 
   it should "be bounded by element count" in withFeature { bl =>

@@ -4,11 +4,20 @@ import io.findify.featury.flink.FeatureProcessFunction.KeyedFeatureValue
 import io.findify.featury.flink.feature.{FlinkCounterFeature, FlinkScalarFeature}
 import io.findify.featury.model.Feature.{Counter, ScalarFeature}
 import io.findify.featury.model.FeatureConfig.{CounterConfig, ScalarConfig}
-import io.findify.featury.model.FeatureValue.ScalarValue.LongScalarValue
-import io.findify.featury.model.FeatureValue.ScalarValue
 import io.findify.featury.model.Key.{FeatureKey, FeatureName, GroupName, Namespace}
 import io.findify.featury.model.Write.{Increment, Put}
-import io.findify.featury.model.{ConfigMap, Feature, FeatureConfig, FeatureValue, SDouble, SString, Scalar, Write}
+import io.findify.featury.model.{
+  ConfigMap,
+  Feature,
+  FeatureConfig,
+  FeatureValue,
+  LongScalarValue,
+  SDouble,
+  SString,
+  Scalar,
+  ScalarValue,
+  Write
+}
 import org.apache.flink.api.common.state.KeyedStateStore
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction

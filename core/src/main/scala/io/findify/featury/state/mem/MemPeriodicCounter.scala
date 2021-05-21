@@ -4,7 +4,7 @@ import com.github.blemale.scaffeine.Cache
 import io.findify.featury.model.Feature.PeriodicCounter
 import io.findify.featury.model.FeatureConfig.PeriodicCounterConfig
 import io.findify.featury.model.Write.PeriodicIncrement
-import io.findify.featury.model.{FeatureValue, Key, Timestamp}
+import io.findify.featury.model.{FeatureValue, Key, PeriodicCounterValue, Timestamp}
 
 case class MemPeriodicCounter(config: PeriodicCounterConfig, cache: Cache[Key, Map[Timestamp, Long]])
     extends PeriodicCounter {
@@ -22,6 +22,6 @@ case class MemPeriodicCounter(config: PeriodicCounterConfig, cache: Cache[Key, M
     }
   }
 
-  override def computeValue(key: Key): Option[FeatureValue.PeriodicCounterValue] =
+  override def computeValue(key: Key): Option[PeriodicCounterValue] =
     cache.getIfPresent(key).map(fromMap)
 }

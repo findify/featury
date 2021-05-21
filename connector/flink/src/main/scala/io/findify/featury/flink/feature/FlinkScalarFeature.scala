@@ -3,10 +3,17 @@ package io.findify.featury.flink.feature
 import io.findify.featury.flink.StateTTL
 import io.findify.featury.model.Feature.ScalarFeature
 import io.findify.featury.model.FeatureConfig.ScalarConfig
-import io.findify.featury.model.FeatureValue.ScalarValue.{DoubleScalarValue, StringScalarValue}
-import io.findify.featury.model.FeatureValue.ScalarValue
 import io.findify.featury.model.Write.Put
-import io.findify.featury.model.{FeatureValue, Key, SDouble, SString, Scalar}
+import io.findify.featury.model.{
+  DoubleScalarValue,
+  FeatureValue,
+  Key,
+  SDouble,
+  SString,
+  Scalar,
+  ScalarValue,
+  StringScalarValue
+}
 import org.apache.flink.api.common.state.{KeyedStateStore, ValueState, ValueStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 
@@ -14,7 +21,7 @@ trait FlinkScalarFeature[T <: Scalar] extends ScalarFeature[T] {
   def state: ValueState[T]
   override def put(action: Put[T]): Unit = state.update(action.value)
 
-  override def computeValue(key: Key): Option[FeatureValue.ScalarValue[T]] =
+  override def computeValue(key: Key): Option[ScalarValue[T]] =
     Option(state.value()).map(makeValue)
 }
 

@@ -1,8 +1,8 @@
 package io.findify.featury.model
 
 import io.findify.featury.model.FeatureConfig.{CounterConfig, ScalarConfig}
-import io.findify.featury.model.FeatureValue.{NumType, TextType}
 import io.findify.featury.model.Key.FeatureKey
+import io.findify.featury.model.ScalarType.{NumType, TextType}
 
 case class ConfigMap(
     counters: Map[FeatureKey, CounterConfig],

@@ -41,7 +41,7 @@ class FeatureProcessFunction[W <: Write, T <: FeatureValue, C <: FeatureConfig, 
       // wtf?
       case Some(feature) =>
         feature.put(value)
-        val lastUpdate = Option(updated.value()).map(Timestamp.apply).getOrElse(Timestamp(0L))
+        val lastUpdate = Option(updated.value()).map(ts => Timestamp(ts)).getOrElse(Timestamp(0L))
         if (lastUpdate.diff(value.ts) > feature.config.ttl) {
           updated.update(value.ts.ts)
           feature.computeValue(value.key).foreach(value => out.collect(KeyedFeatureValue(ctx.getCurrentKey, value)))
