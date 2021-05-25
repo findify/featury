@@ -6,21 +6,14 @@ import io.findify.featury.model.FeatureConfig.ScalarConfig
 import io.findify.featury.model.Write.Put
 import io.findify.featury.model._
 
-sealed trait MemScalarFeature[T <: Scalar] extends ScalarFeature[T] {
-  def cache: Cache[Key, T]
-  override def put(action: Put[T]): Unit = cache.put(action.key, action.value)
+case class MemScalarFeature(config: ScalarConfig, cache: Cache[Key, Scalar]) extends ScalarFeature {
+  override def put(action: Put): Unit = cache.put(action.key, action.value)
 
-  override def computeValue(key: Key, ts: Timestamp): Option[ScalarValue[T]] =
-    cache.getIfPresent(key).map(makeValue(key, ts, _))
-}
+  override def computeValue(key: Key, ts: Timestamp): Option[ScalarValue] =
+    cache.getIfPresent(key).map(ScalarValue(key, ts, _))
 
-object MemScalarFeature {
-  case class MemTextScalarFeature(config: ScalarConfig, cache: Cache[Key, SString]) extends MemScalarFeature[SString] {
-    override def makeValue(key: Key, ts: Timestamp, value: SString): ScalarValue[SString] =
-      StringScalarValue(key, ts, value)
-  }
-  case class MemNumScalarFeature(config: ScalarConfig, cache: Cache[Key, SDouble]) extends MemScalarFeature[SDouble] {
-    override def makeValue(key: Key, ts: Timestamp, value: SDouble): ScalarValue[SDouble] =
-      DoubleScalarValue(key, ts, value)
-  }
+  override def readState(key: Key, ts: Timestamp): Option[ScalarState] =
+    cache.getIfPresent(key).map(ScalarState(key, ts, _))
+
+  override def writeState(state: ScalarState): Unit = cache.put(state.key, state.value)
 }

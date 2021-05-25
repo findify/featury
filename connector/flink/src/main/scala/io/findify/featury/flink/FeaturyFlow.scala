@@ -23,15 +23,12 @@ object FeaturyFlow {
 
     def process(configs: ConfigMap): DataStream[FeatureValue] = {
       val counters = stream.processCounters(configs.counters)
-      val strings =
-        stream.processScalar[SString](configs.strings, "strings", Write.selectString, FlinkScalarFeature.applyString)
-      val doubles =
-        stream.processScalar[SDouble](configs.doubles, "doubles", Write.selectDouble, FlinkScalarFeature.applyDouble)
+      val scalars  = stream.processScalar(configs.strings, "scalars", Write.selectPut)
       ???
     }
 
-    def processCounters(configs: Map[FeatureKey, CounterConfig]): DataStream[LongScalarValue] = {
-      stream.processFeature[Increment, CounterConfig, LongScalarValue, Counter](
+    def processCounters(configs: Map[FeatureKey, CounterConfig]): DataStream[CounterValue] = {
+      stream.processFeature[Increment, CounterConfig, CounterValue, CounterState, Counter](
         "counters",
         configs,
         FlinkCounterFeature.apply,
@@ -39,18 +36,15 @@ object FeaturyFlow {
       )
     }
 
-    def processScalar[T <: Scalar](
+    def processScalar(
         configs: Map[FeatureKey, ScalarConfig],
         name: String,
-        select: PartialFunction[Write, Put[T]],
-        make: (KeyedStateStore, ScalarConfig) => ScalarFeature[T]
-    )(implicit
-        ti: TypeInformation[T]
-    ): DataStream[ScalarValue[T]] = {
-      stream.processFeature[Put[T], ScalarConfig, ScalarValue[T], ScalarFeature[T]](
+        select: PartialFunction[Write, Put]
+    ): DataStream[ScalarValue] = {
+      stream.processFeature[Put, ScalarConfig, ScalarValue, ScalarState, ScalarFeature](
         name = name,
         configs = configs,
-        make,
+        FlinkScalarFeature.apply,
         select
       )
     }
@@ -59,7 +53,8 @@ object FeaturyFlow {
         W <: Write: TypeInformation,
         C <: FeatureConfig,
         T <: FeatureValue: TypeInformation,
-        F <: Feature[W, T, C]
+        S <: State,
+        F <: Feature[W, T, C, S]
     ](
         name: String,
         configs: Map[FeatureKey, C],
@@ -71,7 +66,7 @@ object FeaturyFlow {
         .id(s"select-${name}")
         .keyingBy(_.key)
         .process(
-          new FeatureProcessFunction[W, T, C, F](
+          new FeatureProcessFunction[W, T, C, S, F](
             configs = configs,
             name = name,
             make = make

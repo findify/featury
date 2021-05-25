@@ -9,11 +9,9 @@ option (scalapb.options) = {
   single_file: true
   no_default_values_in_constructor: true
   preserve_unknown_fields: false
-  preamble: "sealed trait Scalar"
-  preamble: "sealed trait ScalarValue[T <: Scalar] extends FeatureValue { def value: T }"
-  preamble: "sealed trait ListItem[T <: Scalar] { def value:T; def ts: Timestamp }"
-  preamble: "sealed trait BoundedListValue[T <: Scalar] extends FeatureValue { def value: List[ListItem[T]]}"
-  preamble: "sealed trait FeatureValue { def key: Key; def ts: Timestamp }"
+//  preamble: "sealed trait ListItem[T <: Scalar] { def value:T; def ts: Timestamp }"
+  //preamble: "sealed trait BoundedListValue[T <: Scalar] extends FeatureValue { def value: List[ListItem[T]]}"
+  //preamble: "sealed trait FeatureValue { def key: Key; def ts: Timestamp }"
 };
 
 message Key {
@@ -51,42 +49,37 @@ message Timestamp {
     required int64 ts = 1;
 }
 
+message Scalar {
+    oneof sealed_value {
+        SString scalarString = 1;
+        SDouble scalarDouble = 2;
+        SLong scalarLong = 3;
+    }
+}
+
 message SString {
-    option (scalapb.message).extends = "io.findify.featury.model.Scalar";
     required string value = 1;
 }
 message SDouble {
-    option (scalapb.message).extends = "io.findify.featury.model.Scalar";
     required double value = 1;
 }
 message SLong {
-    option (scalapb.message).extends = "io.findify.featury.model.Scalar";
     required int64 value = 1;
 }
 
-message StringScalarValue {
-    option (scalapb.message).extends = "io.findify.featury.model.ScalarValue[SString]";
+message ScalarValue {
     required Key key = 1;
     required Timestamp ts = 2;
-    required SString value = 3;
+    required Scalar value = 3;
 }
 
-message DoubleScalarValue {
-    option (scalapb.message).extends = "io.findify.featury.model.ScalarValue[SDouble]";
+message CounterValue {
     required Key key = 1;
     required Timestamp ts = 2;
-    required SDouble value = 3;
-}
-
-message LongScalarValue {
-    option (scalapb.message).extends = "io.findify.featury.model.ScalarValue[SLong]";
-    required Key key = 1;
-    required Timestamp ts = 2;
-    required SLong value = 3;
+    required int64 value = 3;
 }
 
 message NumStatsValue {
-    option (scalapb.message).extends = "io.findify.featury.model.FeatureValue";
     required Key key = 1;
     required Timestamp ts = 2;
     required double min = 3;
@@ -102,41 +95,86 @@ message PeriodicCounterValue {
         required int32 periods = 3;
         required double value = 4;
     }
-    option (scalapb.message).extends = "io.findify.featury.model.FeatureValue";
     required Key key = 1;
     required Timestamp ts = 2;
     repeated PeriodicValue values = 3 [(scalapb.field).collection_type="List"];
 }
 
 message FrequencyValue {
-    option (scalapb.message).extends = "io.findify.featury.model.FeatureValue";
     required Key key = 1;
     required Timestamp ts = 2;
     map<string, double> values = 3;
 }
 
-message StringListItem {
-    option (scalapb.message).extends = "io.findify.featury.model.ListItem[SString]";
-    required SString value = 1;
-    required Timestamp ts = 2;
+message TimeValue {
+    required Timestamp ts = 1;
+    required Scalar value = 2;
 }
 
-message DoubleListItem {
-    option (scalapb.message).extends = "io.findify.featury.model.ListItem[SDouble]";
-    required SDouble value = 1;
-    required Timestamp ts = 2;
-}
-
-message StringBoundedListValue {
-    option (scalapb.message).extends = "io.findify.featury.model.BoundedListValue[SString]";
+message BoundedListValue {
     required Key key = 1;
     required Timestamp ts = 2;
-    repeated StringListItem value = 3 [(scalapb.field).collection_type="List"];
+    repeated TimeValue value = 3 [(scalapb.field).collection_type="List"];
 }
 
-message DoubleBoundedListValue {
-    option (scalapb.message).extends = "io.findify.featury.model.BoundedListValue[SDouble]";
+message FeatureValue {
+    oneof sealed_value {
+        ScalarValue scalarValue = 1;
+        CounterValue counterValue = 2;
+        NumStatsValue numStatsValue = 3;
+        PeriodicCounterValue periodicCounterValue = 4;
+        FrequencyValue frequencyValue = 5;
+        BoundedListValue boundedListValue = 6;
+    }
+}
+
+message ScalarState {
     required Key key = 1;
     required Timestamp ts = 2;
-    repeated DoubleListItem value = 3 [(scalapb.field).collection_type="List"];
+    required Scalar value = 3;
+}
+
+message CounterState {
+    required Key key = 1;
+    required Timestamp ts = 2;
+    required int64 value = 3;
+}
+
+message PeriodicCounterState {
+    message TimeCounter {
+        required Timestamp ts = 1;
+        required int64 count = 2;
+    }
+    required Key key = 1;
+    required Timestamp ts = 2;
+    repeated TimeCounter values = 3 [(scalapb.field).collection_type="List"];
+}
+
+message BoundedListState {
+    required Key key = 1;
+    required Timestamp ts = 2;
+    repeated TimeValue values = 3 [(scalapb.field).collection_type="List"];
+}
+
+message FrequencyState {
+    required Key key = 1;
+    required Timestamp ts = 2;
+    repeated string values = 3 [(scalapb.field).collection_type="Vector"];
+}
+
+message StatsState {
+    required Key key = 1;
+    required Timestamp ts = 2;
+    repeated double values = 3 [(scalapb.field).collection_type="Vector"];
+}
+
+message State {
+    oneof sealed_value {
+        ScalarState scalarState = 1;
+        CounterState counterState = 2;
+        PeriodicCounterState periodicCounterState = 3;
+        BoundedListState boundedListState = 4;
+        FrequencyState frequencyState = 5;
+        StatsState statsState = 6;
+    }
 }

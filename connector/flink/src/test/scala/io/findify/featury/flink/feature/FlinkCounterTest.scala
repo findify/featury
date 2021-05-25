@@ -2,9 +2,8 @@ package io.findify.featury.flink.feature
 
 import io.findify.featury.flink.FlinkStreamTest
 import io.findify.featury.model.FeatureConfig.{CounterConfig, ScalarConfig}
-import io.findify.featury.model.{FeatureKey, Key, LongScalarValue, SString, Timestamp, Write}
+import io.findify.featury.model.{CounterValue, FeatureKey, Key, Timestamp, Write}
 import io.findify.featury.model.Key.{FeatureName, GroupName, Id, Namespace, Tenant}
-import io.findify.featury.model.ScalarType.TextType
 import io.findify.featury.model.Write.Increment
 import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.scalatest.flatspec.AnyFlatSpec
@@ -12,7 +11,6 @@ import org.scalatest.matchers.should.Matchers
 import org.apache.flink.api.scala._
 
 import java.time.Duration
-
 import scala.concurrent.duration._
 
 class FlinkCounterTest extends AnyFlatSpec with FlinkStreamTest with Matchers {
@@ -32,10 +30,10 @@ class FlinkCounterTest extends AnyFlatSpec with FlinkStreamTest with Matchers {
     val conf   = Map(fkey -> CounterConfig(fkey.feature, fkey.ns, fkey.group, refresh = 1.hour))
     val list   = (0 until 300).map(i => Increment(k, now.plus(i.minutes), 1)).toList
     val result = writeIncrements(conf, list)
-    result.map(_.value.value) shouldBe List(1, 2)
+    result.map(_.value) shouldBe List(1, 2)
   }
 
-  def writeIncrements(conf: Map[FeatureKey, CounterConfig], values: List[Increment]): List[LongScalarValue] = {
+  def writeIncrements(conf: Map[FeatureKey, CounterConfig], values: List[Increment]): List[CounterValue] = {
     env
       .fromCollection[Write](values)
       .assignTimestampsAndWatermarks(

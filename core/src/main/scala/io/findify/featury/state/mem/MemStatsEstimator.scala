@@ -5,7 +5,7 @@ import com.google.common.math.Quantiles
 import io.findify.featury.model.Feature.StatsEstimator
 import io.findify.featury.model.FeatureConfig.StatsEstimatorConfig
 import io.findify.featury.model.Write.PutStatSample
-import io.findify.featury.model.{FeatureValue, Key, NumStatsValue, Timestamp}
+import io.findify.featury.model.{FeatureValue, Key, NumStatsValue, StatsState, Timestamp}
 
 import scala.collection.JavaConverters._
 import scala.util.Random
@@ -42,4 +42,9 @@ case class MemStatsEstimator(config: StatsEstimatorConfig, cache: Cache[Key, Vec
       quantiles = quantile.toMap
     )
   }
+
+  override def readState(key: Key, ts: Timestamp): Option[StatsState] =
+    cache.getIfPresent(key).map(StatsState(key, ts, _))
+
+  override def writeState(state: StatsState): Unit = cache.put(state.key, state.values)
 }

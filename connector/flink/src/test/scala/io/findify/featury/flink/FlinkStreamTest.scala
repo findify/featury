@@ -18,6 +18,8 @@ object FlinkStreamTest {
   )
   lazy val stream = {
     val env = cluster.getTestEnvironment
+    env.setParallelism(1)
+    env.setRestartStrategy(RestartStrategies.noRestart())
     StreamExecutionEnvironment.getExecutionEnvironment
   }
 }

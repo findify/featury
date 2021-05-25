@@ -4,20 +4,23 @@ import io.findify.featury.flink.StateTTL
 import io.findify.featury.model.Feature.Counter
 import io.findify.featury.model.FeatureConfig.CounterConfig
 import io.findify.featury.model.Write.Increment
-import io.findify.featury.model.{FeatureValue, Key, LongScalarValue, SLong, Timestamp}
+import io.findify.featury.model.{CounterState, CounterValue, Key, SLong, Timestamp}
 import org.apache.flink.api.common.state.{KeyedStateStore, ValueState, ValueStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 
-case class FlinkCounterFeature(config: CounterConfig, state: ValueState[Long]) extends Counter {
-  override def put(action: Increment): Unit = {
-    Option(state.value()) match {
-      case Some(counter) => state.update(counter + action.inc)
-      case None          => state.update(action.inc)
-    }
+case class FlinkCounterFeature(config: CounterConfig, valueState: ValueState[Long]) extends Counter {
+  override def put(action: Increment): Unit = Option(valueState.value()) match {
+    case Some(counter) => valueState.update(counter + action.inc)
+    case None          => valueState.update(action.inc)
   }
 
-  override def computeValue(key: Key, ts: Timestamp): Option[LongScalarValue] =
-    Option(state.value()).map(v => LongScalarValue(key, ts, SLong(v)))
+  override def computeValue(key: Key, ts: Timestamp): Option[CounterValue] =
+    Option(valueState.value()).map(v => CounterValue(key, ts, v))
+
+  override def writeState(state: CounterState): Unit = valueState.update(state.value)
+
+  override def readState(key: Key, ts: Timestamp): Option[CounterState] =
+    Option(valueState.value()).map(CounterState(key, ts, _))
 }
 
 object FlinkCounterFeature {

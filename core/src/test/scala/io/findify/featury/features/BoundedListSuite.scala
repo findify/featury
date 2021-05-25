@@ -9,8 +9,8 @@ import io.findify.featury.utils.TestKey
 
 import scala.concurrent.duration._
 
-trait BoundedListSuite[T <: Scalar] extends FeatureSuite[BoundedListConfig, BoundedList[T]] {
-  def makeValue(i: Int): T
+trait BoundedListSuite extends FeatureSuite[BoundedListConfig, BoundedList] {
+  def makeValue(i: Int): Scalar
   override lazy val config = BoundedListConfig(
     name = FeatureName("example"),
     ns = Namespace("a"),

@@ -3,8 +3,9 @@ package io.findify.featury.state.mem
 import com.github.blemale.scaffeine.Cache
 import io.findify.featury.model.Feature.PeriodicCounter
 import io.findify.featury.model.FeatureConfig.PeriodicCounterConfig
+import io.findify.featury.model.PeriodicCounterState.TimeCounter
 import io.findify.featury.model.Write.PeriodicIncrement
-import io.findify.featury.model.{FeatureValue, Key, PeriodicCounterValue, Timestamp}
+import io.findify.featury.model.{FeatureValue, Key, PeriodicCounterState, PeriodicCounterValue, Timestamp}
 
 case class MemPeriodicCounter(config: PeriodicCounterConfig, cache: Cache[Key, Map[Timestamp, Long]])
     extends PeriodicCounter {
@@ -24,4 +25,12 @@ case class MemPeriodicCounter(config: PeriodicCounterConfig, cache: Cache[Key, M
 
   override def computeValue(key: Key, ts: Timestamp): Option[PeriodicCounterValue] =
     cache.getIfPresent(key).map(values => PeriodicCounterValue(key, ts, fromMap(values)))
+
+  override def readState(key: Key, ts: Timestamp): Option[PeriodicCounterState] =
+    cache
+      .getIfPresent(key)
+      .map(counters => PeriodicCounterState(key, ts, counters.map(c => TimeCounter(c._1, c._2)).toList))
+
+  override def writeState(state: PeriodicCounterState): Unit =
+    cache.put(state.key, state.values.map(kv => kv.ts -> kv.count).toMap)
 }

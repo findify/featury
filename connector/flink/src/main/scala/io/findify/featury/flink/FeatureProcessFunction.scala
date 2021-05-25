@@ -1,6 +1,7 @@
 package io.findify.featury.flink
 
-import io.findify.featury.model.{Feature, FeatureConfig, FeatureKey, FeatureValue, Key, Timestamp, Write}
+import io.findify.featury.flink.FeatureProcessFunction.stateTag
+import io.findify.featury.model.{Feature, FeatureConfig, FeatureKey, FeatureValue, Key, State, Timestamp, Write}
 import org.apache.flink.api.common.state.{KeyedStateStore, ValueState, ValueStateDescriptor}
 import org.apache.flink.api.common.typeinfo.{TypeInfo, TypeInformation}
 import org.apache.flink.runtime.state.{FunctionInitializationContext, FunctionSnapshotContext}
@@ -8,8 +9,9 @@ import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction
 import org.apache.flink.util.Collector
 import org.apache.flink.api.scala._
+import org.apache.flink.streaming.api.scala.OutputTag
 
-class FeatureProcessFunction[W <: Write, T <: FeatureValue, C <: FeatureConfig, F <: Feature[W, T, C]](
+class FeatureProcessFunction[W <: Write, T <: FeatureValue, C <: FeatureConfig, S <: State, F <: Feature[W, T, C, S]](
     configs: Map[FeatureKey, C],
     name: String,
     make: (KeyedStateStore, C) => F
@@ -47,7 +49,12 @@ class FeatureProcessFunction[W <: Write, T <: FeatureValue, C <: FeatureConfig, 
         if (lastUpdate.diff(value.ts) > feature.config.refresh) {
           updated.update(value.ts.ts)
           feature.computeValue(value.key, value.ts).foreach(value => out.collect(value))
+          feature.readState(value.key, value.ts).foreach(state => ctx.output(stateTag, state))
         }
     }
   }
+}
+
+object FeatureProcessFunction {
+  val stateTag = OutputTag[State]("side-output")
 }

@@ -1,22 +1,6 @@
 package io.findify.featury.state.codec
 
-import io.findify.featury.model.{
-  BackendError,
-  BoundedListValue,
-  DoubleBoundedListValue,
-  DoubleScalarValue,
-  FeatureValue,
-  ListItem,
-  LongScalarValue,
-  SDouble,
-  SLong,
-  SString,
-  Scalar,
-  ScalarValue,
-  StringBoundedListValue,
-  StringScalarValue,
-  Timestamp
-}
+import io.findify.featury.model.{SDouble, SLong, SString}
 import io.findify.featury.state.codec.Codec.DecodingError
 
 import scala.util.{Failure, Success, Try}
