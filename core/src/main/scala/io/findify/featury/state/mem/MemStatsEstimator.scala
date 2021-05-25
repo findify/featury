@@ -23,24 +23,27 @@ case class MemStatsEstimator(config: StatsEstimatorConfig, cache: Cache[Key, Vec
     }
   }
 
-  override def computeValue(key: Key, ts: Timestamp): Option[NumStatsValue] = for {
-    pool <- cache.getIfPresent(key) if pool.nonEmpty
-  } yield {
-    val quantile = Quantiles
-      .percentiles()
-      .indexes(config.percentiles.map(i => Integer.valueOf(i)).asJavaCollection)
-      .compute(pool: _*)
-      .asScala
-      .map { case (k, v) =>
-        k.intValue() -> v.doubleValue()
-      }
-    NumStatsValue(
-      key = key,
-      ts = ts,
-      min = pool.min,
-      max = pool.max,
-      quantiles = quantile.toMap
-    )
+  override def computeValue(key: Key, ts: Timestamp): Option[NumStatsValue] = {
+    val br = 1
+    for {
+      pool <- cache.getIfPresent(key) if pool.nonEmpty
+    } yield {
+      val quantile = Quantiles
+        .percentiles()
+        .indexes(config.percentiles.map(i => Integer.valueOf(i)).asJavaCollection)
+        .compute(pool: _*)
+        .asScala
+        .map { case (k, v) =>
+          k.intValue() -> v.doubleValue()
+        }
+      NumStatsValue(
+        key = key,
+        ts = ts,
+        min = pool.min,
+        max = pool.max,
+        quantiles = quantile.toMap
+      )
+    }
   }
 
   override def readState(key: Key, ts: Timestamp): Option[StatsState] =

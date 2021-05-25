@@ -5,7 +5,7 @@ import io.findify.featury.model.Feature.{Counter, ScalarFeature}
 import io.findify.featury.model.FeatureConfig.{CounterConfig, ScalarConfig}
 import io.findify.featury.model.Write.{Increment, Put}
 import io.findify.featury.model._
-import org.apache.flink.api.common.eventtime.WatermarkStrategy
+import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.apache.flink.api.common.state.KeyedStateStore
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.functions.KeySelector
@@ -62,6 +62,13 @@ object FeaturyFlow {
         select: PartialFunction[Write, W]
     ): DataStream[T] = {
       stream
+        .assignTimestampsAndWatermarks(
+          WatermarkStrategy
+            .forBoundedOutOfOrderness[Write](java.time.Duration.ofSeconds(1))
+            .withTimestampAssigner(new SerializableTimestampAssigner[Write] {
+              override def extractTimestamp(element: Write, recordTimestamp: Long): Long = element.ts.ts
+            })
+        )
         .flatMapWith(w => select.lift(w))
         .id(s"select-${name}")
         .keyingBy(_.key)

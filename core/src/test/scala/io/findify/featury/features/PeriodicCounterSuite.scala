@@ -10,8 +10,8 @@ import io.findify.featury.utils.TestKey
 
 import scala.concurrent.duration._
 
-trait PeriodicCounterSuite extends FeatureSuite[PeriodicCounterConfig, PeriodicCounter] {
-  override val config = PeriodicCounterConfig(
+trait PeriodicCounterSuite extends FeatureSuite[PeriodicIncrement, PeriodicCounterValue] {
+  val config = PeriodicCounterConfig(
     FeatureName("f1"),
     ns = Namespace("a"),
     group = GroupName("b"),
@@ -20,10 +20,9 @@ trait PeriodicCounterSuite extends FeatureSuite[PeriodicCounterConfig, PeriodicC
     List(PeriodRange(0, 0), PeriodRange(7, 0))
   )
 
-  it should "increment once" in withFeature { c =>
-    val k = TestKey(id = "p1")
-    c.put(PeriodicIncrement(k, now, 1))
-    val result = c.computeValue(k, now)
+  it should "increment once" in {
+    val k      = TestKey(id = "p1")
+    val result = write(List(PeriodicIncrement(k, now, 1)))
     result shouldBe Some(
       PeriodicCounterValue(
         k,
@@ -45,16 +44,16 @@ trait PeriodicCounterSuite extends FeatureSuite[PeriodicCounterConfig, PeriodicC
       )
     )
   }
-  it should "increment once in a intra-day burst" in withFeature { c =>
+  it should "increment once in a intra-day burst" in {
     val k     = TestKey(id = "p2")
     val start = now.minus(10.hours)
-    for {
+    val incrs = for {
       offset <- 1 to 10
-    } {
+    } yield {
       val ts = start.plus(offset.hours)
-      c.put(PeriodicIncrement(k, ts, 1))
+      PeriodicIncrement(k, ts, 1)
     }
-    val result = c.computeValue(k, now)
+    val result = write(incrs.toList)
     result shouldBe Some(
       PeriodicCounterValue(
         k,
@@ -77,16 +76,16 @@ trait PeriodicCounterSuite extends FeatureSuite[PeriodicCounterConfig, PeriodicC
     )
   }
 
-  it should "increment once in a day" in withFeature { c =>
+  it should "increment once in a day" in {
     val k     = TestKey(id = "p3")
     val start = now.minus(10.days)
-    for {
+    val incrs = for {
       offset <- 1 to 10
-    } {
+    } yield {
       val ts = start.plus(offset.days)
-      c.put(PeriodicIncrement(k, ts, 1))
+      PeriodicIncrement(k, ts, 1)
     }
-    val result = c.computeValue(k, now)
+    val result = write(incrs.toList)
     result shouldBe Some(
       PeriodicCounterValue(
         k,
@@ -109,16 +108,16 @@ trait PeriodicCounterSuite extends FeatureSuite[PeriodicCounterConfig, PeriodicC
     )
   }
 
-  it should "increment once in a week" in withFeature { c =>
+  it should "increment once in a week" in {
     val k     = TestKey(id = "p4")
     val start = now.minus(10 * 7.days)
-    for {
+    val incrs = for {
       offset <- 1 to 10
-    } {
+    } yield {
       val ts = start.plus((7 * offset).days)
-      c.put(PeriodicIncrement(k, ts, 1))
+      PeriodicIncrement(k, ts, 1)
     }
-    val result = c.computeValue(k, now)
+    val result = write(incrs.toList)
     result shouldBe Some(
       PeriodicCounterValue(
         k,

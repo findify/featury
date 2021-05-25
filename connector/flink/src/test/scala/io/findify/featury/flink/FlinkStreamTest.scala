@@ -17,9 +17,9 @@ object FlinkStreamTest {
     new MiniClusterResourceConfiguration.Builder().setNumberSlotsPerTaskManager(1).setNumberTaskManagers(1).build()
   )
   lazy val stream = {
-    val env = cluster.getTestEnvironment
+    val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.setParallelism(1)
     env.setRestartStrategy(RestartStrategies.noRestart())
-    StreamExecutionEnvironment.getExecutionEnvironment
+    env
   }
 }
