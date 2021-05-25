@@ -9,12 +9,12 @@ import scala.util.Random
 sealed trait Feature[W <: Write, T <: FeatureValue, C <: FeatureConfig] {
   def put(action: W): Unit
   def config: C
-  def computeValue(key: Key): Option[T]
+  def computeValue(key: Key, ts: Timestamp): Option[T]
 }
 
 object Feature {
   trait ScalarFeature[T <: Scalar] extends Feature[Put[T], ScalarValue[T], ScalarConfig] {
-    def makeValue(value: T): ScalarValue[T]
+    def makeValue(key: Key, ts: Timestamp, value: T): ScalarValue[T]
   }
 
   trait Counter extends Feature[Increment, LongScalarValue, CounterConfig]
@@ -28,8 +28,8 @@ object Feature {
   }
 
   trait PeriodicCounter extends Feature[PeriodicIncrement, PeriodicCounterValue, PeriodicCounterConfig] {
-    def fromMap(map: Map[Timestamp, Long]): PeriodicCounterValue = {
-      val result = for {
+    def fromMap(map: Map[Timestamp, Long]): List[PeriodicValue] = {
+      for {
         range         <- config.sumPeriodRanges
         lastTimestamp <- map.keys.toList.sortBy(_.ts).lastOption
       } yield {
@@ -42,7 +42,6 @@ object Feature {
           }
         PeriodicValue(start, end, range.startOffset - range.endOffset + 1, sum)
       }
-      PeriodicCounterValue(result)
     }
   }
 

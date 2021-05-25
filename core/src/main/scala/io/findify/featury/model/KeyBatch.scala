@@ -1,15 +1,15 @@
 package io.findify.featury.model
 
-import io.findify.featury.model.Key.{FeatureName, GroupName, KeyId, Namespace, Tenant}
+import io.findify.featury.model.Key.{FeatureName, GroupName, Id, Namespace, Tenant}
 
 case class KeyBatch(
     ns: Namespace,
     group: GroupName,
     featureNames: List[FeatureName],
     tenant: Tenant,
-    ids: List[KeyId]
+    ids: List[Id]
 ) {
-  def asKey(name: FeatureName, id: KeyId) = Key(ns, group, name, tenant, id)
+  def asKey(name: FeatureName, id: Id) = Key(ns, group, name, tenant, id)
   def asKeys: List[Key] = for {
     id      <- ids
     feature <- featureNames

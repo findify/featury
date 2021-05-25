@@ -9,19 +9,26 @@ sealed trait FeatureConfig {
   def group: GroupName
   def name: FeatureName
   def ttl: FiniteDuration
+  def refresh: FiniteDuration
   def fqdn = s"${ns.value}.${group.value}.${name.value}"
 }
 
 object FeatureConfig {
-  case class CounterConfig(name: FeatureName, ns: Namespace, group: GroupName, ttl: FiniteDuration = 365.days)
-      extends FeatureConfig
+  case class CounterConfig(
+      name: FeatureName,
+      ns: Namespace,
+      group: GroupName,
+      ttl: FiniteDuration = 365.days,
+      refresh: FiniteDuration = 1.hour
+  ) extends FeatureConfig
 
   case class ScalarConfig(
       name: FeatureName,
       ns: Namespace,
       group: GroupName,
       contentType: ScalarType,
-      ttl: FiniteDuration = 365.days
+      ttl: FiniteDuration = 365.days,
+      refresh: FiniteDuration = 1.hour
   ) extends FeatureConfig
 
   case class BoundedListConfig(
@@ -31,7 +38,8 @@ object FeatureConfig {
       count: Int = Int.MaxValue,
       duration: FiniteDuration = Long.MaxValue.nanos,
       contentType: ScalarType,
-      ttl: FiniteDuration = 365.days
+      ttl: FiniteDuration = 365.days,
+      refresh: FiniteDuration = 1.hour
   ) extends FeatureConfig
 
   case class FreqEstimatorConfig(
@@ -40,7 +48,8 @@ object FeatureConfig {
       group: GroupName,
       poolSize: Int,
       sampleRate: Int,
-      ttl: FiniteDuration = 365.days
+      ttl: FiniteDuration = 365.days,
+      refresh: FiniteDuration = 1.hour
   ) extends FeatureConfig
 
   case class PeriodRange(startOffset: Int, endOffset: Int)
@@ -51,7 +60,8 @@ object FeatureConfig {
       period: FiniteDuration,
       count: Int,
       sumPeriodRanges: List[PeriodRange],
-      ttl: FiniteDuration = 365.days
+      ttl: FiniteDuration = 365.days,
+      refresh: FiniteDuration = 1.hour
   ) extends FeatureConfig {
     private val periods      = (sumPeriodRanges.map(_.startOffset) ++ sumPeriodRanges.map(_.endOffset)).sorted
     val latestPeriodOffset   = periods.head
@@ -65,7 +75,8 @@ object FeatureConfig {
       poolSize: Int,
       sampleRate: Int,
       percentiles: List[Int],
-      ttl: FiniteDuration = 365.days
+      ttl: FiniteDuration = 365.days,
+      refresh: FiniteDuration = 1.hour
   ) extends FeatureConfig
 
 }

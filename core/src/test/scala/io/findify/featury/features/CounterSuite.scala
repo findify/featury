@@ -15,19 +15,19 @@ trait CounterSuite extends FeatureSuite[CounterConfig, Counter] {
   it should "increment once" in withFeature { counter =>
     val key = TestKey(id = "p10")
     counter.put(Increment(key, Timestamp.now, 1))
-    counter.computeValue(key) shouldBe Some(LongScalarValue(SLong(1)))
+    counter.computeValue(key, now) shouldBe Some(LongScalarValue(key, now, SLong(1)))
   }
 
   it should "inc-dec multiple times" in withFeature { counter =>
     val key        = TestKey(id = "p11")
     val increments = (0 until 10).map(_ => Random.nextInt(100) - 50).toList
     increments.foreach(inc => counter.put(Increment(key, Timestamp.now, inc)))
-    counter.computeValue(key) shouldBe Some(LongScalarValue(SLong(increments.sum)))
+    counter.computeValue(key, now) shouldBe Some(LongScalarValue(key, now, SLong(increments.sum)))
   }
 
   it should "read zero on empty state" in withFeature { counter =>
     val key   = TestKey(id = "p13")
-    val state = counter.computeValue(key)
+    val state = counter.computeValue(key, now)
     state shouldBe None
   }
 }

@@ -22,6 +22,6 @@ case class MemPeriodicCounter(config: PeriodicCounterConfig, cache: Cache[Key, M
     }
   }
 
-  override def computeValue(key: Key): Option[PeriodicCounterValue] =
-    cache.getIfPresent(key).map(fromMap)
+  override def computeValue(key: Key, ts: Timestamp): Option[PeriodicCounterValue] =
+    cache.getIfPresent(key).map(values => PeriodicCounterValue(key, ts, fromMap(values)))
 }

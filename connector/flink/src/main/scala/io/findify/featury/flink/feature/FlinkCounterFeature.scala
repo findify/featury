@@ -4,7 +4,7 @@ import io.findify.featury.flink.StateTTL
 import io.findify.featury.model.Feature.Counter
 import io.findify.featury.model.FeatureConfig.CounterConfig
 import io.findify.featury.model.Write.Increment
-import io.findify.featury.model.{FeatureValue, Key, LongScalarValue, SLong}
+import io.findify.featury.model.{FeatureValue, Key, LongScalarValue, SLong, Timestamp}
 import org.apache.flink.api.common.state.{KeyedStateStore, ValueState, ValueStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 
@@ -16,8 +16,8 @@ case class FlinkCounterFeature(config: CounterConfig, state: ValueState[Long]) e
     }
   }
 
-  override def computeValue(key: Key): Option[LongScalarValue] =
-    Option(state.value()).map(v => LongScalarValue(SLong(v)))
+  override def computeValue(key: Key, ts: Timestamp): Option[LongScalarValue] =
+    Option(state.value()).map(v => LongScalarValue(key, ts, SLong(v)))
 }
 
 object FlinkCounterFeature {

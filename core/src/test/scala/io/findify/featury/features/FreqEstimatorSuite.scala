@@ -14,7 +14,7 @@ trait FreqEstimatorSuite extends FeatureSuite[FreqEstimatorConfig, FreqEstimator
     FreqEstimatorConfig(FeatureName("f1"), ns = Namespace("a"), group = GroupName("b"), 100, 1)
 
   it should "be empty" in withFeature { s =>
-    s.computeValue(TestKey(id = "f10")) shouldBe None
+    s.computeValue(TestKey(id = "f10"), now) shouldBe None
   }
 
   it should "sample freqs for 100 items" in withFeature { s =>
@@ -22,7 +22,7 @@ trait FreqEstimatorSuite extends FeatureSuite[FreqEstimatorConfig, FreqEstimator
     for { i <- 0 until 100 } {
       s.put(PutFreqSample(k, Timestamp.now, "p" + math.round(math.abs(Random.nextGaussian() * 10.0)).toString))
     }
-    val result = s.computeValue(k)
+    val result = s.computeValue(k, now)
     result.map(_.values.values.sum).get shouldBe 1.0 +- 0.01
     result.map(_.values.getOrElse("p1", 0.0)).get should be > 0.01
   }

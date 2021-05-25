@@ -4,7 +4,7 @@ import com.github.blemale.scaffeine.Cache
 import io.findify.featury.model.Feature.FreqEstimator
 import io.findify.featury.model.FeatureConfig.FreqEstimatorConfig
 import io.findify.featury.model.Write.PutFreqSample
-import io.findify.featury.model.{FeatureValue, FrequencyValue, Key, WriteRequest}
+import io.findify.featury.model.{FeatureValue, FrequencyValue, Key, Timestamp, WriteRequest}
 
 import scala.util.Random
 
@@ -20,13 +20,13 @@ case class MemFreqEstimator(config: FreqEstimatorConfig, cache: Cache[Key, Vecto
         cache.put(action.key, Vector(action.value))
     }
 
-  override def computeValue(key: Key): Option[FrequencyValue] = for {
+  override def computeValue(key: Key, ts: Timestamp): Option[FrequencyValue] = for {
     pool <- cache.getIfPresent(key) if pool.nonEmpty
   } yield {
     val sum = pool.size.toDouble
     val result = pool.groupBy(identity).map { case (key, values) =>
       key -> values.size / sum
     }
-    FrequencyValue(result)
+    FrequencyValue(key, ts, result)
   }
 }

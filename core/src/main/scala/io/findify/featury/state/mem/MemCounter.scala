@@ -4,7 +4,7 @@ import com.github.blemale.scaffeine.Cache
 import io.findify.featury.model.Feature.Counter
 import io.findify.featury.model.FeatureConfig.CounterConfig
 import io.findify.featury.model.Write.Increment
-import io.findify.featury.model.{FeatureValue, Key, LongScalarValue, SLong}
+import io.findify.featury.model.{FeatureValue, Key, LongScalarValue, SLong, Timestamp}
 
 case class MemCounter(config: CounterConfig, cache: Cache[Key, Long]) extends Counter {
   override def put(action: Increment): Unit = {
@@ -14,7 +14,7 @@ case class MemCounter(config: CounterConfig, cache: Cache[Key, Long]) extends Co
     }
 
   }
-  override def computeValue(key: Key): Option[LongScalarValue] = {
-    cache.getIfPresent(key).map(c => LongScalarValue(SLong(c)))
+  override def computeValue(key: Key, ts: Timestamp): Option[LongScalarValue] = {
+    cache.getIfPresent(key).map(c => LongScalarValue(key, ts, SLong(c)))
   }
 }

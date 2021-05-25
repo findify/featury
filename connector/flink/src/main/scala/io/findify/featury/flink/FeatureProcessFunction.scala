@@ -1,8 +1,6 @@
 package io.findify.featury.flink
 
-import io.findify.featury.flink.FeatureProcessFunction.KeyedFeatureValue
-import io.findify.featury.model.{Feature, FeatureConfig, FeatureValue, Key, Timestamp, Write}
-import io.findify.featury.model.Key.FeatureKey
+import io.findify.featury.model.{Feature, FeatureConfig, FeatureKey, FeatureValue, Key, Timestamp, Write}
 import org.apache.flink.api.common.state.{KeyedStateStore, ValueState, ValueStateDescriptor}
 import org.apache.flink.api.common.typeinfo.{TypeInfo, TypeInformation}
 import org.apache.flink.runtime.state.{FunctionInitializationContext, FunctionSnapshotContext}
@@ -15,7 +13,7 @@ class FeatureProcessFunction[W <: Write, T <: FeatureValue, C <: FeatureConfig, 
     configs: Map[FeatureKey, C],
     name: String,
     make: (KeyedStateStore, C) => F
-) extends KeyedProcessFunction[Key, W, KeyedFeatureValue[T]]
+) extends KeyedProcessFunction[Key, W, T]
     with CheckpointedFunction {
 
   @transient var features: Map[FeatureKey, F] = _
@@ -33,23 +31,23 @@ class FeatureProcessFunction[W <: Write, T <: FeatureValue, C <: FeatureConfig, 
 
   override def processElement(
       value: W,
-      ctx: KeyedProcessFunction[Key, W, KeyedFeatureValue[T]]#Context,
-      out: Collector[KeyedFeatureValue[T]]
+      ctx: KeyedProcessFunction[Key, W, T]#Context,
+      out: Collector[T]
   ): Unit = {
-    features.get(ctx.getCurrentKey.featureKey) match {
+
+    println(
+      s"${getRuntimeContext.getIndexOfThisSubtask}: ${Timestamp(ctx.timestamp())} wm:${ctx.timerService().currentWatermark()}"
+    )
+    features.get(FeatureKey(ctx.getCurrentKey)) match {
       case None =>
       // wtf?
       case Some(feature) =>
         feature.put(value)
         val lastUpdate = Option(updated.value()).map(ts => Timestamp(ts)).getOrElse(Timestamp(0L))
-        if (lastUpdate.diff(value.ts) > feature.config.ttl) {
+        if (lastUpdate.diff(value.ts) > feature.config.refresh) {
           updated.update(value.ts.ts)
-          feature.computeValue(value.key).foreach(value => out.collect(KeyedFeatureValue(ctx.getCurrentKey, value)))
+          feature.computeValue(value.key, value.ts).foreach(value => out.collect(value))
         }
     }
   }
-}
-
-object FeatureProcessFunction {
-  case class KeyedFeatureValue[T <: FeatureValue](key: Key, value: T)
 }

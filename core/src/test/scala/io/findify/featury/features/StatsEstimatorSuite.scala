@@ -14,7 +14,7 @@ trait StatsEstimatorSuite extends FeatureSuite[StatsEstimatorConfig, StatsEstima
   it should "measure a 1-100 range" in withFeature { s =>
     val k = TestKey(id = "p10")
     for { i <- 0 until 100 } { s.put(PutStatSample(k, Timestamp.now, i.toDouble)) }
-    val result = s.computeValue(k).get
+    val result = s.computeValue(k, now).get
     result.min should be >= 0.0
     result.max should be <= 100.0
     result.quantiles.values.toList.forall(_ > 1) shouldBe true
@@ -23,7 +23,7 @@ trait StatsEstimatorSuite extends FeatureSuite[StatsEstimatorConfig, StatsEstima
   it should "measure a 1-1000 range" in withFeature { s =>
     val k = TestKey(id = "p11")
     for { i <- 0 until 1000 } { s.put(PutStatSample(k, Timestamp.now, i.toDouble)) }
-    val result = s.computeValue(k).get
+    val result = s.computeValue(k, now).get
     result.min should be > 100.0
     result.max should be > 100.0
     result.quantiles.values.toList.forall(_ > 10) shouldBe true

@@ -15,8 +15,8 @@ object TestKey {
   ) = Key(
     ns = Namespace(ns),
     group = GroupName(group),
-    featureName = FeatureName(fname),
+    name = FeatureName(fname),
     tenant = Tenant(tenant),
-    id = KeyId(id)
+    id = Id(id)
   )
 }

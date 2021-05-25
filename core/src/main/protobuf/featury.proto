@@ -13,8 +13,37 @@ option (scalapb.options) = {
   preamble: "sealed trait ScalarValue[T <: Scalar] extends FeatureValue { def value: T }"
   preamble: "sealed trait ListItem[T <: Scalar] { def value:T; def ts: Timestamp }"
   preamble: "sealed trait BoundedListValue[T <: Scalar] extends FeatureValue { def value: List[ListItem[T]]}"
-  preamble: "sealed trait FeatureValue"
+  preamble: "sealed trait FeatureValue { def key: Key; def ts: Timestamp }"
 };
+
+message Key {
+    message Namespace {
+        option (scalapb.message).extends = "AnyVal";
+        required string value = 1;
+    }
+    message GroupName {
+        option (scalapb.message).extends = "AnyVal";
+        required string value = 1;
+    }
+    message FeatureName {
+        option (scalapb.message).extends = "AnyVal";
+        required string value = 1;
+    }
+    message Tenant {
+        option (scalapb.message).extends = "AnyVal";
+        required int32 value = 1;
+    }
+    message Id {
+        option (scalapb.message).extends = "AnyVal";
+        required string value = 1;
+    }
+
+    required Namespace ns = 1;
+    required GroupName group = 2;
+    required FeatureName name = 3;
+    required Tenant tenant = 4;
+    required Id id = 5;
+}
 
 message Timestamp {
     option (scalapb.message).companion_extends = "io.findify.featury.model.TimestampOps.TimestampCompanion";
@@ -37,24 +66,32 @@ message SLong {
 
 message StringScalarValue {
     option (scalapb.message).extends = "io.findify.featury.model.ScalarValue[SString]";
-    required SString value = 1;
+    required Key key = 1;
+    required Timestamp ts = 2;
+    required SString value = 3;
 }
 
 message DoubleScalarValue {
     option (scalapb.message).extends = "io.findify.featury.model.ScalarValue[SDouble]";
-    required SDouble value = 1;
+    required Key key = 1;
+    required Timestamp ts = 2;
+    required SDouble value = 3;
 }
 
 message LongScalarValue {
     option (scalapb.message).extends = "io.findify.featury.model.ScalarValue[SLong]";
-    required SLong value = 1;
+    required Key key = 1;
+    required Timestamp ts = 2;
+    required SLong value = 3;
 }
 
 message NumStatsValue {
     option (scalapb.message).extends = "io.findify.featury.model.FeatureValue";
-    required double min = 1;
-    required double max = 2;
-    map<int32, double> quantiles = 3;
+    required Key key = 1;
+    required Timestamp ts = 2;
+    required double min = 3;
+    required double max = 4;
+    map<int32, double> quantiles = 5;
 }
 
 
@@ -66,16 +103,17 @@ message PeriodicCounterValue {
         required double value = 4;
     }
     option (scalapb.message).extends = "io.findify.featury.model.FeatureValue";
-    repeated PeriodicValue values = 1 [(scalapb.field).collection_type="List"];
+    required Key key = 1;
+    required Timestamp ts = 2;
+    repeated PeriodicValue values = 3 [(scalapb.field).collection_type="List"];
 }
 
 message FrequencyValue {
     option (scalapb.message).extends = "io.findify.featury.model.FeatureValue";
-    map<string, double> values = 1;
+    required Key key = 1;
+    required Timestamp ts = 2;
+    map<string, double> values = 3;
 }
-
-//case class BoundedListValue[T <: Scalar](value: List[ListItem[T]]) extends FeatureValue
-//case class ListItem[T <: Scalar](value: T, ts: Timestamp)
 
 message StringListItem {
     option (scalapb.message).extends = "io.findify.featury.model.ListItem[SString]";
@@ -91,10 +129,14 @@ message DoubleListItem {
 
 message StringBoundedListValue {
     option (scalapb.message).extends = "io.findify.featury.model.BoundedListValue[SString]";
-    repeated StringListItem value = 1 [(scalapb.field).collection_type="List"];
+    required Key key = 1;
+    required Timestamp ts = 2;
+    repeated StringListItem value = 3 [(scalapb.field).collection_type="List"];
 }
 
 message DoubleBoundedListValue {
     option (scalapb.message).extends = "io.findify.featury.model.BoundedListValue[SDouble]";
-    repeated DoubleListItem value = 1 [(scalapb.field).collection_type="List"];
+    required Key key = 1;
+    required Timestamp ts = 2;
+    repeated DoubleListItem value = 3 [(scalapb.field).collection_type="List"];
 }

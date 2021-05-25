@@ -51,23 +51,23 @@ object Codec {
     }
   }
 
-  sealed trait ValueCodec[T <: FeatureValue] extends Codec[T]
-
-  implicit val scalarStringCodec: ValueCodec[ScalarValue[SString]] = new ValueCodec[ScalarValue[SString]] {
-    override def encode(value: ScalarValue[SString]): String = stringCodec.encode(value.value)
-    override def decode(in: String): Either[DecodingError, ScalarValue[SString]] =
-      stringCodec.decode(in).map(s => StringScalarValue(s))
-  }
-  implicit val scalarDoubleCodec: ValueCodec[ScalarValue[SDouble]] = new ValueCodec[ScalarValue[SDouble]] {
-    override def encode(value: ScalarValue[SDouble]): String = doubleCodec.encode(value.value)
-    override def decode(in: String): Either[DecodingError, ScalarValue[SDouble]] =
-      doubleCodec.decode(in).map(s => DoubleScalarValue(s))
-  }
-  implicit val scalarLongCodec: ValueCodec[ScalarValue[SLong]] = new ValueCodec[ScalarValue[SLong]] {
-    override def encode(value: ScalarValue[SLong]): String = longCodec.encode(value.value)
-    override def decode(in: String): Either[DecodingError, ScalarValue[SLong]] =
-      longCodec.decode(in).map(s => LongScalarValue(s))
-  }
+//  sealed trait ValueCodec[T <: FeatureValue] extends Codec[T]
+//
+//  implicit val scalarStringCodec: ValueCodec[ScalarValue[SString]] = new ValueCodec[ScalarValue[SString]] {
+//    override def encode(value: ScalarValue[SString]): String = stringCodec.encode(value.value)
+//    override def decode(in: String): Either[DecodingError, ScalarValue[SString]] =
+//      stringCodec.decode(in).map(s => StringScalarValue(s))
+//  }
+//  implicit val scalarDoubleCodec: ValueCodec[ScalarValue[SDouble]] = new ValueCodec[ScalarValue[SDouble]] {
+//    override def encode(value: ScalarValue[SDouble]): String = doubleCodec.encode(value.value)
+//    override def decode(in: String): Either[DecodingError, ScalarValue[SDouble]] =
+//      doubleCodec.decode(in).map(s => DoubleScalarValue(s))
+//  }
+//  implicit val scalarLongCodec: ValueCodec[ScalarValue[SLong]] = new ValueCodec[ScalarValue[SLong]] {
+//    override def encode(value: ScalarValue[SLong]): String = longCodec.encode(value.value)
+//    override def decode(in: String): Either[DecodingError, ScalarValue[SLong]] =
+//      longCodec.decode(in).map(s => LongScalarValue(s))
+//  }
 //  implicit def listItemCodec[T <: Scalar](implicit c: Codec[T]): Codec[ListItem[T]] = new Codec[ListItem[T]] {
 //    override def encode(value: ListItem[T]): String = s"${value.ts.ts}$RS${c.encode(value.value)}"
 //
@@ -113,33 +113,33 @@ object Codec {
 //  implicit val numListValueCodec =
 //    listValueCodec[SDouble, DoubleBoundedListValue](list => new DoubleBoundedListValue(list))
 
-  implicit val valueCodec: Codec[FeatureValue] = new Codec[FeatureValue] {
-    override def encode(value: FeatureValue): String = value match {
-      case value: StringScalarValue => "s:" + scalarStringCodec.encode(value)
-      case value: DoubleScalarValue => "d:" + scalarDoubleCodec.encode(value)
-      case value: LongScalarValue   => "l:" + scalarLongCodec.encode(value)
-//      case value: TextBoundedListValue => "tl:" + textListValueCodec.encode(value)
-//      case value: NumBoundedListValue  => "nl:" + numListValueCodec.encode(value)
-      case _ => "" // todo
-      //      case NumStatsValue(min, max, quantiles) =>
-      //      case PeriodicNumValue(values) =>
-      //      case StringFrequencyValue(values) =>
-    }
-
-    override def decode(string: String): Either[DecodingError, FeatureValue] = {
-      val sepIndex = string.indexOf(":")
-      if (sepIndex <= 0) {
-        Left(DecodingError(s"incorrect format: $string"))
-      } else {
-        val valueType   = string.substring(0, sepIndex)
-        val valueString = string.substring(sepIndex + 1, string.length)
-        valueType match {
-          case "s" => scalarStringCodec.decode(valueString)
-          case "d" => scalarDoubleCodec.decode(valueString)
-          case "l" => scalarLongCodec.decode(valueString)
-          case _   => Left(DecodingError("not supported yet"))
-        }
-      }
-    }
-  }
+//  implicit val valueCodec: Codec[FeatureValue] = new Codec[FeatureValue] {
+//    override def encode(value: FeatureValue): String = value match {
+//      case value: StringScalarValue => "s:" + scalarStringCodec.encode(value)
+//      case value: DoubleScalarValue => "d:" + scalarDoubleCodec.encode(value)
+//      case value: LongScalarValue   => "l:" + scalarLongCodec.encode(value)
+////      case value: TextBoundedListValue => "tl:" + textListValueCodec.encode(value)
+////      case value: NumBoundedListValue  => "nl:" + numListValueCodec.encode(value)
+//      case _ => "" // todo
+//      //      case NumStatsValue(min, max, quantiles) =>
+//      //      case PeriodicNumValue(values) =>
+//      //      case StringFrequencyValue(values) =>
+//    }
+//
+//    override def decode(string: String): Either[DecodingError, FeatureValue] = {
+//      val sepIndex = string.indexOf(":")
+//      if (sepIndex <= 0) {
+//        Left(DecodingError(s"incorrect format: $string"))
+//      } else {
+//        val valueType   = string.substring(0, sepIndex)
+//        val valueString = string.substring(sepIndex + 1, string.length)
+//        valueType match {
+//          case "s" => scalarStringCodec.decode(valueString)
+//          case "d" => scalarDoubleCodec.decode(valueString)
+//          case "l" => scalarLongCodec.decode(valueString)
+//          case _   => Left(DecodingError("not supported yet"))
+//        }
+//      }
+//    }
+//  }
 }

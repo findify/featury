@@ -12,23 +12,23 @@ trait ScalarFeatureSuite[T <: Scalar] extends FeatureSuite[ScalarConfig, ScalarF
   override lazy val config = ScalarConfig(FeatureName("counter"), ns = Namespace("a"), group = GroupName("b"), null)
 
   it should "read empty" in withFeature { c =>
-    c.computeValue(TestKey()) shouldBe None
+    c.computeValue(TestKey(), now) shouldBe None
   }
 
   it should "write and read" in withFeature { c =>
     val key = TestKey(id = "p11")
-    val put = makePut(key, Timestamp.now, 1)
+    val put = makePut(key, now, 1)
     c.put(put)
-    c.computeValue(key) shouldBe Some(c.makeValue(put.value))
+    c.computeValue(key, now) shouldBe Some(c.makeValue(key, now, put.value))
   }
 
   it should "update and read" in withFeature { c =>
     val key  = TestKey(id = "p12")
-    val put1 = makePut(key, Timestamp.now, 1)
-    val put2 = makePut(key, Timestamp.now, 2)
+    val put1 = makePut(key, now, 1)
+    val put2 = makePut(key, now, 2)
     c.put(put1)
-    c.computeValue(key) shouldBe Some(c.makeValue(put1.value))
+    c.computeValue(key, now) shouldBe Some(c.makeValue(key, now, put1.value))
     c.put(put2)
-    c.computeValue(key) shouldBe Some(c.makeValue(put2.value))
+    c.computeValue(key, now) shouldBe Some(c.makeValue(key, now, put2.value))
   }
 }
