@@ -9,9 +9,6 @@ option (scalapb.options) = {
   single_file: true
   no_default_values_in_constructor: true
   preserve_unknown_fields: false
-//  preamble: "sealed trait ListItem[T <: Scalar] { def value:T; def ts: Timestamp }"
-  //preamble: "sealed trait BoundedListValue[T <: Scalar] extends FeatureValue { def value: List[ListItem[T]]}"
-  //preamble: "sealed trait FeatureValue { def key: Key; def ts: Timestamp }"
 };
 
 message Key {

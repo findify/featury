@@ -21,5 +21,4 @@ class FlinkBoundedListTest extends BoundedListSuite with FlinkStreamTest {
   def write(conf: Map[FeatureKey, BoundedListConfig], values: List[Append]): List[BoundedListValue] = {
     FeaturyFlow.processList(env.fromCollection[Write](values), conf).executeAndCollect(100)
   }
-
 }

@@ -20,7 +20,7 @@ lazy val core = (project in file("core")).settings(shared: _*)
 
 lazy val flink = (project in file("connector/flink"))
   .settings(shared: _*)
-  .dependsOn(core % "test->test;it->it;compile->compile")
+  .dependsOn(core % "test->test;compile->compile")
 
 //lazy val spark = (project in file("connector/spark"))
 //  .settings(shared: _*)
@@ -36,5 +36,4 @@ lazy val flink = (project in file("connector/flink"))
 
 lazy val api = (project in file("api"))
   .settings(shared: _*)
-  .dependsOn(core % "test->test;it->it;compile->compile")
-
+  .dependsOn(core % "test->test;compile->compile")

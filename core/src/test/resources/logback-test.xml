@@ -11,7 +11,7 @@
     <logger name="org.apache.cassandra" level="INFO"/>
     <logger name="io.netty" level="INFO"/>
     <logger name="com.datastax.oss.driver" level="INFO"/>
-    <logger name="org.apache.flink" level="WARN"/>
+    <logger name="org.apache.flink" level="INFO"/>
     <root level="error">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="Sentry"/>

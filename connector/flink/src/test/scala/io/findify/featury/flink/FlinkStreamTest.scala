@@ -1,25 +1,37 @@
 package io.findify.featury.flink
 
+import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.test.util.MiniClusterWithClientResource
-import org.scalatest.Suite
+import org.scalatest.{BeforeAndAfterAll, Suite}
 
-trait FlinkStreamTest { this: Suite =>
-  lazy val env: StreamExecutionEnvironment = FlinkStreamTest.stream
-
-}
-
-object FlinkStreamTest {
-  lazy val cluster = new MiniClusterWithClientResource(
+trait FlinkStreamTest extends BeforeAndAfterAll { this: Suite =>
+  val cluster = new MiniClusterWithClientResource(
     new MiniClusterResourceConfiguration.Builder().setNumberSlotsPerTaskManager(1).setNumberTaskManagers(1).build()
   )
-  lazy val stream = {
+
+  lazy val env = {
+    cluster.getTestEnvironment.setAsContext()
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.setParallelism(1)
+    env.setRuntimeMode(RuntimeExecutionMode.BATCH)
+    env.enableCheckpointing(1000)
     env.setRestartStrategy(RestartStrategies.noRestart())
     env
   }
+
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+    cluster.before()
+  }
+
+  override def afterAll(): Unit = {
+    cluster.after()
+    super.afterAll()
+  }
 }
+
+object FlinkStreamTest {}
