@@ -37,7 +37,7 @@ object FeatureConfig {
       group: GroupName,
       count: Int = Int.MaxValue,
       duration: FiniteDuration = Long.MaxValue.nanos,
-      contentType: ScalarType,
+      //contentType: ScalarType,
       ttl: FiniteDuration = 365.days,
       refresh: FiniteDuration = 1.hour
   ) extends FeatureConfig

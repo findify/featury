@@ -10,39 +10,24 @@ import io.findify.featury.model.{FeatureValue, Key, NumStatsValue, StatsState, T
 import scala.collection.JavaConverters._
 import scala.util.Random
 
-case class MemStatsEstimator(config: StatsEstimatorConfig, cache: Cache[Key, Vector[Double]]) extends StatsEstimator {
+case class MemStatsEstimator(config: StatsEstimatorConfig, cache: Cache[Key, List[Double]]) extends StatsEstimator {
   override def putSampled(action: PutStatSample): Unit = {
     cache.getIfPresent(action.key) match {
       case None =>
-        cache.put(action.key, Vector(action.value))
+        cache.put(action.key, List(action.value))
       case Some(pool) if pool.size < config.poolSize =>
         cache.put(action.key, action.value +: pool)
       case Some(pool) =>
         val index = Random.nextInt(config.poolSize)
-        cache.put(action.key, pool.updated(index, action.value))
+        cache.put(action.key, (action.value +: pool).take(config.poolSize))
     }
   }
 
   override def computeValue(key: Key, ts: Timestamp): Option[NumStatsValue] = {
-    val br = 1
     for {
       pool <- cache.getIfPresent(key) if pool.nonEmpty
     } yield {
-      val quantile = Quantiles
-        .percentiles()
-        .indexes(config.percentiles.map(i => Integer.valueOf(i)).asJavaCollection)
-        .compute(pool: _*)
-        .asScala
-        .map { case (k, v) =>
-          k.intValue() -> v.doubleValue()
-        }
-      NumStatsValue(
-        key = key,
-        ts = ts,
-        min = pool.min,
-        max = pool.max,
-        quantiles = quantile.toMap
-      )
+      fromPool(key, ts, pool)
     }
   }
 

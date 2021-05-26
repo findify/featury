@@ -1,5 +1,6 @@
 package io.findify.featury.model
 
+import com.google.common.math.Quantiles
 import io.findify.featury.model.FeatureConfig._
 import io.findify.featury.model.PeriodicCounterValue.PeriodicValue
 import io.findify.featury.model.Write._
@@ -22,7 +23,7 @@ object Feature {
   trait BoundedList extends Feature[Append, BoundedListValue, BoundedListConfig, BoundedListState]
 
   trait FreqEstimator extends Feature[PutFreqSample, FrequencyValue, FreqEstimatorConfig, FrequencyState] {
-    override final def put(action: PutFreqSample): Unit =
+    override def put(action: PutFreqSample): Unit =
       if (Feature.shouldSample(config.sampleRate)) putSampled(action)
     def putSampled(action: PutFreqSample): Unit
   }
@@ -47,10 +48,27 @@ object Feature {
   }
 
   trait StatsEstimator extends Feature[PutStatSample, NumStatsValue, StatsEstimatorConfig, StatsState] {
-    override final def put(action: PutStatSample): Unit =
+    import scala.collection.JavaConverters._
+    override def put(action: PutStatSample): Unit =
       if (Feature.shouldSample(config.sampleRate)) putSampled(action)
     def putSampled(action: PutStatSample): Unit
-
+    def fromPool(key: Key, ts: Timestamp, pool: Seq[Double]): NumStatsValue = {
+      val quantile = Quantiles
+        .percentiles()
+        .indexes(config.percentiles: _*)
+        .compute(pool: _*)
+        .asScala
+        .map { case (k, v) =>
+          k.intValue() -> v.doubleValue()
+        }
+      NumStatsValue(
+        key = key,
+        ts = ts,
+        min = pool.min,
+        max = pool.max,
+        quantiles = quantile.toMap
+      )
+    }
   }
 
   def shouldSample(rate: Int): Boolean = Random.nextInt(rate) == 0

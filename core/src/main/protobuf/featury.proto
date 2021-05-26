@@ -159,13 +159,13 @@ message BoundedListState {
 message FrequencyState {
     required Key key = 1;
     required Timestamp ts = 2;
-    repeated string values = 3 [(scalapb.field).collection_type="Vector"];
+    repeated string values = 3 [(scalapb.field).collection_type="List"];
 }
 
 message StatsState {
     required Key key = 1;
     required Timestamp ts = 2;
-    repeated double values = 3 [(scalapb.field).collection_type="Vector"];
+    repeated double values = 3 [(scalapb.field).collection_type="List"];
 }
 
 message State {

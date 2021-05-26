@@ -9,10 +9,14 @@ import org.apache.flink.api.common.state.{KeyedStateStore, ValueState, ValueStat
 import org.apache.flink.api.common.typeinfo.TypeInformation
 
 case class FlinkScalarFeature(config: ScalarConfig, valueState: ValueState[Scalar]) extends ScalarFeature {
-  override def put(action: Put): Unit = valueState.update(action.value)
+  override def put(action: Put): Unit = {
+    valueState.update(action.value)
+  }
 
-  override def computeValue(key: Key, ts: Timestamp): Option[ScalarValue] =
-    Option(valueState.value()).map(ScalarValue(key, ts, _))
+  override def computeValue(key: Key, ts: Timestamp): Option[ScalarValue] = {
+    val read = Option(valueState.value())
+    read.map(ScalarValue(key, ts, _))
+  }
 
   override def readState(key: Key, ts: Timestamp): Option[ScalarState] =
     Option(valueState.value()).map(ScalarState(key, ts, _))

@@ -14,7 +14,7 @@ trait FreqEstimatorSuite extends FeatureSuite[PutFreqSample, FrequencyValue] {
     FreqEstimatorConfig(FeatureName("f1"), ns = Namespace("a"), group = GroupName("b"), 100, 1)
 
   it should "sample freqs for 100 items" in {
-    val k = TestKey(id = "f10")
+    val k = TestKey(config, id = "f10")
     val puts = for { i <- 0 until 100 } yield {
       PutFreqSample(k, Timestamp.now, "p" + math.round(math.abs(Random.nextGaussian() * 10.0)).toString)
     }

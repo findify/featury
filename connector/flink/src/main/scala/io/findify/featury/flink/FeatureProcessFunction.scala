@@ -46,9 +46,13 @@ class FeatureProcessFunction[W <: Write, T <: FeatureValue, C <: FeatureConfig, 
       case Some(feature) =>
         feature.put(value)
         val lastUpdate = Option(updated.value()).map(ts => Timestamp(ts)).getOrElse(Timestamp(0L))
-        if (lastUpdate.diff(value.ts) > feature.config.refresh) {
+        if (lastUpdate.diff(value.ts) >= feature.config.refresh) {
           updated.update(value.ts.ts)
-          feature.computeValue(value.key, value.ts).foreach(value => out.collect(value))
+          feature
+            .computeValue(value.key, value.ts)
+            .foreach(value => {
+              out.collect(value)
+            })
           feature.readState(value.key, value.ts).foreach(state => ctx.output(stateTag, state))
         }
     }

@@ -1,86 +1,156 @@
 package io.findify.featury.flink
 
-import io.findify.featury.flink.feature.{FlinkCounterFeature, FlinkScalarFeature}
-import io.findify.featury.model.Feature.{Counter, ScalarFeature}
-import io.findify.featury.model.FeatureConfig.{CounterConfig, ScalarConfig}
-import io.findify.featury.model.Write.{Increment, Put}
+import io.findify.featury.flink.feature.{
+  FlinkBoundedList,
+  FlinkCounter,
+  FlinkFreqEstimator,
+  FlinkPeriodicCounter,
+  FlinkScalarFeature,
+  FlinkStatsEstimator
+}
+import io.findify.featury.model.Feature.{
+  BoundedList,
+  Counter,
+  FreqEstimator,
+  PeriodicCounter,
+  ScalarFeature,
+  StatsEstimator
+}
+import io.findify.featury.model.FeatureConfig.{
+  BoundedListConfig,
+  CounterConfig,
+  FreqEstimatorConfig,
+  PeriodicCounterConfig,
+  ScalarConfig,
+  StatsEstimatorConfig
+}
+import io.findify.featury.model.Write.{Append, Increment, PeriodicIncrement, Put, PutFreqSample, PutStatSample}
 import io.findify.featury.model._
 import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.apache.flink.api.common.state.KeyedStateStore
 import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.api.java.functions.KeySelector
-import org.apache.flink.streaming.api.datastream.DataStreamUtils
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.scala.extensions._
-
-import java.util.concurrent.TimeUnit
-import scala.concurrent.duration._
 
 object FeaturyFlow {
   import io.findify.featury.flink.util.StreamName._
 
-  implicit class WriteDataStream(stream: DataStream[Write]) {
+  def process(stream: DataStream[Write], configs: ConfigMap): DataStream[FeatureValue] = {
+    val counters = processCounters(stream, configs.counters)
+    val scalars  = processScalar(stream, configs.strings)
+    ???
+  }
 
-    def process(configs: ConfigMap): DataStream[FeatureValue] = {
-      val counters = stream.processCounters(configs.counters)
-      val scalars  = stream.processScalar(configs.strings, "scalars", Write.selectPut)
-      ???
-    }
+  def processCounters(stream: DataStream[Write], configs: Map[FeatureKey, CounterConfig]): DataStream[CounterValue] = {
+    processFeature[Increment, CounterConfig, CounterValue, CounterState, Counter](
+      stream = stream,
+      "counters",
+      configs,
+      FlinkCounter.apply,
+      Write.selectIncrement
+    )
+  }
 
-    def processCounters(configs: Map[FeatureKey, CounterConfig]): DataStream[CounterValue] = {
-      stream.processFeature[Increment, CounterConfig, CounterValue, CounterState, Counter](
-        "counters",
-        configs,
-        FlinkCounterFeature.apply,
-        Write.selectIncrement
-      )
-    }
+  def processFreqEstimators(
+      stream: DataStream[Write],
+      configs: Map[FeatureKey, FreqEstimatorConfig]
+  ): DataStream[FrequencyValue] = {
+    processFeature[PutFreqSample, FreqEstimatorConfig, FrequencyValue, FrequencyState, FreqEstimator](
+      stream = stream,
+      "freq",
+      configs,
+      FlinkFreqEstimator.apply,
+      Write.selectFreq
+    )
+  }
 
-    def processScalar(
-        configs: Map[FeatureKey, ScalarConfig],
-        name: String,
-        select: PartialFunction[Write, Put]
-    ): DataStream[ScalarValue] = {
-      stream.processFeature[Put, ScalarConfig, ScalarValue, ScalarState, ScalarFeature](
-        name = name,
-        configs = configs,
-        FlinkScalarFeature.apply,
-        select
-      )
-    }
+  def processStatEstimators(
+      stream: DataStream[Write],
+      configs: Map[FeatureKey, StatsEstimatorConfig]
+  ): DataStream[NumStatsValue] = {
+    processFeature[PutStatSample, StatsEstimatorConfig, NumStatsValue, StatsState, StatsEstimator](
+      stream = stream,
+      "stats",
+      configs,
+      FlinkStatsEstimator.apply,
+      Write.selectStats
+    )
+  }
 
-    def processFeature[
-        W <: Write: TypeInformation,
-        C <: FeatureConfig,
-        T <: FeatureValue: TypeInformation,
-        S <: State,
-        F <: Feature[W, T, C, S]
+  def processPeriodicCounters(
+      stream: DataStream[Write],
+      configs: Map[FeatureKey, PeriodicCounterConfig]
+  ): DataStream[PeriodicCounterValue] = {
+    processFeature[
+      PeriodicIncrement,
+      PeriodicCounterConfig,
+      PeriodicCounterValue,
+      PeriodicCounterState,
+      PeriodicCounter
     ](
-        name: String,
-        configs: Map[FeatureKey, C],
-        make: (KeyedStateStore, C) => F,
-        select: PartialFunction[Write, W]
-    ): DataStream[T] = {
-      stream
-        .assignTimestampsAndWatermarks(
-          WatermarkStrategy
-            .forBoundedOutOfOrderness[Write](java.time.Duration.ofSeconds(1))
-            .withTimestampAssigner(new SerializableTimestampAssigner[Write] {
-              override def extractTimestamp(element: Write, recordTimestamp: Long): Long = element.ts.ts
-            })
+      stream = stream,
+      "periodic_counters",
+      configs,
+      FlinkPeriodicCounter.apply,
+      Write.selectPeriodicIncrement
+    )
+  }
+
+  def processScalar(stream: DataStream[Write], configs: Map[FeatureKey, ScalarConfig]): DataStream[ScalarValue] = {
+    processFeature[Put, ScalarConfig, ScalarValue, ScalarState, ScalarFeature](
+      stream = stream,
+      name = "scalars",
+      configs = configs,
+      FlinkScalarFeature.apply,
+      Write.selectPut
+    )
+  }
+
+  def processList(
+      stream: DataStream[Write],
+      configs: Map[FeatureKey, BoundedListConfig]
+  ): DataStream[BoundedListValue] = {
+    processFeature[Append, BoundedListConfig, BoundedListValue, BoundedListState, BoundedList](
+      stream = stream,
+      name = "lists",
+      configs = configs,
+      FlinkBoundedList.apply,
+      Write.selectAppend
+    )
+  }
+
+  def processFeature[
+      W <: Write: TypeInformation,
+      C <: FeatureConfig,
+      T <: FeatureValue: TypeInformation,
+      S <: State,
+      F <: Feature[W, T, C, S]
+  ](
+      stream: DataStream[Write],
+      name: String,
+      configs: Map[FeatureKey, C],
+      make: (KeyedStateStore, C) => F,
+      select: PartialFunction[Write, W]
+  ): DataStream[T] = {
+    stream
+      .assignTimestampsAndWatermarks(
+        WatermarkStrategy
+          .forBoundedOutOfOrderness[Write](java.time.Duration.ofSeconds(0))
+          .withTimestampAssigner(new SerializableTimestampAssigner[Write] {
+            override def extractTimestamp(element: Write, recordTimestamp: Long): Long = element.ts.ts
+          })
+      )
+      .flatMapWith(w => select.lift(w))
+      .id(s"select-${name}")
+      .keyingBy(_.key)
+      .process(
+        new FeatureProcessFunction[W, T, C, S, F](
+          configs = configs,
+          name = name,
+          make = make
         )
-        .flatMapWith(w => select.lift(w))
-        .id(s"select-${name}")
-        .keyingBy(_.key)
-        .process(
-          new FeatureProcessFunction[W, T, C, S, F](
-            configs = configs,
-            name = name,
-            make = make
-          )
-        )
-        .id(s"process-${name}")
-    }
+      )
+      .id(s"process-${name}")
   }
 
 }

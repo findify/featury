@@ -1,11 +1,20 @@
 package io.findify.featury.utils
 
-import io.findify.featury.model.Key
+import io.findify.featury.model.{FeatureConfig, Key}
 import io.findify.featury.model.Key._
 
 import scala.util.Random
 
 object TestKey {
+  def apply(c: FeatureConfig, id: String) = {
+    Key(
+      ns = c.ns,
+      group = c.group,
+      name = c.name,
+      tenant = Tenant(1),
+      id = Id(id)
+    )
+  }
   def apply(
       ns: String = "dev",
       group: String = "product",

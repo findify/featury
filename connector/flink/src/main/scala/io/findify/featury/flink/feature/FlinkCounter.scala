@@ -8,10 +8,12 @@ import io.findify.featury.model.{CounterState, CounterValue, Key, SLong, Timesta
 import org.apache.flink.api.common.state.{KeyedStateStore, ValueState, ValueStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 
-case class FlinkCounterFeature(config: CounterConfig, valueState: ValueState[Long]) extends Counter {
+case class FlinkCounter(config: CounterConfig, valueState: ValueState[Long]) extends Counter {
   override def put(action: Increment): Unit = Option(valueState.value()) match {
-    case Some(counter) => valueState.update(counter + action.inc)
-    case None          => valueState.update(action.inc)
+    case Some(counter) =>
+      valueState.update(counter + action.inc)
+    case None =>
+      valueState.update(action.inc)
   }
 
   override def computeValue(key: Key, ts: Timestamp): Option[CounterValue] =
@@ -23,10 +25,10 @@ case class FlinkCounterFeature(config: CounterConfig, valueState: ValueState[Lon
     Option(valueState.value()).map(CounterState(key, ts, _))
 }
 
-object FlinkCounterFeature {
-  def apply(ctx: KeyedStateStore, config: CounterConfig)(implicit ti: TypeInformation[Long]): FlinkCounterFeature = {
+object FlinkCounter {
+  def apply(ctx: KeyedStateStore, config: CounterConfig)(implicit ti: TypeInformation[Long]): FlinkCounter = {
     val desc = new ValueStateDescriptor[Long](config.fqdn, ti)
     desc.enableTimeToLive(StateTTL(config.ttl))
-    FlinkCounterFeature(config, ctx.getState(desc))
+    FlinkCounter(config, ctx.getState(desc))
   }
 }

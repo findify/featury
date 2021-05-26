@@ -8,16 +8,16 @@ import io.findify.featury.model.{FeatureValue, FrequencyState, FrequencyValue, K
 
 import scala.util.Random
 
-case class MemFreqEstimator(config: FreqEstimatorConfig, cache: Cache[Key, Vector[String]]) extends FreqEstimator {
+case class MemFreqEstimator(config: FreqEstimatorConfig, cache: Cache[Key, List[String]]) extends FreqEstimator {
   override def putSampled(action: PutFreqSample): Unit =
     cache.getIfPresent(action.key) match {
       case Some(pool) if pool.size < config.poolSize =>
         cache.put(action.key, action.value +: pool)
       case Some(pool) =>
         val index = Random.nextInt(config.poolSize)
-        cache.put(action.key, pool.updated(index, action.value))
+        cache.put(action.key, (action.value +: pool).take(config.poolSize))
       case None =>
-        cache.put(action.key, Vector(action.value))
+        cache.put(action.key, List(action.value))
     }
 
   override def computeValue(key: Key, ts: Timestamp): Option[FrequencyValue] = for {
