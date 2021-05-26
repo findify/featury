@@ -1,31 +1,10 @@
 package io.findify.featury.flink
 
-import io.findify.featury.flink.feature.{
-  FlinkBoundedList,
-  FlinkCounter,
-  FlinkFreqEstimator,
-  FlinkPeriodicCounter,
-  FlinkScalarFeature,
-  FlinkStatsEstimator
-}
-import io.findify.featury.model.Feature.{
-  BoundedList,
-  Counter,
-  FreqEstimator,
-  PeriodicCounter,
-  ScalarFeature,
-  StatsEstimator
-}
-import io.findify.featury.model.FeatureConfig.{
-  BoundedListConfig,
-  CounterConfig,
-  FreqEstimatorConfig,
-  PeriodicCounterConfig,
-  ScalarConfig,
-  StatsEstimatorConfig
-}
+import io.findify.featury.flink.feature._
+import io.findify.featury.model.Feature._
+import io.findify.featury.model.FeatureConfig._
 import io.findify.featury.model.Write.{Append, Increment, PeriodicIncrement, Put, PutFreqSample, PutStatSample}
-import io.findify.featury.model._
+import io.findify.featury.model.{Schema, _}
 import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.apache.flink.api.common.state.KeyedStateStore
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -34,12 +13,6 @@ import org.apache.flink.streaming.api.scala.extensions._
 
 object FeaturyFlow {
   import io.findify.featury.flink.util.StreamName._
-
-  def process(stream: DataStream[Write], configs: ConfigMap): DataStream[FeatureValue] = {
-    val counters = processCounters(stream, configs.counters)
-    val scalars  = processScalar(stream, configs.strings)
-    ???
-  }
 
   def processCounters(stream: DataStream[Write], configs: Map[FeatureKey, CounterConfig]): DataStream[CounterValue] = {
     processFeature[Increment, CounterConfig, CounterValue, CounterState, Counter](
