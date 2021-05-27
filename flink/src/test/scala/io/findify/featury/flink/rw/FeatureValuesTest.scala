@@ -39,6 +39,7 @@ class FeatureValuesTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
         WatermarkStrategy.noWatermarks(),
         "read"
       )
+      .flatMap(m => m.toFeatureValue.toList)
       .executeAndCollect(100)
     read shouldBe items
   }
