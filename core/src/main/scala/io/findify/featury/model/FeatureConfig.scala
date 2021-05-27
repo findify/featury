@@ -19,25 +19,25 @@ sealed trait FeatureConfig {
 
 object FeatureConfig {
   case class CounterConfig(
-      name: FeatureName,
       ns: Namespace,
       group: GroupName,
+      name: FeatureName,
       ttl: FiniteDuration = 365.days,
       refresh: FiniteDuration = 1.hour
   ) extends FeatureConfig
 
   case class ScalarConfig(
-      name: FeatureName,
       ns: Namespace,
       group: GroupName,
+      name: FeatureName,
       ttl: FiniteDuration = 365.days,
       refresh: FiniteDuration = 1.hour
   ) extends FeatureConfig
 
   case class BoundedListConfig(
-      name: FeatureName,
       ns: Namespace,
       group: GroupName,
+      name: FeatureName,
       count: Int = Int.MaxValue,
       duration: FiniteDuration = Long.MaxValue.nanos,
       ttl: FiniteDuration = 365.days,
@@ -45,9 +45,9 @@ object FeatureConfig {
   ) extends FeatureConfig
 
   case class FreqEstimatorConfig(
-      name: FeatureName,
       ns: Namespace,
       group: GroupName,
+      name: FeatureName,
       poolSize: Int,
       sampleRate: Int,
       ttl: FiniteDuration = 365.days,
@@ -56,9 +56,9 @@ object FeatureConfig {
 
   case class PeriodRange(startOffset: Int, endOffset: Int)
   case class PeriodicCounterConfig(
-      name: FeatureName,
       ns: Namespace,
       group: GroupName,
+      name: FeatureName,
       period: FiniteDuration,
       count: Int,
       sumPeriodRanges: List[PeriodRange],
@@ -71,9 +71,9 @@ object FeatureConfig {
   }
 
   case class StatsEstimatorConfig(
-      name: FeatureName,
       ns: Namespace,
       group: GroupName,
+      name: FeatureName,
       poolSize: Int,
       sampleRate: Int,
       percentiles: List[Int],

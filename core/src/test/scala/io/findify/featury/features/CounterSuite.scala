@@ -10,7 +10,7 @@ import scala.concurrent.duration._
 import scala.util.Random
 
 trait CounterSuite extends FeatureSuite[Increment, CounterValue] {
-  val config = CounterConfig(FeatureName("c1"), Namespace("n1"), GroupName("g1"))
+  val config = CounterConfig(Namespace("n1"), GroupName("g1"), FeatureName("c1"))
 
   it should "increment once" in {
     val key      = TestKey(config, id = "p11")

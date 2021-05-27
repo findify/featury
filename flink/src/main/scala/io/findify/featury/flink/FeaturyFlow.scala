@@ -1,6 +1,7 @@
 package io.findify.featury.flink
 
 import io.findify.featury.flink.feature._
+import io.findify.featury.flink.util.ScopeKey
 import io.findify.featury.model.Feature._
 import io.findify.featury.model.FeatureConfig._
 import io.findify.featury.model.Write.{Append, Increment, PeriodicIncrement, Put, PutFreqSample, PutStatSample}
@@ -13,6 +14,37 @@ import org.apache.flink.streaming.api.scala.extensions._
 
 object FeaturyFlow {
   import io.findify.featury.flink.util.StreamName._
+
+  def join[T](
+      values: DataStream[FeatureValue],
+      events: DataStream[T],
+      scope: T => ScopeKey,
+      add: (T, List[FeatureValue]) => T
+  )(implicit ti: TypeInformation[T]) = {
+    events
+      .connect(values)
+      .keyBy[ScopeKey](t => scope(t), value => ScopeKey(value.key))
+      .process(new FeatureJoinFunction[T](add))
+  }
+
+  def process(stream: DataStream[Write], schema: Schema): DataStream[FeatureValue] = {
+    def add[T <: FeatureValue, C <: FeatureConfig](
+        stream: DataStream[Write],
+        conf: Map[FeatureKey, C],
+        make: (DataStream[Write], Map[FeatureKey, C]) => DataStream[T]
+    ) =
+      if (conf.isEmpty) None else Some(make(stream, conf).mapWith(x => x.asInstanceOf[FeatureValue]))
+
+    val targets = List(
+      add(stream, schema.counters, processCounters),
+      add(stream, schema.lists, processList),
+      add(stream, schema.stats, processStatEstimators),
+      add(stream, schema.scalars, processScalar),
+      add(stream, schema.freqs, processFreqEstimators),
+      add(stream, schema.periodicCounters, processPeriodicCounters)
+    ).flatten
+    targets.reduceLeft((a, b) => a.union(b)).assignAscendingTimestamps(_.ts.ts)
+  }
 
   def processCounters(stream: DataStream[Write], configs: Map[FeatureKey, CounterConfig]): DataStream[CounterValue] = {
     processFeature[Increment, CounterConfig, CounterValue, CounterState, Counter](

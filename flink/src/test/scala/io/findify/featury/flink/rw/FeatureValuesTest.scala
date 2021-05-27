@@ -11,17 +11,22 @@ import org.scalatest.matchers.should.Matchers
 import org.apache.flink.api.scala._
 import org.apache.flink.core.fs.Path
 
+import scala.concurrent.duration._
+
 class FeatureValuesTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
   val path = File.newTemporaryDirectory("valuesink").deleteOnExit()
+  val k    = TestKey(id = "p1", fname = "f1")
+  val now  = Timestamp.now
   val items = List[FeatureValue](
-    ScalarValue(TestKey(id = "p1", fname = "f1"), Timestamp.now, SString("foo")),
-    ScalarValue(TestKey(id = "p2", fname = "f1"), Timestamp.now, SString("bar")),
-    ScalarValue(TestKey(id = "p3", fname = "f1"), Timestamp.now, SString("baz"))
+    ScalarValue(k, now.minus(2.minute), SString("foo")),
+    ScalarValue(k, now.minus(1.minute), SString("bar")),
+    ScalarValue(k, now, SString("baz"))
   )
 
   it should "write events to files" in {
     env
       .fromCollection[FeatureValue](items)
+      .map(_.asMessage)
       .sinkTo(FeatureValues.writeFile(new Path(path.toString()), Compress.ZstdCompression(3)))
     env.execute()
     path.children.isEmpty shouldBe false
@@ -37,4 +42,5 @@ class FeatureValuesTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
       .executeAndCollect(100)
     read shouldBe items
   }
+
 }

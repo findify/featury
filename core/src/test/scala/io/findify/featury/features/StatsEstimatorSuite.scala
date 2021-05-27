@@ -9,7 +9,7 @@ import io.findify.featury.utils.TestKey
 
 trait StatsEstimatorSuite extends FeatureSuite[PutStatSample, NumStatsValue] {
   val config =
-    StatsEstimatorConfig(FeatureName("f1"), ns = Namespace("a"), group = GroupName("b"), 100, 1, List(50, 90))
+    StatsEstimatorConfig(ns = Namespace("a"), group = GroupName("b"), FeatureName("f1"), 100, 1, List(50, 90))
 
   it should "measure a 1-100 range" in {
     val k      = TestKey(config, id = "p10")

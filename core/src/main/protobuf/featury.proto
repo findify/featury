@@ -115,7 +115,8 @@ message BoundedListValue {
 }
 
 message FeatureValue {
-    oneof sealed_value {
+    option (scalapb.message).sealed_oneof_extends = "io.findify.featury.model.FeatureValueOps";
+    oneof sealed_value_optional {
         ScalarValue scalarValue = 1;
         CounterValue counterValue = 2;
         NumStatsValue numStatsValue = 3;
