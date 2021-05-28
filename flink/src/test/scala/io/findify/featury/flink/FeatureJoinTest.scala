@@ -9,12 +9,14 @@ import io.findify.featury.model.Write.{Increment, Put}
 import io.findify.featury.utils.TestKey
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import org.apache.flink.api.scala._
+import io.findify.flinkadt.api._
+import org.apache.flink.api.common.typeinfo.TypeInformation
 
 import scala.concurrent.duration._
 
 class FeatureJoinTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
   val now = Timestamp.now
+  import FeatureTypeInfo._
 
   it should "join with latest value" in {
     val dev      = Namespace("dev")
@@ -23,6 +25,7 @@ class FeatureJoinTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
     val merchant = GroupName("merchant")
     val session  = ProductLine(1, "q1", "p1", now)
     val sessions = env.fromCollection(List(session)).assignAscendingTimestamps(_.ts.ts)
+    sessions.executeAndCollect(10)
     val schema = Schema(
       List(
         ScalarConfig(dev, merchant, FeatureName("lang"), refresh = 0.seconds),
@@ -92,5 +95,9 @@ object FeatureJoinTest {
       ts: Timestamp,
       values: List[FeatureValue] = Nil
   )
+
+  sealed trait ADT
+  case class Foo(a: Int)       extends ADT
+  case class Bar(a: List[Int]) extends ADT
 
 }

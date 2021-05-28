@@ -9,11 +9,13 @@ import io.findify.featury.model.{Schema, _}
 import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.apache.flink.api.common.state.KeyedStateStore
 import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.streaming.api.scala._
+import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.api.scala.extensions._
 
 object FeaturyFlow {
   import io.findify.featury.flink.util.StreamName._
+  import FeatureTypeInfo._
+  import io.findify.flinkadt.api._
 
   def join[T](
       values: DataStream[FeatureValue],

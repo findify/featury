@@ -9,7 +9,7 @@ import org.apache.flink.test.util.MiniClusterWithClientResource
 import org.scalatest.{BeforeAndAfterAll, Suite}
 
 trait FlinkStreamTest extends BeforeAndAfterAll { this: Suite =>
-  val cluster = new MiniClusterWithClientResource(
+  lazy val cluster = new MiniClusterWithClientResource(
     new MiniClusterResourceConfiguration.Builder().setNumberSlotsPerTaskManager(1).setNumberTaskManagers(1).build()
   )
 
@@ -20,6 +20,7 @@ trait FlinkStreamTest extends BeforeAndAfterAll { this: Suite =>
     env.setRuntimeMode(RuntimeExecutionMode.BATCH)
     env.enableCheckpointing(1000)
     env.setRestartStrategy(RestartStrategies.noRestart())
+    env.getConfig.disableGenericTypes()
     env
   }
 

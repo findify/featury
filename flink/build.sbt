@@ -9,7 +9,8 @@ libraryDependencies ++= Seq(
   "org.apache.flink"  % "flink-connector-files" % flinkVersion % "provided",
   "org.apache.flink" %% "flink-test-utils"      % flinkVersion % "provided, test",
   "org.apache.flink" %% "flink-streaming-scala" % flinkVersion % "provided",
-  "com.github.luben"  % "zstd-jni"              % "1.4.9-5"
+  "com.github.luben"  % "zstd-jni"              % "1.4.9-5",
+  "io.findify"       %% "flink-adt"             % "0.4.0-M3"
 )
 
 publishMavenStyle := true
