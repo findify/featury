@@ -12,7 +12,9 @@ case class Schema(
     freqs: Map[FeatureKey, FreqEstimatorConfig],
     stats: Map[FeatureKey, StatsEstimatorConfig],
     lists: Map[FeatureKey, BoundedListConfig]
-) {}
+) {
+  def configs: Map[FeatureKey, FeatureConfig] = (counters ++ scalars ++ periodicCounters ++ freqs ++ stats ++ lists)
+}
 
 object Schema {
   case class SchemaYaml(features: List[FeatureConfig])
@@ -26,7 +28,8 @@ object Schema {
         }
     }
   }
-  def apply(confs: List[FeatureConfig]) = {
+  def apply(conf: FeatureConfig): Schema = apply(List(conf))
+  def apply(confs: List[FeatureConfig]): Schema = {
     val configs = for {
       c <- confs
     } yield {

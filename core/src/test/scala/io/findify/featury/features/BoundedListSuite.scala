@@ -10,7 +10,7 @@ import io.findify.featury.utils.TestKey
 
 import scala.concurrent.duration._
 
-trait BoundedListSuite extends FeatureSuite[Append, BoundedListValue] {
+trait BoundedListSuite extends FeatureSuite[Append] {
   val config = BoundedListConfig(
     name = FeatureName("example"),
     ns = Namespace("a"),
@@ -22,20 +22,27 @@ trait BoundedListSuite extends FeatureSuite[Append, BoundedListValue] {
   it should "push single element" in {
     val key    = TestKey(config, id = "p11")
     val result = write(List(Append(key, SString("foo"), now)))
-    result.map(_.value) shouldBe Some(List(TimeValue(now, SString("foo"))))
+    result should matchPattern {
+      case Some(BoundedListValue(_, _, vals)) if vals == List(TimeValue(now, SString("foo"))) =>
+    }
   }
 
   it should "push multiple elements" in {
     val key    = TestKey(config, id = "p12")
     val result = write(List(Append(key, SString("foo"), now), Append(key, SString("bar"), now)))
-    result.map(_.value) shouldBe Some(List(TimeValue(now, SString("bar")), TimeValue(now, SString("foo"))))
+    result should matchPattern {
+      case Some(BoundedListValue(_, _, value))
+          if value == List(TimeValue(now, SString("bar")), TimeValue(now, SString("foo"))) =>
+    }
   }
 
   it should "be bounded by element count" in {
     val key     = TestKey(config, id = "p12")
     val appends = for { i <- 0 until 20 } yield { Append(key, SString(i.toString), now) }
     val result  = write(appends.toList)
-    result.map(_.value.size) shouldBe Some(config.count)
+    result should matchPattern {
+      case Some(BoundedListValue(_, _, values)) if values.size == config.count =>
+    }
   }
 
   it should "be bounded by time" in {
@@ -43,6 +50,8 @@ trait BoundedListSuite extends FeatureSuite[Append, BoundedListValue] {
     val appends = for { i <- (0 until 10).reverse } yield { Append(key, SString(i.toString), now.minus(i.hours)) }
     val result  = write(appends.toList)
     val cutoff  = now.minus(config.duration)
-    result.map(_.value.forall(_.ts.isAfterOrEquals(cutoff))) shouldBe Some(true)
+    result should matchPattern {
+      case Some(BoundedListValue(_, _, values)) if values.forall(_.ts.isAfterOrEquals(cutoff)) =>
+    }
   }
 }

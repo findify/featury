@@ -7,6 +7,6 @@ import io.findify.featury.model.Write.Increment
 import io.findify.featury.model.{CounterValue, Feature, FeatureValue, Key, Write}
 import io.findify.featury.state.mem.MemCounter
 
-class MemCounterTest extends CounterSuite with MemTest[Increment, CounterValue, Counter] {
+class MemCounterTest extends CounterSuite with MemTest[Increment, Counter] {
   override val feature = MemCounter(config, Scaffeine().build[Key, Long]())
 }

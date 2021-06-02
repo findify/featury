@@ -3,10 +3,10 @@ package io.findify.featury.state.memory
 import io.findify.featury.features.FeatureSuite
 import io.findify.featury.model.{Feature, FeatureValue, Write}
 
-trait MemTest[W <: Write, T <: FeatureValue, F <: Feature[W, T, _, _]] { this: FeatureSuite[W, T] =>
+trait MemTest[W <: Write, F <: Feature[W, _ <: FeatureValue, _, _]] { this: FeatureSuite[W] =>
   def feature: F
-  def write(values: List[W]): Option[T] = {
-    values.foldLeft(Option.empty[T])((_, inc) => {
+  def write(values: List[W]): Option[FeatureValue] = {
+    values.foldLeft(Option.empty[FeatureValue])((_, inc) => {
       feature.put(inc)
       feature.computeValue(inc.key, inc.ts)
     })

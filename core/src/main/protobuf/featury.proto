@@ -167,7 +167,7 @@ message StatsState {
 }
 
 message State {
-    oneof sealed_value {
+    oneof sealed_value_optional {
         ScalarState scalarState = 1;
         CounterState counterState = 2;
         PeriodicCounterState periodicCounterState = 3;
@@ -175,4 +175,12 @@ message State {
         FrequencyState frequencyState = 5;
         StatsState statsState = 6;
     }
+}
+
+message ScopeKey {
+    option (scalapb.message).companion_extends = "io.findify.featury.model.ScopeKeyOps";
+    required Key.Namespace ns = 1;
+    required Key.GroupName group = 2;
+    required Key.Tenant tenant = 3;
+    required Key.Id id = 4;
 }

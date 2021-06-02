@@ -1,10 +1,21 @@
 package io.findify.featury.flink
 
-import io.findify.featury.model.{FeatureValue, Scalar, Write}
-import io.findify.flinkadt.api._
+import io.findify.featury.model.{
+  FeatureValue,
+  FeatureValueMessage,
+  Key,
+  Scalar,
+  ScalarMessage,
+  ScopeKey,
+  ScopeKeyOps,
+  Write
+}
+//import io.findify.flinkpb.FlinkProtobuf._
 
 object FeatureTypeInfo {
-  implicit val scalar       = deriveTypeInformation[Scalar]
-  implicit val write        = deriveTypeInformation[Write]
-  implicit val featureValue = deriveTypeInformation[FeatureValue]
+//  implicit val scalar       = generateScala(ScalarMessage)
+//  implicit val key          = generateScala(Key)
+//  implicit val featureValue = generateScala(FeatureValueMessage)
+//
+//  implicit val scopeKey = generateScala(ScopeKey)
 }

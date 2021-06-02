@@ -7,6 +7,6 @@ import io.findify.featury.model.{Feature, FrequencyValue}
 import io.findify.featury.model.Write.PutFreqSample
 import io.findify.featury.state.mem.MemFreqEstimator
 
-class MemFreqEstimatorTest extends FreqEstimatorSuite with MemTest[PutFreqSample, FrequencyValue, FreqEstimator] {
+class MemFreqEstimatorTest extends FreqEstimatorSuite with MemTest[PutFreqSample, FreqEstimator] {
   override val feature: Feature.FreqEstimator = MemFreqEstimator(config, Scaffeine().build())
 }

@@ -1,29 +1,37 @@
 package io.findify.featury.flink
 
-import io.findify.featury.flink.FeatureJoinTest.ProductLine
-import io.findify.featury.flink.util.ScopeKey
+import io.findify.featury.flink.FeatureJoinTest.{MerchantId, ProductId, ProductLine, SearchId}
+import io.findify.featury.flink.Join.Scope
 import io.findify.featury.model.FeatureConfig.{CounterConfig, ScalarConfig}
 import io.findify.featury.model.Key.{FeatureName, GroupName, Namespace}
-import io.findify.featury.model.{CounterValue, FeatureValue, SString, ScalarValue, Schema, Timestamp, Write}
+import io.findify.featury.model.{
+  CounterValue,
+  FeatureValue,
+  SString,
+  ScalarValue,
+  Schema,
+  ScopeKey,
+  ScopeKeyOps,
+  Timestamp,
+  Write
+}
 import io.findify.featury.model.Write.{Increment, Put}
 import io.findify.featury.utils.TestKey
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import io.findify.flinkadt.api._
-import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.api.scala._
 
 import scala.concurrent.duration._
 
 class FeatureJoinTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
   val now = Timestamp.now
-  import FeatureTypeInfo._
 
   it should "join with latest value" in {
     val dev      = Namespace("dev")
     val product  = GroupName("product")
     val search   = GroupName("search")
     val merchant = GroupName("merchant")
-    val session  = ProductLine(1, "q1", "p1", now)
+    val session  = ProductLine(merchant = "1", search = "q1", product = "p1", now)
     val sessions = env.fromCollection(List(session)).assignAscendingTimestamps(_.ts.ts)
     sessions.executeAndCollect(10)
     val schema = Schema(
@@ -52,27 +60,9 @@ class FeatureJoinTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
 
     val features = FeaturyFlow.process(writes, schema)
 
-    val withProduct = FeaturyFlow.join[ProductLine](
-      values = features,
-      events = sessions,
-      scope = p => ScopeKey.make("dev", "product", 1, p.product),
-      add = (p, a) => p.copy(values = a ++ p.values)
-    )
+    val joined = FeaturyFlow.join[ProductLine](features, sessions, List(ProductId, MerchantId, SearchId))
 
-    val withMerchant = FeaturyFlow.join[ProductLine](
-      values = features,
-      events = withProduct,
-      scope = p => ScopeKey.make("dev", "merchant", 1, p.merchant.toString),
-      add = (p, a) => p.copy(values = a ++ p.values)
-    )
-    val withSearch = FeaturyFlow.join[ProductLine](
-      values = features,
-      events = withMerchant,
-      scope = p => ScopeKey.make("dev", "search", 1, p.search),
-      add = (p, a) => p.copy(values = a ++ p.values)
-    )
-
-    val result = withSearch.executeAndCollect(100)
+    val result = joined.executeAndCollect(100)
     result.headOption shouldBe Some(
       session.copy(values =
         List(
@@ -89,12 +79,28 @@ class FeatureJoinTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
 
 object FeatureJoinTest {
   case class ProductLine(
-      merchant: Int,
+      merchant: String,
       search: String,
       product: String,
       ts: Timestamp,
       values: List[FeatureValue] = Nil
   )
+
+  case object ProductId  extends Scope
+  case object MerchantId extends Scope
+  case object SearchId   extends Scope
+
+  implicit val productJoin: Join[ProductLine] = new Join[ProductLine] {
+    override def appendValues(self: ProductLine, values: List[FeatureValue]): ProductLine =
+      self.copy(values = values ++ self.values)
+
+    override def scopedKey(value: ProductLine, scope: Join.Scope): ScopeKey = scope match {
+      case MerchantId => ScopeKey.make("dev", "merchant", 1, value.merchant)
+      case ProductId  => ScopeKey.make("dev", "product", 1, value.product)
+      case SearchId   => ScopeKey.make("dev", "search", 1, value.search)
+      case _          => ???
+    }
+  }
 
   sealed trait ADT
   case class Foo(a: Int)       extends ADT

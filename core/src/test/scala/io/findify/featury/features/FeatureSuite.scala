@@ -4,10 +4,10 @@ import io.findify.featury.model.{Feature, FeatureConfig, FeatureValue, State, Ti
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-trait FeatureSuite[W <: Write, T <: FeatureValue] extends AnyFlatSpec with Matchers {
+trait FeatureSuite[W <: Write] extends AnyFlatSpec with Matchers {
   lazy val now = Timestamp.now
 
-  def write(values: List[W]): Option[T]
+  def write(values: List[W]): Option[FeatureValue]
 
   it should "be empty" in {
     write(Nil) shouldBe None

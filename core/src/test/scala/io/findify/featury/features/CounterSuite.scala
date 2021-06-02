@@ -9,7 +9,7 @@ import io.findify.featury.utils.TestKey
 import scala.concurrent.duration._
 import scala.util.Random
 
-trait CounterSuite extends FeatureSuite[Increment, CounterValue] {
+trait CounterSuite extends FeatureSuite[Increment] {
   val config = CounterConfig(Namespace("n1"), GroupName("g1"), FeatureName("c1"))
 
   it should "increment once" in {

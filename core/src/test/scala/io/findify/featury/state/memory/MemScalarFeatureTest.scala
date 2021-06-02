@@ -7,6 +7,6 @@ import io.findify.featury.model.Write.Put
 import io.findify.featury.model.{Feature, Key, SDouble, ScalarValue, Timestamp, Write}
 import io.findify.featury.state.mem.MemScalarFeature
 
-class MemScalarFeatureTest extends ScalarFeatureSuite with MemTest[Put, ScalarValue, ScalarFeature] {
+class MemScalarFeatureTest extends ScalarFeatureSuite with MemTest[Put, ScalarFeature] {
   override val feature: Feature.ScalarFeature = MemScalarFeature(config, Scaffeine().build())
 }

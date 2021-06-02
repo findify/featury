@@ -6,9 +6,10 @@ import io.findify.featury.model.Key._
 import io.findify.featury.model.{Key, SString, Scalar, ScalarValue, Timestamp}
 import io.findify.featury.model.Write.Put
 import io.findify.featury.utils.TestKey
+import scala.concurrent.duration._
 
-trait ScalarFeatureSuite extends FeatureSuite[Put, ScalarValue] {
-  val config = ScalarConfig(ns = Namespace("a"), group = GroupName("b"), FeatureName("counter"), null)
+trait ScalarFeatureSuite extends FeatureSuite[Put] {
+  val config = ScalarConfig(ns = Namespace("a"), group = GroupName("b"), FeatureName("counter"), 1.day)
 
   it should "write and read" in {
     val key    = TestKey(config, id = "p11")

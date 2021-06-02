@@ -9,7 +9,7 @@ import io.findify.featury.utils.TestKey
 
 import scala.util.Random
 
-trait FreqEstimatorSuite extends FeatureSuite[PutFreqSample, FrequencyValue] {
+trait FreqEstimatorSuite extends FeatureSuite[PutFreqSample] {
   val config: FreqEstimatorConfig =
     FreqEstimatorConfig(ns = Namespace("a"), group = GroupName("b"), name = FeatureName("f1"), 100, 1)
 
@@ -18,8 +18,8 @@ trait FreqEstimatorSuite extends FeatureSuite[PutFreqSample, FrequencyValue] {
     val puts = for { i <- 0 until 100 } yield {
       PutFreqSample(k, Timestamp.now, "p" + math.round(math.abs(Random.nextGaussian() * 10.0)).toString)
     }
-    val result = write(puts.toList)
-    result.map(_.values.values.sum).get shouldBe 1.0 +- 0.01
-    result.map(_.values.getOrElse("p1", 0.0)).get should be > 0.01
+    val result = write(puts.toList).collect { case f: FrequencyValue => f }.get
+    result.values.values.sum shouldBe 1.0 +- 0.001
+    result.values.getOrElse("p1", 0.0) should be > 0.01
   }
 }

@@ -10,7 +10,7 @@ import io.findify.featury.utils.TestKey
 
 import scala.concurrent.duration._
 
-trait PeriodicCounterSuite extends FeatureSuite[PeriodicIncrement, PeriodicCounterValue] {
+trait PeriodicCounterSuite extends FeatureSuite[PeriodicIncrement] {
   val config = PeriodicCounterConfig(
     ns = Namespace("a"),
     group = GroupName("b"),
@@ -63,7 +63,7 @@ trait PeriodicCounterSuite extends FeatureSuite[PeriodicIncrement, PeriodicCount
             now.toStartOfPeriod(config.period),
             now.toStartOfPeriod(config.period).plus(config.period),
             1,
-            9.0
+            8.0
           ),
           PeriodicValue(
             now.toStartOfPeriod(config.period).minus(config.period * 7),
