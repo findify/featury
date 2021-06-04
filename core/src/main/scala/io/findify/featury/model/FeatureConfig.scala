@@ -10,7 +10,7 @@ import scala.util.{Failure, Try}
 
 sealed trait FeatureConfig {
   def ns: Namespace
-  def group: GroupName
+  def group: Scope
   def name: FeatureName
   def ttl: FiniteDuration
   def refresh: FiniteDuration
@@ -20,7 +20,7 @@ sealed trait FeatureConfig {
 object FeatureConfig {
   case class CounterConfig(
       ns: Namespace,
-      group: GroupName,
+      group: Scope,
       name: FeatureName,
       ttl: FiniteDuration = 365.days,
       refresh: FiniteDuration = 1.hour
@@ -28,7 +28,7 @@ object FeatureConfig {
 
   case class ScalarConfig(
       ns: Namespace,
-      group: GroupName,
+      group: Scope,
       name: FeatureName,
       ttl: FiniteDuration = 365.days,
       refresh: FiniteDuration = 1.hour
@@ -36,7 +36,7 @@ object FeatureConfig {
 
   case class BoundedListConfig(
       ns: Namespace,
-      group: GroupName,
+      group: Scope,
       name: FeatureName,
       count: Int = Int.MaxValue,
       duration: FiniteDuration = Long.MaxValue.nanos,
@@ -46,7 +46,7 @@ object FeatureConfig {
 
   case class FreqEstimatorConfig(
       ns: Namespace,
-      group: GroupName,
+      group: Scope,
       name: FeatureName,
       poolSize: Int,
       sampleRate: Int,
@@ -57,10 +57,9 @@ object FeatureConfig {
   case class PeriodRange(startOffset: Int, endOffset: Int)
   case class PeriodicCounterConfig(
       ns: Namespace,
-      group: GroupName,
+      group: Scope,
       name: FeatureName,
       period: FiniteDuration,
-      count: Int,
       sumPeriodRanges: List[PeriodRange],
       ttl: FiniteDuration = 365.days,
       refresh: FiniteDuration = 1.hour
@@ -72,7 +71,7 @@ object FeatureConfig {
 
   case class StatsEstimatorConfig(
       ns: Namespace,
-      group: GroupName,
+      group: Scope,
       name: FeatureName,
       poolSize: Int,
       sampleRate: Int,
@@ -83,7 +82,7 @@ object FeatureConfig {
 
   case class ConfigParsingError(msg: String) extends Exception(msg)
   implicit val featureNameDecoder = Decoder.decodeString.map(FeatureName.apply)
-  implicit val groupDecoder       = Decoder.decodeString.map(GroupName.apply)
+  implicit val groupDecoder       = Decoder.decodeString.map(Scope.apply)
   implicit val namespaceDecoder   = Decoder.decodeString.map(Namespace.apply)
 
   val durationFormat = "([0-9]+)\\s*([a-zA-z]+)".r

@@ -14,10 +14,9 @@ trait BoundedListSuite extends FeatureSuite[Append] {
   val config = BoundedListConfig(
     name = FeatureName("example"),
     ns = Namespace("a"),
-    group = GroupName("b"),
+    group = Scope("b"),
     count = 10,
     duration = 5.hour
-    //contentType = TextType
   )
   it should "push single element" in {
     val key    = TestKey(config, id = "p11")

@@ -1,7 +1,6 @@
 package io.findify.featury.flink
 
-import io.findify.featury.flink.Join.Scope
-import io.findify.featury.model.Key.{GroupName, Id, Namespace, Tenant}
+import io.findify.featury.model.Key.Scope
 import io.findify.featury.model.{Schema, ScopeKeyOps, _}
 import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -23,6 +22,7 @@ object FeaturyFlow {
           .connect(values)
           .keyBy[ScopeKey](t => j.scopedKey(t, head), t => ScopeKey(t.key))
           .process(new FeatureJoinFunction[T]())
+          .id(s"join-$head")
         join(values, result, tail)
 
     }
@@ -31,13 +31,13 @@ object FeaturyFlow {
     stream
       .assignTimestampsAndWatermarks(
         WatermarkStrategy
-          .forBoundedOutOfOrderness[Write](java.time.Duration.ofSeconds(0))
+          .forMonotonousTimestamps()
           .withTimestampAssigner(new SerializableTimestampAssigner[Write] {
             override def extractTimestamp(element: Write, recordTimestamp: Long): Long = element.ts.ts
           })
       )
       .keyingBy(_.key)
       .process(new FeatureProcessFunction(schema))
-      .id("process")
+      .id("feature-process")
   }
 }

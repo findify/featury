@@ -11,7 +11,7 @@ object TestKey {
       ns = c.ns,
       group = c.group,
       name = c.name,
-      tenant = Tenant(1),
+      tenant = Tenant("1"),
       id = Id(id)
     )
   }
@@ -23,9 +23,9 @@ object TestKey {
       id: String = "p1"
   ) = Key(
     ns = Namespace(ns),
-    group = GroupName(group),
+    group = Scope(group),
     name = FeatureName(fname),
-    tenant = Tenant(tenant),
+    tenant = Tenant(tenant.toString),
     id = Id(id)
   )
 }

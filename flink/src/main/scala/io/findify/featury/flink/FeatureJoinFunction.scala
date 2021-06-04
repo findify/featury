@@ -37,6 +37,8 @@ class FeatureJoinFunction[T]()(implicit
     val values = lastValues.values().asScala.toList
     if (values.nonEmpty) {
       out.collect(join.appendValues(value, values))
+    } else {
+      out.collect(value)
     }
     val br = 1
   }

@@ -16,7 +16,7 @@ message Key {
         option (scalapb.message).extends = "AnyVal";
         required string value = 1;
     }
-    message GroupName {
+    message Scope {
         option (scalapb.message).extends = "AnyVal";
         required string value = 1;
     }
@@ -26,7 +26,7 @@ message Key {
     }
     message Tenant {
         option (scalapb.message).extends = "AnyVal";
-        required int32 value = 1;
+        required string value = 1;
     }
     message Id {
         option (scalapb.message).extends = "AnyVal";
@@ -34,7 +34,7 @@ message Key {
     }
 
     required Namespace ns = 1;
-    required GroupName group = 2;
+    required Scope group = 2;
     required FeatureName name = 3;
     required Tenant tenant = 4;
     required Id id = 5;
@@ -180,7 +180,7 @@ message State {
 message ScopeKey {
     option (scalapb.message).companion_extends = "io.findify.featury.model.ScopeKeyOps";
     required Key.Namespace ns = 1;
-    required Key.GroupName group = 2;
+    required Key.Scope scope = 2;
     required Key.Tenant tenant = 3;
     required Key.Id id = 4;
 }

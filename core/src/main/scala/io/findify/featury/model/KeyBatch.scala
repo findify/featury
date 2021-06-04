@@ -1,10 +1,10 @@
 package io.findify.featury.model
 
-import io.findify.featury.model.Key.{FeatureName, GroupName, Id, Namespace, Tenant}
+import io.findify.featury.model.Key.{FeatureName, Scope, Id, Namespace, Tenant}
 
 case class KeyBatch(
     ns: Namespace,
-    group: GroupName,
+    group: Scope,
     featureNames: List[FeatureName],
     tenant: Tenant,
     ids: List[Id]

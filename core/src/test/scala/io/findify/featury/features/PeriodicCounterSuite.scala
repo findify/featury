@@ -13,10 +13,9 @@ import scala.concurrent.duration._
 trait PeriodicCounterSuite extends FeatureSuite[PeriodicIncrement] {
   val config = PeriodicCounterConfig(
     ns = Namespace("a"),
-    group = GroupName("b"),
+    group = Scope("b"),
     FeatureName("f1"),
     1.day,
-    10,
     List(PeriodRange(0, 0), PeriodRange(7, 0))
   )
 

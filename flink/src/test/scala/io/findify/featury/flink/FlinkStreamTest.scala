@@ -34,5 +34,3 @@ trait FlinkStreamTest extends BeforeAndAfterAll { this: Suite =>
     super.afterAll()
   }
 }
-
-object FlinkStreamTest {}

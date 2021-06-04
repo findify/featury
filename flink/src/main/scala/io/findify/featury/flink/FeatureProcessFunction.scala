@@ -74,10 +74,6 @@ class FeatureProcessFunction(schema: Schema)
       ctx: KeyedProcessFunction[Key, Write, FeatureValue]#Context,
       out: Collector[FeatureValue]
   ): Unit = {
-
-    println(
-      s"${getRuntimeContext.getIndexOfThisSubtask}: ${Timestamp(ctx.timestamp())} wm:${ctx.timerService().currentWatermark()}"
-    )
     features.get(FeatureKey(ctx.getCurrentKey)) match {
       case None =>
       // wtf?

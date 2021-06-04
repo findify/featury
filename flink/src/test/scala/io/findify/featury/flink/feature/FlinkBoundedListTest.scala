@@ -20,7 +20,7 @@ import org.apache.flink.api.scala._
 import scala.concurrent.duration._
 
 class FlinkBoundedListTest extends BoundedListSuite with FlinkStreamTest {
-  val k = Key(config.ns, config.group, config.name, Tenant(1), Id("x1"))
+  val k = Key(config.ns, config.group, config.name, Tenant("1"), Id("x1"))
 
   override def write(values: List[Append]): Option[FeatureValue] = {
     val conf = Schema(List(config.copy(refresh = 0.hour)))
