@@ -4,7 +4,7 @@ import io.findify.featury.flink.StateTTL
 import io.findify.featury.model.Feature.Counter
 import io.findify.featury.model.FeatureConfig.CounterConfig
 import io.findify.featury.model.Write.Increment
-import io.findify.featury.model.{CounterState, CounterValue, Key, SLong, Timestamp}
+import io.findify.featury.model.{CounterState, CounterValue, Key, Timestamp}
 import org.apache.flink.api.common.state.{KeyedStateStore, ValueState, ValueStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 

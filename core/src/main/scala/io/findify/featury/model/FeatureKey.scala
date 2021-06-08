@@ -7,5 +7,5 @@ case class FeatureKey(ns: Namespace, group: Scope, feature: FeatureName) {
 }
 
 object FeatureKey {
-  def apply(key: Key): FeatureKey = FeatureKey(key.ns, key.group, key.name)
+  def apply(key: Key): FeatureKey = FeatureKey(key.ns, key.scope, key.name)
 }

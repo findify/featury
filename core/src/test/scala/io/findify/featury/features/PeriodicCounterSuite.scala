@@ -31,13 +31,13 @@ trait PeriodicCounterSuite extends FeatureSuite[PeriodicIncrement] {
             now.toStartOfPeriod(config.period),
             now.toStartOfPeriod(config.period).plus(config.period),
             1,
-            1.0
+            1
           ),
           PeriodicValue(
             now.toStartOfPeriod(config.period).minus(config.period * 7),
             now.toStartOfPeriod(config.period).plus(config.period),
             8,
-            1.0
+            1
           )
         )
       )
@@ -62,13 +62,13 @@ trait PeriodicCounterSuite extends FeatureSuite[PeriodicIncrement] {
             now.toStartOfPeriod(config.period),
             now.toStartOfPeriod(config.period).plus(config.period),
             1,
-            8.0
+            8
           ),
           PeriodicValue(
             now.toStartOfPeriod(config.period).minus(config.period * 7),
             now.toStartOfPeriod(config.period).plus(config.period),
             8,
-            10.0
+            10
           )
         )
       )
@@ -94,13 +94,13 @@ trait PeriodicCounterSuite extends FeatureSuite[PeriodicIncrement] {
             now.toStartOfPeriod(config.period),
             now.toStartOfPeriod(config.period).plus(config.period),
             1,
-            1.0
+            1
           ),
           PeriodicValue(
             now.toStartOfPeriod(config.period).minus(config.period * 7),
             now.toStartOfPeriod(config.period).plus(config.period),
             8,
-            8.0
+            8
           )
         )
       )
@@ -126,13 +126,13 @@ trait PeriodicCounterSuite extends FeatureSuite[PeriodicIncrement] {
             now.toStartOfPeriod(config.period),
             now.toStartOfPeriod(config.period).plus(config.period),
             1,
-            1.0
+            1
           ),
           PeriodicValue(
             now.toStartOfPeriod(config.period).minus(config.period * 7),
             now.toStartOfPeriod(config.period).plus(config.period),
             8,
-            2.0
+            2
           )
         )
       )

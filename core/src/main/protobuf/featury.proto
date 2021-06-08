@@ -12,6 +12,7 @@ option (scalapb.options) = {
 };
 
 message Key {
+    option (scalapb.message).companion_extends = "io.findify.featury.model.json.KeyJson";
     message Namespace {
         option (scalapb.message).extends = "AnyVal";
         required string value = 1;
@@ -34,7 +35,7 @@ message Key {
     }
 
     required Namespace ns = 1;
-    required Scope group = 2;
+    required Scope scope = 2;
     required FeatureName name = 3;
     required Tenant tenant = 4;
     required Id id = 5;
@@ -43,6 +44,7 @@ message Key {
 message Timestamp {
     option (scalapb.message).companion_extends = "io.findify.featury.model.TimestampOps.TimestampCompanion";
     option (scalapb.message).extends = "io.findify.featury.model.TimestampOps";
+    option (scalapb.message).companion_extends = "io.findify.featury.model.json.TimestampJson";
     required int64 ts = 1;
 }
 
@@ -50,7 +52,6 @@ message Scalar {
     oneof sealed_value {
         SString scalarString = 1;
         SDouble scalarDouble = 2;
-        SLong scalarLong = 3;
     }
 }
 
@@ -59,9 +60,6 @@ message SString {
 }
 message SDouble {
     required double value = 1;
-}
-message SLong {
-    required int64 value = 1;
 }
 
 message ScalarValue {
@@ -90,7 +88,7 @@ message PeriodicCounterValue {
         required Timestamp start = 1;
         required Timestamp end = 2;
         required int32 periods = 3;
-        required double value = 4;
+        required int64 value = 4;
     }
     required Key key = 1;
     required Timestamp ts = 2;
@@ -111,7 +109,7 @@ message TimeValue {
 message BoundedListValue {
     required Key key = 1;
     required Timestamp ts = 2;
-    repeated TimeValue value = 3 [(scalapb.field).collection_type="List"];
+    repeated TimeValue values = 3 [(scalapb.field).collection_type="List"];
 }
 
 message FeatureValue {

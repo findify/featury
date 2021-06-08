@@ -39,7 +39,7 @@ object Feature {
         val end   = lastTimestamp.minus(range.endOffset * config.period).plus(config.period)
         val sum =
           map.filterKeys(ts => ts.isBeforeOrEquals(end) && ts.isAfterOrEquals(start)).values.toList match {
-            case Nil      => 0.0
+            case Nil      => 0L
             case nonEmpty => nonEmpty.sum
           }
         PeriodicValue(start, end, range.startOffset - range.endOffset + 1, sum)

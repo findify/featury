@@ -3,7 +3,7 @@ package io.findify.featury.features
 import io.findify.featury.model.Feature.Counter
 import io.findify.featury.model.FeatureConfig.CounterConfig
 import io.findify.featury.model.Key.{FeatureName, Scope, Namespace}
-import io.findify.featury.model.{CounterValue, SLong, Timestamp}
+import io.findify.featury.model.{CounterValue, Timestamp}
 import io.findify.featury.model.Write.Increment
 import io.findify.featury.utils.TestKey
 import scala.concurrent.duration._
