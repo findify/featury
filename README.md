@@ -41,17 +41,6 @@ The problem solved by feature stores is typical for majority of production ML sy
 * Feature values are eventually recomputed (like computing running median over a sampled reservoir) and exposed
   in inference API.
   
-## Online servin
+## License
 
-**Featury** API  
-
-**Featury** data model pre-joins features by scope and item key, so if you need to fetch 100 item 
-features for 100 items, it will require only 100 read operations from storage, and not 100*100. 
-There is a single REST API endpoint:
-
-`POST /<namespace>/<group>/<tenant>/features`
-```
-{
-  "keys": [""]
-}
-```
+Featury is licensed under the Apache 2.0.
