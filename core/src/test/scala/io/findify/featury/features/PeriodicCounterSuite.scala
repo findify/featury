@@ -62,7 +62,7 @@ trait PeriodicCounterSuite extends FeatureSuite[PeriodicIncrement] {
             now.toStartOfPeriod(config.period),
             now.toStartOfPeriod(config.period).plus(config.period),
             1,
-            8
+            10
           ),
           PeriodicValue(
             now.toStartOfPeriod(config.period).minus(config.period * 7),
