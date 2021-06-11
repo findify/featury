@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.platform }}
+    services:
+      redis:
+        image: "redis:6.2.3"
     strategy:
       matrix:
         java: [11]
