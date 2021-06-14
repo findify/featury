@@ -17,7 +17,9 @@ libraryDependencies ++= Seq(
   "io.circe"              %% "circe-generic-extras" % circeVersion,
   "io.circe"              %% "circe-parser"         % circeVersion,
   "org.typelevel"         %% "cats-effect"          % "3.1.1",
-  "com.github.pureconfig" %% "pureconfig"           % "0.15.0"
+  "com.github.pureconfig" %% "pureconfig"           % "0.15.0",
+  "org.typelevel"         %% "log4cats-core"        % log4catsVersion,
+  "org.typelevel"         %% "log4cats-slf4j"       % log4catsVersion
 )
 
 Compile / PB.targets := Seq(

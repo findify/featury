@@ -1,19 +1,16 @@
 package io.findify.featury.config
 
+import better.files.File
 import cats.effect.IO
-import io.findify.featury.config.ApiConfig.{RedisClientConfig, ValueStoreConfig}
+import io.findify.featury.values.{StoreCodec, ValueStoreConfig}
 import pureconfig._
 import pureconfig.generic.semiauto._
 
-case class ApiConfig(storeConfig: ValueStoreConfig)
+case class ApiConfig(store: ValueStoreConfig)
 
 object ApiConfig {
-  sealed trait ValueStoreConfig
-  case class RedisClientConfig(host: String, port: Int) extends ValueStoreConfig
-
-  implicit val redisConfigReader = deriveReader[RedisClientConfig]
-  implicit val valueStoreReader  = deriveReader[ValueStoreConfig]
-  implicit val configReader      = deriveReader[ApiConfig]
+  import io.findify.featury.values.ValueStoreConfig._
+  implicit val configReader = deriveReader[ApiConfig]
 
   case class ConfigLoadError(err: String) extends Exception(err)
 
@@ -22,6 +19,17 @@ object ApiConfig {
     case Right(value) => IO.pure(value)
   }
 
-  def default = ???
+  def fromFile(path: String): IO[ApiConfig] = {
+    val source = File(path)
+    if (source.exists && source.nonEmpty) {
+      fromString(source.contentAsString)
+    } else {
+      IO.raiseError(ConfigLoadError(s"file $path does not exist"))
+    }
+  }
+
+  def default = ApiConfig(
+    store = MemoryConfig()
+  )
 
 }

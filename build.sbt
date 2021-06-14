@@ -38,5 +38,10 @@ lazy val flink = (project in file("flink"))
 lazy val api = (project in file("api"))
   .settings(shared: _*)
   .dependsOn(core % "test->test;compile->compile")
+  .dependsOn(redis % "test->test;compile->compile")
+
+lazy val redis = (project in file("connector/redis"))
+  .settings(shared: _*)
+  .dependsOn(core % "test->test;compile->compile")
 
 sonatypeProfileName := "io.findify"
