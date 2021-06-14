@@ -9,9 +9,6 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.platform }}
-    services:
-      redis:
-        image: "redis:6.2.3"
     strategy:
       matrix:
         java: [11]
@@ -25,6 +22,11 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
 
+      - name: Start Redis
+        uses: supercharge/redis-github-action@1.2.0
+        with:
+          redis-version: 6.2.3
+          
       - name: Cache maven packages
         uses: actions/cache@v2
         env:

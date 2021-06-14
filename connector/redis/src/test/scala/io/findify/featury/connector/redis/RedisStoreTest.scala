@@ -8,5 +8,5 @@ import redis.clients.jedis.Jedis
 
 class RedisStoreTest extends StoreTestSuite {
   override def storeResource: Resource[IO, FeatureStore] =
-    Resource.make(IO(RedisStore(new Jedis("redis", 6379), ProtobufCodec)))(redis => IO(redis.client.close()))
+    Resource.make(IO(RedisStore(new Jedis("localhost", 6379), ProtobufCodec)))(redis => IO(redis.client.close()))
 }
