@@ -13,8 +13,8 @@
     <logger name="io.netty" level="INFO"/>
     <logger name="org.http4s" level="INFO"/>
     <logger name="com.datastax.oss.driver" level="INFO"/>
-
     <logger name="org.apache.flink" level="WARN"/>
+
 
     <root level="error">
         <appender-ref ref="STDOUT"/>
