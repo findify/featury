@@ -5,7 +5,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 trait FeatureSuite[W <: Write] extends AnyFlatSpec with Matchers {
-  lazy val now = Timestamp.now
+  lazy val now = Timestamp.date(2021, 6, 1, 0, 0, 1)
 
   def write(values: List[W]): Option[FeatureValue]
 

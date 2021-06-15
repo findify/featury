@@ -12,10 +12,11 @@ import org.scalatest.matchers.should.Matchers
 import io.circe.syntax._
 import io.findify.featury.model.{Key, SString, ScalarValue, Timestamp}
 import org.http4s.circe.CirceEntityCodec.circeEntityDecoder
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 class ValuesApiTest extends AnyFlatSpec with Matchers {
   lazy val store   = new MemoryStore()
-  lazy val service = ValuesApi(store)
+  lazy val service = ValuesApi(store, Slf4jLogger.getLogger[IO])
 
   lazy val k =
     Key(ns = Namespace("ns"), scope = Scope("s"), tenant = Tenant("t"), name = FeatureName("f1"), id = Id("1"))
