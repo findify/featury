@@ -8,6 +8,21 @@ on:
 
 jobs:
   build:
+    services:
+      redis:
+        image: "redis:6.2.3"
+        ports:
+          - 6379:6379
+      cassandra:
+        image: "cassandra:3.11.10"
+        env:
+          JVM_OPTS: "-Dcassandra.skip_wait_for_gossip_to_settle=0"
+          HEAP_NEWSIZE: "32m"
+          MAX_HEAP_SIZE: "256m"
+          CASSANDRA_START_RPC: "true"
+        ports:
+          - 9042:9042
+
     runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
@@ -21,11 +36,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java }}
-
-      - name: Start Redis
-        uses: supercharge/redis-github-action@1.2.0
-        with:
-          redis-version: 6.2.3
 
       - name: Cache maven packages
         uses: actions/cache@v2
