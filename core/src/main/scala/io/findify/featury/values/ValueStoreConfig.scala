@@ -21,10 +21,10 @@ object ValueStoreConfig {
       replication: Int
   ) extends ValueStoreConfig
 
-  implicit val animalConfHint = new FieldCoproductHint[ValueStoreConfig]("type") {
+  implicit val storeConfHint = new FieldCoproductHint[ValueStoreConfig]("type") {
     override def fieldValue(name: String) = name.dropRight("Config".length).toLowerCase
   }
-  implicit val codecReader = ConfigReader.fromString {
+  implicit val codecReader: ConfigReader[StoreCodec] = ConfigReader.fromString {
     case "protobuf" => Right(ProtobufCodec)
     case "json"     => Right(JsonCodec)
     case other      => Left(CannotConvert(other, "codec", "not supported"))
