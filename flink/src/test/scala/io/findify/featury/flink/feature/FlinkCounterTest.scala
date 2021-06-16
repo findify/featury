@@ -6,7 +6,7 @@ import io.findify.featury.model.FeatureConfig.{CounterConfig, ScalarConfig}
 import io.findify.featury.model.{CounterValue, FeatureKey, FeatureValue, Key, SString, Schema, Timestamp, Write}
 import io.findify.featury.model.Key.{FeatureName, Scope, Id, Namespace, Tenant}
 import io.findify.featury.model.Write.{Append, Increment}
-import org.apache.flink.api.scala._
+import io.findify.flinkadt.api._
 
 import scala.concurrent.duration._
 

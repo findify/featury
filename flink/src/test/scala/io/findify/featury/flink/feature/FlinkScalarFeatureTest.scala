@@ -17,7 +17,7 @@ import io.findify.featury.model.Key.{Id, Tenant}
 import io.findify.featury.model.Write.{Append, Put}
 
 import scala.concurrent.duration._
-import org.apache.flink.api.scala._
+import io.findify.flinkadt.api._
 
 class FlinkScalarFeatureTest extends ScalarFeatureSuite with FlinkStreamTest {
   val k = Key(config.ns, config.group, config.name, Tenant("1"), Id("x1"))

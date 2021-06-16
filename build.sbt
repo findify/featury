@@ -6,11 +6,8 @@ version := "0.0.1-SNAPSHOT"
 
 lazy val shared = Seq(
   organization := "io.findify",
-  scalaVersion := "2.12.13",
+  scalaVersion := "2.12.14",
   scalacOptions ++= Seq("-feature", "-deprecation"),
-  libraryDependencies ++= Seq(
-    "com.github.blemale" %% "scaffeine" % "4.0.2"
-  ),
   version := "0.0.1-SNAPSHOT",
   publishMavenStyle := true,
   publishTo := sonatypePublishToBundle.value,
@@ -27,7 +24,7 @@ lazy val shared = Seq(
   )
 )
 
-scalaVersion := "2.12.13"
+scalaVersion := "2.12.14"
 
 lazy val core = (project in file("core")).settings(shared: _*)
 

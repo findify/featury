@@ -6,7 +6,7 @@ import io.findify.featury.model.FeatureConfig.{FreqEstimatorConfig, PeriodicCoun
 import io.findify.featury.model.Key.{Id, Tenant}
 import io.findify.featury.model.Write.{PeriodicIncrement, PutFreqSample}
 import io.findify.featury.model.{FeatureKey, FeatureValue, FrequencyValue, Key, PeriodicCounterValue, Schema, Write}
-import org.apache.flink.api.scala._
+import io.findify.flinkadt.api._
 
 import scala.concurrent.duration._
 

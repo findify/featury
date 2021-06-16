@@ -15,7 +15,7 @@ import io.findify.featury.model.{
 }
 import io.findify.featury.model.Key.{Id, Tenant}
 import io.findify.featury.model.Write.{Append, PeriodicIncrement}
-import org.apache.flink.api.scala._
+import io.findify.flinkadt.api._
 
 import scala.concurrent.duration._
 

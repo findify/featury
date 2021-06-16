@@ -2,7 +2,6 @@ package io.findify.featury.flink.feature
 
 import io.findify.featury.features.BoundedListSuite
 import io.findify.featury.flink.{FeaturyFlow, FlinkStreamTest}
-import io.findify.featury.model.FeatureConfig.{BoundedListConfig, ScalarConfig}
 import io.findify.featury.model.Key.{Id, Tenant}
 import io.findify.featury.model.Write.Append
 import io.findify.featury.model.{
@@ -15,7 +14,7 @@ import io.findify.featury.model.{
   Schema,
   Write
 }
-import org.apache.flink.api.scala._
+import io.findify.flinkadt.api._
 
 import scala.concurrent.duration._
 

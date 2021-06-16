@@ -10,7 +10,7 @@ import io.findify.featury.model.{FeatureValue, Key, SString, ScalarValue, Timest
 import io.findify.featury.values.StoreCodec.ProtobufCodec
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import org.apache.flink.api.scala._
+import io.findify.flinkadt.api._
 
 class FeatureStoreSinkTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
   val k   = Key(Namespace("ns"), Scope("s"), FeatureName("f1"), Tenant("1"), Id("x1"))
