@@ -1,31 +1,19 @@
-package io.findify.featury.flink.rw
+package io.findify.featury.flink.format
 
-import io.findify.featury.flink.rw.ProtobufReaderWriter.{ProtobufBucketAssigner, ProtobufBulkWriterFactory}
+import io.findify.featury.flink.format.ProtobufReaderWriter.{ProtobufBucketAssigner, ProtobufBulkWriterFactory}
 import io.findify.featury.flink.util.Compress
-import io.findify.featury.model.{
-  BoundedListValue,
-  CounterValue,
-  FeatureKey,
-  FeatureValue,
-  FrequencyValue,
-  NumStatsValue,
-  PeriodicCounterValue,
-  Scalar,
-  ScalarMessage,
-  ScalarValue
-}
 import org.apache.flink.api.common.serialization.BulkWriter
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
+import org.apache.flink.connector.file.sink.FileSink
+import org.apache.flink.connector.file.src.reader.{BulkFormat, StreamFormat}
+import org.apache.flink.connector.file.src.{FileSource, FileSourceSplit}
 import org.apache.flink.core.fs.{FSDataInputStream, FSDataOutputStream, Path}
 import org.apache.flink.core.io.SimpleVersionedSerializer
-import org.apache.flink.streaming.api.functions.sink.filesystem.{BucketAssigner, OutputFileConfig, StreamingFileSink}
 import org.apache.flink.streaming.api.functions.sink.filesystem.bucketassigners.SimpleVersionedStringSerializer
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.OnCheckpointRollingPolicy
-import scalapb.{GeneratedMessage, GeneratedMessageCompanion, GeneratedSealedOneof}
-import org.apache.flink.connector.file.sink.FileSink
-import org.apache.flink.connector.file.src.{FileSource, FileSourceSplit}
-import org.apache.flink.connector.file.src.reader.{BulkFormat, StreamFormat}
+import org.apache.flink.streaming.api.functions.sink.filesystem.{BucketAssigner, OutputFileConfig}
+import scalapb.GeneratedMessage
 
 import java.io.{BufferedOutputStream, FilterOutputStream, InputStream, OutputStream}
 

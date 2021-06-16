@@ -1,25 +1,13 @@
-package io.findify.featury.flink.rw
+package io.findify.featury.flink
 
-import io.findify.featury.flink.rw.ProtobufReaderWriter.{
+import io.findify.featury.flink.format.ProtobufReaderWriter
+import io.findify.featury.flink.format.ProtobufReaderWriter.{
   ProtobufBucketAssigner,
   ProtobufBulkWriterFactory,
   ProtobufStreamFormat
 }
 import io.findify.featury.flink.util.Compress
-import io.findify.featury.model.{
-  BoundedListValue,
-  CounterValue,
-  FeatureKey,
-  FeatureValue,
-  FeatureValueMessage,
-  FrequencyValue,
-  Key,
-  NumStatsValue,
-  PeriodicCounterValue,
-  ScalarValue,
-  State,
-  Timestamp
-}
+import io.findify.featury.model.{FeatureKey, FeatureValueMessage}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.connector.file.sink.FileSink
 import org.apache.flink.connector.file.src.FileSource

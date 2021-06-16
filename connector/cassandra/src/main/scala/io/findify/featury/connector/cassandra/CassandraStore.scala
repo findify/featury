@@ -75,6 +75,8 @@ case class CassandraStore(session: CqlSession, codec: StoreCodec) extends Featur
     session.execute(stmt)
   }
 
+  override def close(): Unit = { session.close() }
+
 }
 
 object CassandraStore {

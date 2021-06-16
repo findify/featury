@@ -6,7 +6,7 @@ import io.findify.featury.model.{FeatureValue, Key}
 
 import scala.collection.mutable
 
-class MemoryStore extends FeatureStore {
+case class MemoryStore() extends FeatureStore {
   val cache = mutable.Map[Key, FeatureValue]()
 
   override def write(batch: List[FeatureValue]): Unit =
@@ -22,4 +22,6 @@ class MemoryStore extends FeatureStore {
     }
     ReadResponse(values)
   }
+
+  override def close(): Unit = {}
 }
