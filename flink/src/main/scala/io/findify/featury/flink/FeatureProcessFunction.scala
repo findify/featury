@@ -1,53 +1,28 @@
 package io.findify.featury.flink
 
 import io.findify.featury.flink.FeatureProcessFunction.stateTag
-import io.findify.featury.flink.feature.{
-  FlinkBoundedList,
-  FlinkCounter,
-  FlinkFreqEstimator,
-  FlinkPeriodicCounter,
-  FlinkScalarFeature,
-  FlinkStatsEstimator
-}
-import io.findify.featury.model.Feature.{
-  BoundedList,
-  Counter,
-  FreqEstimator,
-  PeriodicCounter,
-  ScalarFeature,
-  StatsEstimator
-}
-import io.findify.featury.model.FeatureConfig.{
-  BoundedListConfig,
-  CounterConfig,
-  FreqEstimatorConfig,
-  PeriodicCounterConfig,
-  ScalarConfig,
-  StatsEstimatorConfig
-}
-import io.findify.featury.model.Write.{Append, Increment, PeriodicIncrement, Put, PutFreqSample, PutStatSample}
-import io.findify.featury.model.{
-  Feature,
-  FeatureConfig,
-  FeatureKey,
-  FeatureValue,
-  FeatureValueMessage,
-  Key,
-  Schema,
-  State,
-  Timestamp,
-  Write
-}
+import io.findify.featury.flink.feature._
+import io.findify.featury.model.Feature._
+import io.findify.featury.model.FeatureConfig._
+import io.findify.featury.model.Write._
+import io.findify.featury.model._
 import org.apache.flink.api.common.state.{KeyedStateStore, ValueState, ValueStateDescriptor}
 import org.apache.flink.api.common.typeinfo.{TypeInfo, TypeInformation}
 import org.apache.flink.runtime.state.{FunctionInitializationContext, FunctionSnapshotContext}
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction
+import org.apache.flink.streaming.api.scala.OutputTag
 import org.apache.flink.util.Collector
-import org.apache.flink.streaming.api.scala._
 
-class FeatureProcessFunction(schema: Schema)
-    extends KeyedProcessFunction[Key, Write, FeatureValue]
+class FeatureProcessFunction(schema: Schema)(implicit
+    longTI: TypeInformation[Long],
+    intTI: TypeInformation[Int],
+    doubleTI: TypeInformation[Double],
+    tvTI: TypeInformation[TimeValue],
+    stringTI: TypeInformation[String],
+    scalarTI: TypeInformation[Scalar],
+    stateTI: TypeInformation[State]
+) extends KeyedProcessFunction[Key, Write, FeatureValue]
     with CheckpointedFunction {
 
   @transient var features: Map[FeatureKey, Feature[_ <: Write, _ <: FeatureValue, _ <: FeatureConfig, _ <: State]] = _
@@ -105,5 +80,5 @@ class FeatureProcessFunction(schema: Schema)
 }
 
 object FeatureProcessFunction {
-  val stateTag = OutputTag[State]("side-output")
+  def stateTag(implicit stateTI: TypeInformation[State]) = OutputTag[State]("side-output")
 }

@@ -6,7 +6,7 @@ import io.findify.featury.model.FeatureConfig.{FreqEstimatorConfig, StatsEstimat
 import io.findify.featury.model.{FeatureKey, FeatureValue, FrequencyValue, Key, NumStatsValue, Schema, Write}
 import io.findify.featury.model.Key.{Id, Tenant}
 import io.findify.featury.model.Write.{PutFreqSample, PutStatSample}
-import org.apache.flink.api.scala._
+import io.findify.flinkadt.api._
 
 import scala.concurrent.duration._
 

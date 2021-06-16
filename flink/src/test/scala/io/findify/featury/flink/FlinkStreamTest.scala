@@ -20,7 +20,7 @@ trait FlinkStreamTest extends BeforeAndAfterAll { this: Suite =>
     env.setRuntimeMode(RuntimeExecutionMode.BATCH)
     env.enableCheckpointing(1000)
     env.setRestartStrategy(RestartStrategies.noRestart())
-    //env.getConfig.disableGenericTypes()
+    env.getConfig.disableGenericTypes()
     env
   }
 

@@ -6,14 +6,16 @@ import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, Wat
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.api.scala.extensions._
-import org.apache.flink.api.scala._
 
 object FeaturyFlow {
   import io.findify.featury.flink.util.StreamName._
 
   def join[T](values: DataStream[FeatureValue], events: DataStream[T], scopes: List[Scope])(implicit
       j: Join[T],
-      ti: TypeInformation[T]
+      ti: TypeInformation[T],
+      ki: TypeInformation[ScopeKey],
+      si: TypeInformation[String],
+      fvi: TypeInformation[FeatureValue]
   ): DataStream[T] =
     scopes match {
       case Nil => events
@@ -27,7 +29,17 @@ object FeaturyFlow {
 
     }
 
-  def process(stream: DataStream[Write], schema: Schema): DataStream[FeatureValue] = {
+  def process(stream: DataStream[Write], schema: Schema)(implicit
+      ki: TypeInformation[Key],
+      fvi: TypeInformation[FeatureValue],
+      longTI: TypeInformation[Long],
+      intTI: TypeInformation[Int],
+      doubleTI: TypeInformation[Double],
+      tvTI: TypeInformation[TimeValue],
+      stringTI: TypeInformation[String],
+      scalarTI: TypeInformation[Scalar],
+      stateTI: TypeInformation[State]
+  ): DataStream[FeatureValue] = {
     stream
       .assignTimestampsAndWatermarks(
         WatermarkStrategy

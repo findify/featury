@@ -10,7 +10,7 @@ import org.apache.flink.api.common.eventtime.WatermarkStrategy
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.apache.flink.core.fs.Path
-import org.apache.flink.api.scala._
+import io.findify.flinkadt.api._
 
 import scala.language.higherKinds
 import scala.concurrent.duration._
