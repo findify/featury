@@ -34,6 +34,7 @@ lazy val core = (project in file("core")).settings(shared: _*)
 lazy val flink = (project in file("flink"))
   .settings(shared: _*)
   .dependsOn(core % "test->test;compile->compile")
+  .dependsOn(rocksdb % "test->test;compile->compile")
 
 lazy val api = (project in file("api"))
   .settings(shared: _*)
@@ -46,6 +47,10 @@ lazy val redis = (project in file("connector/redis"))
   .dependsOn(core % "test->test;compile->compile")
 
 lazy val cassandra = (project in file("connector/cassandra"))
+  .settings(shared: _*)
+  .dependsOn(core % "test->test;compile->compile")
+
+lazy val rocksdb = (project in file("connector/rocksdb"))
   .settings(shared: _*)
   .dependsOn(core % "test->test;compile->compile")
 

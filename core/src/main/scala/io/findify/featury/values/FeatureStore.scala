@@ -7,4 +7,5 @@ import io.findify.featury.model.api.{ReadRequest, ReadResponse}
 trait FeatureStore {
   def write(batch: List[FeatureValue]): Unit
   def read(request: ReadRequest): IO[ReadResponse]
+  def close(): Unit
 }

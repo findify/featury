@@ -62,6 +62,7 @@ case class RedisStore(client: Jedis, codec: StoreCodec) extends FeatureStore {
         }
     }
 
+  override def close(): Unit = { client.close() }
 }
 
 object RedisStore {

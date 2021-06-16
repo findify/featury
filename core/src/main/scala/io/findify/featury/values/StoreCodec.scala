@@ -17,7 +17,7 @@ object StoreCodec {
   case class DecodingError(msg: String) extends Exception(msg)
 
   import io.findify.featury.model.json.FeatureValueJson._
-  object JsonCodec extends StoreCodec {
+  case object JsonCodec extends StoreCodec {
     override def encode(value: FeatureValue): Array[Byte] =
       value.asJson.noSpaces.getBytes(StandardCharsets.UTF_8)
 
@@ -30,7 +30,7 @@ object StoreCodec {
     }
   }
 
-  object ProtobufCodec extends StoreCodec {
+  case object ProtobufCodec extends StoreCodec {
     override def encode(value: FeatureValue): Array[Byte] = value.asMessage.toByteArray
 
     override def decode(bytes: Array[Byte]): Either[DecodingError, FeatureValue] =
