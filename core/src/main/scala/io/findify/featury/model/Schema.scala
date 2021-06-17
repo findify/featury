@@ -11,9 +11,11 @@ case class Schema(
     periodicCounters: Map[FeatureKey, PeriodicCounterConfig],
     freqs: Map[FeatureKey, FreqEstimatorConfig],
     stats: Map[FeatureKey, StatsEstimatorConfig],
-    lists: Map[FeatureKey, BoundedListConfig]
+    lists: Map[FeatureKey, BoundedListConfig],
+    maps: Map[FeatureKey, MapConfig]
 ) {
-  def configs: Map[FeatureKey, FeatureConfig] = (counters ++ scalars ++ periodicCounters ++ freqs ++ stats ++ lists)
+  def configs: Map[FeatureKey, FeatureConfig] =
+    (counters ++ scalars ++ periodicCounters ++ freqs ++ stats ++ lists ++ maps)
 }
 
 object Schema {
@@ -41,7 +43,8 @@ object Schema {
       periodicCounters = configs.collect { case (key, c: PeriodicCounterConfig) => key -> c }.toMap,
       freqs = configs.collect { case (key, c: FreqEstimatorConfig) => key -> c }.toMap,
       stats = configs.collect { case (key, c: StatsEstimatorConfig) => key -> c }.toMap,
-      lists = configs.collect { case (key, c: BoundedListConfig) => key -> c }.toMap
+      lists = configs.collect { case (key, c: BoundedListConfig) => key -> c }.toMap,
+      maps = configs.collect { case (key, c: MapConfig) => key -> c }.toMap
     )
   }
   implicit val schemaDecoder: Decoder[Schema] = deriveDecoder[SchemaYaml].map(s => Schema(s.features))

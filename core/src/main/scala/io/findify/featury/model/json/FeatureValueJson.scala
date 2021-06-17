@@ -17,6 +17,7 @@ object FeatureValueJson {
   implicit val periodicCounterValueCodec: Codec[PeriodicCounterValue] = deriveCodec
   implicit val timeValueCodec: Codec[TimeValue]                       = deriveCodec
   implicit val boundedListCodec: Codec[BoundedListValue]              = deriveCodec
+  implicit val mapCodec: Codec[MapValue]                              = deriveCodec
 
   implicit val config = Configuration.default
     .withDiscriminator("type")
@@ -27,6 +28,7 @@ object FeatureValueJson {
       case "NumStatsValue"        => "stats"
       case "PeriodicCounterValue" => "periodic_counter"
       case "BoundedListValue"     => "list"
+      case "MapValue"             => "map"
     })
 
   implicit val featureValueEncoder: Codec[FeatureValue] = deriveConfiguredCodec

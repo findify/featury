@@ -30,7 +30,7 @@ trait FlinkStreamTest extends BeforeAndAfterAll { this: Suite =>
   }
 
   override def afterAll(): Unit = {
-    cluster.after()
+    //cluster.after()
     super.afterAll()
   }
 }

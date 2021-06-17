@@ -34,6 +34,14 @@ object FeatureConfig {
       refresh: FiniteDuration = 1.hour
   ) extends FeatureConfig
 
+  case class MapConfig(
+      ns: Namespace,
+      group: Scope,
+      name: FeatureName,
+      ttl: FiniteDuration = 365.days,
+      refresh: FiniteDuration = 1.hour
+  ) extends FeatureConfig
+
   case class BoundedListConfig(
       ns: Namespace,
       group: Scope,
@@ -98,6 +106,7 @@ object FeatureConfig {
   implicit val freqDecoder          = deriveDecoder[FreqEstimatorConfig]
   implicit val listDecoder          = deriveDecoder[BoundedListConfig]
   implicit val scalarDecoder        = deriveDecoder[ScalarConfig]
+  implicit val mapDecoder           = deriveDecoder[MapConfig]
   implicit val counterDecoder       = deriveDecoder[CounterConfig]
 
   implicit val featureDecoder = Decoder.instance[FeatureConfig](c =>
@@ -110,6 +119,7 @@ object FeatureConfig {
         case "list"             => listDecoder.tryDecode(c)
         case "scalar"           => scalarDecoder.tryDecode(c)
         case "counter"          => counterDecoder.tryDecode(c)
+        case "map"              => mapDecoder.tryDecode(c)
         case other              => Left(DecodingFailure(s"feature type $other is not supported", c.history))
       }
     } yield {
