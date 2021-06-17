@@ -36,6 +36,7 @@ class FeatureProcessFunction(schema: Schema)(implicit
       case (key, c: FreqEstimatorConfig)   => key -> FlinkFreqEstimator(context.getKeyedStateStore, c)
       case (key, c: ScalarConfig)          => key -> FlinkScalarFeature(context.getKeyedStateStore, c)
       case (key, c: StatsEstimatorConfig)  => key -> FlinkStatsEstimator(context.getKeyedStateStore, c)
+      case (key, c: MapConfig)             => key -> FlinkMapFeature(context.getKeyedStateStore, c)
     }
     updated = context.getKeyedStateStore.getState(
       new ValueStateDescriptor[Long]("last-update", implicitly[TypeInformation[Long]])
@@ -75,6 +76,7 @@ class FeatureProcessFunction(schema: Schema)(implicit
       case (f: PeriodicCounter, w: PeriodicIncrement) => f.put(w)
       case (f: ScalarFeature, w: Put)                 => f.put(w)
       case (f: StatsEstimator, w: PutStatSample)      => f.put(w)
+      case (f: MapFeature, w: PutTuple)               => f.put(w)
       case _                                          => // ignore
     }
 }
