@@ -35,7 +35,7 @@ object Schema {
     val configs = for {
       c <- confs
     } yield {
-      FeatureKey(c.ns, c.group, c.name) -> c
+      FeatureKey(c.ns, c.scope, c.name) -> c
     }
     new Schema(
       counters = configs.collect { case (key, c: CounterConfig) => key -> c }.toMap,

@@ -10,7 +10,7 @@ import io.circe.syntax._
 import org.http4s.circe._
 import org.typelevel.log4cats.Logger
 
-case class ValuesApi(store: FeatureStore, logger: Logger[IO]) {
+case class ValuesApi(store: FeatureStore, logger: Logger[IO], metrics: MetricsApi) {
   import ValuesApi._
   val service = HttpRoutes.of[IO] {
     case GET -> Root / "status" => Ok("")
@@ -22,6 +22,7 @@ case class ValuesApi(store: FeatureStore, logger: Logger[IO]) {
             .map(_.value)} ids=${read.ids.map(_.value)}"
         )
         response <- store.read(read)
+        _        <- IO(response.features.foreach(metrics.collectFeatureValues))
         _        <- logger.debug(s"read ${response.features.size} values")
         ok       <- Ok(response.asJson)
       } yield {

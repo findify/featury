@@ -7,13 +7,17 @@ import org.http4s.dsl.io._
 import org.http4s.circe._
 import io.circe.syntax._
 import cats.implicits._
-import io.findify.featury.api.ValuesApi
+import io.findify.featury.api.{MetricsApi, ValuesApi}
 import io.findify.featury.config.{ApiConfig, Args}
+import io.findify.featury.connector.cassandra.CassandraStore
 import io.findify.featury.connector.redis.RedisStore
+import io.findify.featury.model.FeatureConfig.{MonitorValuesConfig, ScalarConfig}
+import io.findify.featury.model.Key.{FeatureName, Id, Namespace, Scope, Tenant}
+import io.findify.featury.model.{Key, SDouble, ScalarValue, Schema, Timestamp}
 import io.findify.featury.model.api.{ReadRequest, ReadResponse}
 import io.findify.featury.util.ForkJoinExecutor
 import io.findify.featury.values.{FeatureStore, MemoryStore}
-import io.findify.featury.values.ValueStoreConfig.{MemoryConfig, RedisConfig}
+import io.findify.featury.values.ValueStoreConfig.{CassandraConfig, MemoryConfig, RedisConfig}
 import org.http4s.blaze.server._
 import org.http4s.implicits._
 import org.http4s.server.Router
@@ -40,17 +44,24 @@ object Main extends IOApp {
           RedisStore
             .makeRedisClient(redisConfig)
             .use(redis => serve(config, RedisStore(redis, redisConfig.codec), logger))
+      case cassandraConfig: CassandraConfig =>
+        logger.info("using Cassandra client") *>
+          CassandraStore
+            .makeResource(cassandraConfig)
+            .use(cass => serve(config, cass, logger))
       case _: MemoryConfig =>
         logger.info("using Memory to store feature values") *>
-          Resource.make(IO(new MemoryStore()))(_ => IO.unit).use(mem => serve(config, mem, logger))
+          Resource.make(IO(MemoryStore()))(_ => IO.unit).use(mem => serve(config, mem, logger))
     }
   } yield {
     result
   }
 
   def serve(config: ApiConfig, store: FeatureStore, logger: Logger[IO])(implicit ec: ExecutionContext) = {
-    val api     = ValuesApi(store, logger)
-    val httpApp = Router("/" -> api.service).orNotFound
+    val metrics = MetricsApi(Schema(Nil))
+    val api     = ValuesApi(store, logger, metrics)
+    val routes  = api.service <+> metrics.route
+    val httpApp = Router("/" -> routes).orNotFound
     logger.info("starting API service") *>
       BlazeServerBuilder[IO](ec)
         .bindHttp(8080, "0.0.0.0")

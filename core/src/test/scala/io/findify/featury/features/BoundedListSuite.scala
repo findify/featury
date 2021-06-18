@@ -14,7 +14,7 @@ trait BoundedListSuite extends FeatureSuite[Append] {
   val config = BoundedListConfig(
     name = FeatureName("example"),
     ns = Namespace("a"),
-    group = Scope("b"),
+    scope = Scope("b"),
     count = 10,
     duration = 5.hour
   )

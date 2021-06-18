@@ -11,7 +11,7 @@ import scala.util.Random
 
 trait FreqEstimatorSuite extends FeatureSuite[PutFreqSample] {
   val config: FreqEstimatorConfig =
-    FreqEstimatorConfig(ns = Namespace("a"), group = Scope("b"), name = FeatureName("f1"), 100, 1)
+    FreqEstimatorConfig(ns = Namespace("a"), scope = Scope("b"), name = FeatureName("f1"), 100, 1)
 
   it should "sample freqs for 100 items" in {
     val k = TestKey(config, id = "f10")

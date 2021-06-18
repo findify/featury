@@ -2,8 +2,8 @@ package io.findify.featury.model
 
 import io.findify.featury.model.Key.{FeatureName, Scope, Namespace}
 
-case class FeatureKey(ns: Namespace, group: Scope, feature: FeatureName) {
-  def fqdn = s"${ns.value}/${group.value}/${feature.value}"
+case class FeatureKey(ns: Namespace, scope: Scope, feature: FeatureName) {
+  def fqdn = s"${ns.value}/${scope.value}/${feature.value}"
 }
 
 object FeatureKey {
