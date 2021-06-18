@@ -9,16 +9,18 @@ import org.scalatest.matchers.should.Matchers
 
 class ApiConfigTest extends AnyFlatSpec with Matchers {
   it should "parse mem-only config" in {
-    ApiConfig.fromString("store = { type = memory }").unsafeRunSync() shouldBe ApiConfig(MemoryConfig())
+    val conf =
+      """store:
+        |  type: memory""".stripMargin
+    ApiConfig.fromString(conf).unsafeRunSync() shouldBe ApiConfig(MemoryConfig())
   }
   it should "parse redis config" in {
     val cfg =
-      """store = {
-        | type: redis
-        | host: a
-        | port: 2
-        | codec: json
-        |}
+      """store: 
+        |  type: redis
+        |  host: a
+        |  port: 2
+        |  codec: json
         |""".stripMargin
     ApiConfig.fromString(cfg).unsafeRunSync() shouldBe ApiConfig(RedisConfig("a", 2, JsonCodec))
   }

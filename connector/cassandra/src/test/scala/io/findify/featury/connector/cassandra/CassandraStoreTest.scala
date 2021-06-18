@@ -7,6 +7,6 @@ import io.findify.featury.values.StoreCodec.ProtobufCodec
 import io.findify.featury.values.ValueStoreConfig.CassandraConfig
 
 class CassandraStoreTest extends StoreTestSuite {
-  val conf                                               = CassandraConfig(List("localhost"), 9042, "datacenter1", "dev", None, ProtobufCodec, 1)
+  val conf                                               = CassandraConfig(List("localhost"), 9042, "datacenter1", "dev", ProtobufCodec, 1)
   override def storeResource: Resource[IO, FeatureStore] = CassandraStore.makeResource(conf)
 }

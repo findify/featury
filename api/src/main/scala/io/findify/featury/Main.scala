@@ -36,7 +36,17 @@ object Main extends IOApp {
     cmdline <- IO(Args.parse(args))
     config <- cmdline.configFile match {
       case Some(value) => logger.info(s"loading API config from $value") *> ApiConfig.fromFile(value)
-      case None        => logger.info("loading default API config") *> IO(ApiConfig.default)
+      case None => //logger.info("loading default API config") *> IO(ApiConfig.default)
+        for {
+          _ <- logger.info("config file not passed as a cmdline")
+          conf <- ApiConfig.system.handleErrorWith { case _ =>
+            logger.info(s"${ApiConfig.SYSTEM_CONFIG_PATH} file not found, using default config") *> IO.pure(
+              ApiConfig.default
+            )
+          }
+        } yield {
+          conf
+        }
     }
     result <- config.store match {
       case redisConfig: RedisConfig =>
@@ -64,7 +74,10 @@ object Main extends IOApp {
     val httpApp = Router("/" -> routes).orNotFound
     logger.info("starting API service") *>
       BlazeServerBuilder[IO](ec)
-        .bindHttp(8080, "0.0.0.0")
+        .bindHttp(
+          port = config.api.flatMap(_.port).getOrElse(8080),
+          host = config.api.flatMap(_.host).getOrElse("0.0.0.0")
+        )
         .withHttpApp(httpApp)
         .serve
         .compile
