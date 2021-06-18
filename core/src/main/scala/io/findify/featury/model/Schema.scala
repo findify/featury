@@ -20,6 +20,7 @@ case class Schema(
 
 object Schema {
   case class SchemaYaml(features: List[FeatureConfig])
+
   def fromYaml(text: String): Either[ConfigParsingError, Schema] = {
     parser.parse(text) match {
       case Left(err) => Left(ConfigParsingError(s"cannot decode yaml: $err"))

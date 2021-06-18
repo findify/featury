@@ -18,7 +18,7 @@ class SchemaTest extends AnyFlatSpec with Matchers {
     decodeDuration("1day") shouldBe Success(1.day)
     decodeDuration("1d") shouldBe Success(1.day)
   }
-  it should "load scalar config" in {
+  it should "load scalar config with no drift" in {
     val yaml =
       """
         |features:
@@ -37,6 +37,38 @@ class SchemaTest extends AnyFlatSpec with Matchers {
             scope = Scope("product"),
             ttl = 1.day,
             refresh = 0.seconds
+          )
+        )
+      )
+    )
+  }
+
+  it should "load scalar config with drift" in {
+    val yaml =
+      """
+        |features:
+        |  - type: scalar
+        |    ns: dev
+        |    scope: product
+        |    name: title
+        |    ttl: '1 day'
+        |    refresh: '0 second'
+        |    monitorValues:
+        |      min: 1.0
+        |      max: 2.0
+        |      buckets: 10
+        |    monitorLag: true""".stripMargin
+    Schema.fromYaml(yaml) shouldBe Right(
+      Schema(
+        List(
+          ScalarConfig(
+            name = FeatureName("title"),
+            ns = Namespace("dev"),
+            scope = Scope("product"),
+            ttl = 1.day,
+            refresh = 0.seconds,
+            monitorValues = Some(MonitorValuesConfig(1.0, 2.0, 10)),
+            monitorLag = Some(true)
           )
         )
       )

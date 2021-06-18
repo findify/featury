@@ -1,10 +1,13 @@
 package io.findify.featury.values
 
 import io.findify.featury.values.StoreCodec.{JsonCodec, ProtobufCodec}
-import pureconfig.ConfigReader
-import pureconfig.error.CannotConvert
-import pureconfig.generic.FieldCoproductHint
-import pureconfig.generic.semiauto.deriveReader
+import io.circe.generic.extras.Configuration
+import io.circe.{Codec, Decoder, Encoder}
+import io.circe.generic.semiauto._
+import io.circe.generic.extras.semiauto.{deriveConfiguredCodec, deriveConfiguredDecoder}
+import io.findify.featury.model.BackendError
+
+import scala.util.{Failure, Success}
 
 sealed trait ValueStoreConfig {}
 
@@ -16,22 +19,25 @@ object ValueStoreConfig {
       port: Int,
       dc: String,
       keyspace: String,
-      ttl: Option[Int],
       codec: StoreCodec,
       replication: Int
   ) extends ValueStoreConfig
 
-  implicit val storeConfHint = new FieldCoproductHint[ValueStoreConfig]("type") {
-    override def fieldValue(name: String) = name.dropRight("Config".length).toLowerCase
+  implicit val storeDecoder: Decoder[StoreCodec] = Decoder.decodeString.emapTry {
+    case "protobuf" => Success(ProtobufCodec)
+    case "json"     => Success(JsonCodec)
+    case other      => Failure(BackendError(s"codec $other not supported: try 'json' or 'protobuf'"))
   }
-  implicit val codecReader: ConfigReader[StoreCodec] = ConfigReader.fromString {
-    case "protobuf" => Right(ProtobufCodec)
-    case "json"     => Right(JsonCodec)
-    case other      => Left(CannotConvert(other, "codec", "not supported"))
-  }
-  implicit val redisConfigReader = deriveReader[RedisConfig]
-  implicit val memConfigReader   = deriveReader[MemoryConfig]
-  implicit val cassandraReader   = deriveReader[CassandraConfig]
-  implicit val valueStoreReader  = deriveReader[ValueStoreConfig]
+  implicit val redisDecoder: Decoder[RedisConfig]         = deriveDecoder
+  implicit val memDecoder: Decoder[MemoryConfig]          = deriveDecoder
+  implicit val cassandraDecoder: Decoder[CassandraConfig] = deriveDecoder
+  implicit val config = Configuration.default
+    .withDiscriminator("type")
+    .copy(transformConstructorNames = {
+      case "RedisConfig"     => "redis"
+      case "MemoryConfig"    => "memory"
+      case "CassandraConfig" => "cassandra"
+    })
 
+  implicit val vsDecoder: Decoder[ValueStoreConfig] = deriveConfiguredDecoder
 }

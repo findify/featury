@@ -2,7 +2,7 @@
 
 *Featury* exports all feature values it served as prometheus metrics on the
 `/metrics` endpoint. By default export is disabled and you need to enable it on
-a per-feature basis.
+a per-feature basis. See the [schema](schema.md) document for details.
 
 These exported metrics can be later used as a source for anomaly detection and dashboarding software:
 * monitor feature values quality: what if some feature value becomes missing after update?
