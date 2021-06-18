@@ -9,7 +9,7 @@ object TestKey {
   def apply(c: FeatureConfig, id: String) = {
     Key(
       ns = c.ns,
-      scope = c.group,
+      scope = c.scope,
       name = c.name,
       tenant = Tenant("1"),
       id = Id(id)

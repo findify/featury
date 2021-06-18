@@ -12,7 +12,7 @@ import scala.concurrent.duration._
 
 class FlinkCounterTest extends CounterSuite with FlinkStreamTest {
 
-  val k = Key(config.ns, config.group, config.name, Tenant("1"), Id("x1"))
+  val k = Key(config.ns, config.scope, config.name, Tenant("1"), Id("x1"))
 
   it should "process increments with refresh" in {
     val conf   = Schema(config.copy(refresh = 1.hour))

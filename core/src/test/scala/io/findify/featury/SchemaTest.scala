@@ -34,7 +34,7 @@ class SchemaTest extends AnyFlatSpec with Matchers {
           ScalarConfig(
             name = FeatureName("title"),
             ns = Namespace("dev"),
-            group = Scope("product"),
+            scope = Scope("product"),
             ttl = 1.day,
             refresh = 0.seconds
           )

@@ -9,7 +9,7 @@ import io.findify.featury.utils.TestKey
 import scala.concurrent.duration._
 
 trait MapFeatureSuite extends FeatureSuite[PutTuple] {
-  val config = MapConfig(ns = Namespace("a"), group = Scope("b"), FeatureName("counter"), 1.day)
+  val config = MapConfig(ns = Namespace("a"), scope = Scope("b"), FeatureName("counter"), 1.day)
   val k      = TestKey(config, id = "p11")
 
   it should "write-read" in {

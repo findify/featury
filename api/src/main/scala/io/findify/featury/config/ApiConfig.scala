@@ -9,6 +9,7 @@ import pureconfig.generic.semiauto._
 case class ApiConfig(store: ValueStoreConfig)
 
 object ApiConfig {
+
   import io.findify.featury.values.ValueStoreConfig._
   implicit val configReader = deriveReader[ApiConfig]
 
