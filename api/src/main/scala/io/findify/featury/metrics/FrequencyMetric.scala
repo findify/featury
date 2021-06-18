@@ -6,7 +6,7 @@ import io.prometheus.client.Histogram
 
 case class FrequencyMetric(configs: Map[FeatureKey, FreqEstimatorConfig]) extends FeatureMetric {
   lazy val sizes = for {
-    (key, conf) <- configs if conf.monitorSize
+    (key, conf) <- configs if conf.monitorSize.getOrElse(false)
   } yield {
     key -> Histogram
       .build(s"featury_${key.ns.value}_${key.scope.value}_${key.feature.value}_size", "size of map")

@@ -14,7 +14,7 @@ sealed trait FeatureConfig {
   def name: FeatureName
   def ttl: FiniteDuration
   def refresh: FiniteDuration
-  def monitorLag: Boolean
+  def monitorLag: Option[Boolean]
   def fqdn = s"${ns.value}.${scope.value}.${name.value}"
 }
 
@@ -39,7 +39,7 @@ object FeatureConfig {
       ttl: FiniteDuration = 365.days,
       refresh: FiniteDuration = 1.hour,
       monitorValues: Option[MonitorValuesConfig] = None,
-      monitorLag: Boolean = false
+      monitorLag: Option[Boolean] = None
   ) extends FeatureConfig
 
   case class ScalarConfig(
@@ -49,7 +49,7 @@ object FeatureConfig {
       ttl: FiniteDuration = 365.days,
       refresh: FiniteDuration = 1.hour,
       monitorValues: Option[MonitorValuesConfig] = None,
-      monitorLag: Boolean = false
+      monitorLag: Option[Boolean] = None
   ) extends FeatureConfig
 
   case class MapConfig(
@@ -58,9 +58,9 @@ object FeatureConfig {
       name: FeatureName,
       ttl: FiniteDuration = 365.days,
       refresh: FiniteDuration = 1.hour,
-      monitorLag: Boolean = false,
+      monitorLag: Option[Boolean] = None,
       monitorValues: Option[MonitorValuesConfig] = None,
-      monitorSize: Boolean = false
+      monitorSize: Option[Boolean] = None
   ) extends FeatureConfig
 
   case class BoundedListConfig(
@@ -71,8 +71,8 @@ object FeatureConfig {
       duration: FiniteDuration = Long.MaxValue.nanos,
       ttl: FiniteDuration = 365.days,
       refresh: FiniteDuration = 1.hour,
-      monitorLag: Boolean = false,
-      monitorSize: Boolean = false
+      monitorLag: Option[Boolean] = None,
+      monitorSize: Option[Boolean] = None
   ) extends FeatureConfig
 
   case class FreqEstimatorConfig(
@@ -83,8 +83,8 @@ object FeatureConfig {
       sampleRate: Int,
       ttl: FiniteDuration = 365.days,
       refresh: FiniteDuration = 1.hour,
-      monitorLag: Boolean = false,
-      monitorSize: Boolean = false
+      monitorLag: Option[Boolean] = None,
+      monitorSize: Option[Boolean] = None
   ) extends FeatureConfig
 
   case class PeriodRange(startOffset: Int, endOffset: Int)
@@ -96,7 +96,7 @@ object FeatureConfig {
       sumPeriodRanges: List[PeriodRange],
       ttl: FiniteDuration = 365.days,
       refresh: FiniteDuration = 1.hour,
-      monitorLag: Boolean = false,
+      monitorLag: Option[Boolean] = None,
       monitorValues: Option[MonitorValuesConfig] = None
   ) extends FeatureConfig {
     val periods: List[Int]   = (sumPeriodRanges.map(_.startOffset) ++ sumPeriodRanges.map(_.endOffset)).sorted
@@ -113,7 +113,7 @@ object FeatureConfig {
       percentiles: List[Int],
       ttl: FiniteDuration = 365.days,
       refresh: FiniteDuration = 1.hour,
-      monitorLag: Boolean = false,
+      monitorLag: Option[Boolean] = None,
       monitorValues: Option[MonitorValuesConfig] = None
   ) extends FeatureConfig
 

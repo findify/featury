@@ -24,7 +24,7 @@ class SchemaTest extends AnyFlatSpec with Matchers {
         |features:
         |  - type: scalar
         |    ns: dev
-        |    group: product
+        |    scope: product
         |    name: title
         |    ttl: '1 day'
         |    refresh: '0 second'""".stripMargin

@@ -22,7 +22,7 @@ class MetricsApiTest extends AnyFlatSpec with Matchers {
         scope = key.scope,
         name = key.name,
         monitorValues = Some(MonitorValuesConfig(0, 1, 10)),
-        monitorLag = true
+        monitorLag = Some(true)
       )
     )
     val metrics = MetricsApi(schema)

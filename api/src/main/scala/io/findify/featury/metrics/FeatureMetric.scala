@@ -16,7 +16,7 @@ trait FeatureMetric {
   val LAG_BUCKETS = List(0.01, 0.05, 0.1, 0.2, 0.5, 0.75, 0.9, 1.0, 1.1, 1.2, 1.5, 2.0, 4.0, 10.0, 20.0)
 
   lazy val lags = for {
-    (key, conf) <- configs if conf.monitorLag
+    (key, conf) <- configs if conf.monitorLag.getOrElse(false)
   } yield {
     val buckets = LAG_BUCKETS.map(lag => conf.refresh.toSeconds * lag)
     key -> Histogram
