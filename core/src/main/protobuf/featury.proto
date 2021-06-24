@@ -12,6 +12,7 @@ option (scalapb.options) = {
 };
 
 message Key {
+    option (scalapb.message).companion_extends = "io.findify.featury.model.KeyCompanionOps";
     option (scalapb.message).companion_extends = "io.findify.featury.model.json.KeyJson";
     message Namespace {
         option (scalapb.message).extends = "AnyVal";

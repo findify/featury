@@ -10,10 +10,9 @@ import org.apache.flink.streaming.api.scala.extensions._
 object FeaturyFlow {
   import io.findify.featury.flink.util.StreamName._
 
-  def join[T](values: DataStream[FeatureValue], events: DataStream[T], scopes: List[Scope])(implicit
-      j: Join[T],
+  def join[T](values: DataStream[FeatureValue], events: DataStream[T], scopes: List[Scope], by: Join[T])(implicit
       ti: TypeInformation[T],
-      ki: TypeInformation[ScopeKey],
+      ki: TypeInformation[Option[ScopeKey]],
       si: TypeInformation[String],
       fvi: TypeInformation[FeatureValue]
   ): DataStream[T] =
@@ -22,10 +21,10 @@ object FeaturyFlow {
       case head :: tail =>
         val result = events
           .connect(values)
-          .keyBy[ScopeKey](t => j.scopedKey(t, head), t => ScopeKey(t.key))
-          .process(new FeatureJoinFunction[T]())
-          .id(s"join-$head")
-        join(values, result, tail)
+          .keyBy[Option[ScopeKey]](t => by.scopedKey(t, head), t => Some(ScopeKey(t.key)))
+          .process(new FeatureJoinFunction[T](by))
+          .id(s"join-${head.value}")
+        join(values, result, tail, by)
 
     }
 

@@ -6,6 +6,7 @@ import io.findify.featury.model._
 import io.prometheus.client.{CollectorRegistry, Counter, Gauge, Histogram, Summary}
 import io.prometheus.client.exporter.common.TextFormat
 import org.http4s.HttpRoutes
+import org.http4s.Uri.Path.Segment
 import org.http4s.dsl.io._
 
 import java.io.{ByteArrayOutputStream, OutputStreamWriter}

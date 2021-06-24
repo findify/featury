@@ -5,6 +5,5 @@ import io.findify.featury.model.{FeatureValue, ScopeKey}
 
 trait Join[T] extends Serializable {
   def appendValues(self: T, values: List[FeatureValue]): T
-  def scopedKey(value: T, scope: Scope): ScopeKey
-
+  def scopedKey(value: T, scope: Scope): Option[ScopeKey]
 }
