@@ -13,11 +13,10 @@ import org.apache.flink.util.Collector
 
 import scala.collection.JavaConverters._
 
-class FeatureJoinFunction[T]()(implicit
+class FeatureJoinFunction[T](by: Join[T])(implicit
     ki: TypeInformation[String],
-    vi: TypeInformation[FeatureValue],
-    join: Join[T]
-) extends KeyedCoProcessFunction[ScopeKey, T, FeatureValue, T]
+    vi: TypeInformation[FeatureValue]
+) extends KeyedCoProcessFunction[Option[ScopeKey], T, FeatureValue, T]
     with CheckpointedFunction {
 
   var lastValues: MapState[String, FeatureValue] = _
@@ -31,25 +30,27 @@ class FeatureJoinFunction[T]()(implicit
 
   override def processElement1(
       value: T,
-      ctx: KeyedCoProcessFunction[ScopeKey, T, FeatureValue, T]#Context,
+      ctx: KeyedCoProcessFunction[Option[ScopeKey], T, FeatureValue, T]#Context,
       out: Collector[T]
   ): Unit = {
-    val values = lastValues.values().asScala.toList
-    if (values.nonEmpty) {
-      out.collect(join.appendValues(value, values))
-    } else {
-      out.collect(value)
+    if (ctx.getCurrentKey.isDefined) {
+      val values = lastValues.values().asScala.toList
+      if (values.nonEmpty) {
+        out.collect(by.appendValues(value, values))
+      } else {
+        out.collect(value)
+      }
     }
-    val br = 1
   }
 
   override def processElement2(
       value: FeatureValue,
-      ctx: KeyedCoProcessFunction[ScopeKey, T, FeatureValue, T]#Context,
+      ctx: KeyedCoProcessFunction[Option[ScopeKey], T, FeatureValue, T]#Context,
       out: Collector[T]
   ): Unit = {
-    lastValues.put(value.key.name.value, value)
-    val br = 1
+    if (ctx.getCurrentKey.isDefined) {
+      lastValues.put(value.key.name.value, value)
+    }
   }
 
 }
