@@ -23,7 +23,7 @@ object CompressedBulkWriter {
       .withRollingPolicy(OnCheckpointRollingPolicy.build())
       .withBucketAssigner(SimpleBucketAssigner(codec))
       .withOutputFileConfig(
-        OutputFileConfig.builder().withPartPrefix(prefix).withPartSuffix(".pb" + compress.ext).build()
+        OutputFileConfig.builder().withPartPrefix(prefix).withPartSuffix(codec.ext + compress.ext).build()
       )
       .build()
   }
