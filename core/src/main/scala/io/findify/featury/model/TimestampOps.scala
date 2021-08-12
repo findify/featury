@@ -1,7 +1,7 @@
 package io.findify.featury.model
 
 import java.time.format.DateTimeFormatter
-import java.time.{Instant, ZoneOffset}
+import java.time.{Instant, LocalDateTime, ZoneOffset}
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.FiniteDuration
 
@@ -27,6 +27,8 @@ trait TimestampOps { this: Timestamp =>
 object TimestampOps {
   trait TimestampCompanion {
     def now = new Timestamp(System.currentTimeMillis())
+    def date(year: Int, month: Int, day: Int, hour: Int, min: Int, sec: Int) =
+      new Timestamp(LocalDateTime.of(year, month, day, hour, min, sec).toInstant(ZoneOffset.UTC).toEpochMilli)
   }
   val format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 }

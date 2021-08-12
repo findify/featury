@@ -15,12 +15,12 @@ import io.findify.featury.model.{
 }
 import io.findify.featury.model.Key.{Id, Tenant}
 import io.findify.featury.model.Write.{Append, PeriodicIncrement}
-import org.apache.flink.api.scala._
+import io.findify.flinkadt.api._
 
 import scala.concurrent.duration._
 
 class FlinkPeriodicCounterTest extends PeriodicCounterSuite with FlinkStreamTest {
-  val k = Key(config.ns, config.group, config.name, Tenant("1"), Id("x1"))
+  val k = Key(config.ns, config.scope, config.name, Tenant("1"), Id("x1"))
 
   override def write(values: List[PeriodicIncrement]): Option[FeatureValue] = {
     val conf = Schema(config.copy(refresh = 0.hour))

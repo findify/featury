@@ -18,6 +18,8 @@ sealed trait Feature[W <: Write, T <: FeatureValue, C <: FeatureConfig, S <: Sta
 object Feature {
   trait ScalarFeature extends Feature[Put, ScalarValue, ScalarConfig, ScalarState]
 
+  trait MapFeature extends Feature[PutTuple, MapValue, MapConfig, MapState]
+
   trait Counter extends Feature[Increment, CounterValue, CounterConfig, CounterState]
 
   trait BoundedList extends Feature[Append, BoundedListValue, BoundedListConfig, BoundedListState]

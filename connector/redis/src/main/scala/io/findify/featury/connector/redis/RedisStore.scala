@@ -1,16 +1,16 @@
-package io.findify.featury.values
+package io.findify.featury.connector.redis
 
 import cats.effect.{IO, Resource}
-import io.findify.featury.config.ApiConfig.RedisClientConfig
+import io.findify.featury.connector.redis.RedisStore.RedisKey
 import io.findify.featury.model.Key.{Id, Namespace, Scope, Tenant}
 import io.findify.featury.model.api.{ReadRequest, ReadResponse}
 import io.findify.featury.model.{FeatureValue, Key}
-import io.findify.featury.values.RedisStore.RedisKey
 import io.findify.featury.values.StoreCodec.DecodingError
+import io.findify.featury.values.ValueStoreConfig.RedisConfig
+import io.findify.featury.values.{FeatureStore, StoreCodec}
 import redis.clients.jedis.Jedis
 
 import java.nio.charset.StandardCharsets
-import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.language.higherKinds
 
@@ -62,6 +62,7 @@ case class RedisStore(client: Jedis, codec: StoreCodec) extends FeatureStore {
         }
     }
 
+  override def close(): Unit = { client.close() }
 }
 
 object RedisStore {
@@ -77,6 +78,6 @@ object RedisStore {
     }
   }
 
-  def makeRedisClient(config: RedisClientConfig): Resource[IO, Jedis] =
+  def makeRedisClient(config: RedisConfig): Resource[IO, Jedis] =
     Resource.make(IO(new Jedis(config.host, config.port)))(client => IO(client.close()))
 }

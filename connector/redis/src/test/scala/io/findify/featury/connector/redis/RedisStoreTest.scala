@@ -1,9 +1,9 @@
-package io.findify.featury.values
+package io.findify.featury.connector.redis
 
 import cats.effect.{IO, Resource}
+import io.findify.featury.StoreTestSuite
+import io.findify.featury.values.FeatureStore
 import io.findify.featury.values.StoreCodec.ProtobufCodec
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
 import redis.clients.jedis.Jedis
 
 class RedisStoreTest extends StoreTestSuite {

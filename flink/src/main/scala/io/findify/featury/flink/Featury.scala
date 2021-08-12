@@ -39,14 +39,17 @@ object Featury {
     * @return a stream of original session events, but with corresponsing feature values attached.
     */
   def join[T](values: DataStream[FeatureValue], events: DataStream[T], scopes: List[Scope], by: Join[T])(implicit
-      ti: TypeInformation[T]
+      ti: TypeInformation[T],
+      ki: TypeInformation[Option[ScopeKey]],
+      si: TypeInformation[String],
+      fvi: TypeInformation[FeatureValue]
   ): DataStream[T] =
     scopes match {
       case Nil => events
       case head :: tail =>
         val result = events
           .connect(values)
-          .keyBy[ScopeKey](t => by.key(t, head), t => ScopeKey(t.key))
+          .keyBy[Option[ScopeKey]](t => by.key(t, head), t => Some(ScopeKey(t.key)))
           .process(new FeatureJoinFunction[T](by))
           .id(s"join-$head")
         join(values, result, tail, by)
@@ -60,7 +63,17 @@ object Featury {
     * @param schema
     * @return
     */
-  def process(stream: DataStream[Write], schema: Schema): DataStream[FeatureValue] = {
+  def process(stream: DataStream[Write], schema: Schema)(implicit
+      ki: TypeInformation[Key],
+      fvi: TypeInformation[FeatureValue],
+      longTI: TypeInformation[Long],
+      intTI: TypeInformation[Int],
+      doubleTI: TypeInformation[Double],
+      tvTI: TypeInformation[TimeValue],
+      stringTI: TypeInformation[String],
+      scalarTI: TypeInformation[Scalar],
+      stateTI: TypeInformation[State]
+  ): DataStream[FeatureValue] = {
     stream
       .assignTimestampsAndWatermarks(
         WatermarkStrategy

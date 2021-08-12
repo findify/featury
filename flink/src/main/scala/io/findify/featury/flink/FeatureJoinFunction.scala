@@ -26,7 +26,7 @@ import scala.collection.JavaConverters._
 class FeatureJoinFunction[T](join: Join[T])(implicit
     ki: TypeInformation[String],
     vi: TypeInformation[FeatureValue]
-) extends KeyedCoProcessFunction[ScopeKey, T, FeatureValue, T]
+) extends KeyedCoProcessFunction[Option[ScopeKey], T, FeatureValue, T]
     with CheckpointedFunction {
 
   // to keep track of the latest feature value.
@@ -43,21 +43,25 @@ class FeatureJoinFunction[T](join: Join[T])(implicit
 
   override def processElement1(
       value: T,
-      ctx: KeyedCoProcessFunction[ScopeKey, T, FeatureValue, T]#Context,
+      ctx: KeyedCoProcessFunction[Option[ScopeKey], T, FeatureValue, T]#Context,
       out: Collector[T]
   ): Unit = {
-    // just emit all the features we have for current timestamp for this ScopeKey
-    val values = lastValues.values().asScala.toList
-    out.collect(join.join(value, values))
+    if (ctx.getCurrentKey.isDefined) {
+      // just emit all the features we have for current timestamp for this ScopeKey
+      val values = lastValues.values().asScala.toList
+      out.collect(join.join(value, values))
+    }
   }
 
   override def processElement2(
       value: FeatureValue,
-      ctx: KeyedCoProcessFunction[ScopeKey, T, FeatureValue, T]#Context,
+      ctx: KeyedCoProcessFunction[Option[ScopeKey], T, FeatureValue, T]#Context,
       out: Collector[T]
   ): Unit = {
     // replace previous feature value by a new one
-    lastValues.put(value.key.name.value, value)
+    if (ctx.getCurrentKey.isDefined) {
+      lastValues.put(value.key.name.value, value)
+    }
   }
 
 }

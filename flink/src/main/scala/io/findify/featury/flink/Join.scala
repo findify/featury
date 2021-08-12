@@ -24,9 +24,9 @@ trait Join[T] extends Serializable {
   /** build the left part join key: we need to know things like namespace, scope and so on,
     * which is unclear how it's defined in the type L
     * @param left the left part
-    * @param scope current scope
+    * @param scope current scope, and it can be empty
     * @return
     */
-  def key(left: T, scope: Scope): ScopeKey
+  def key(left: T, scope: Scope): Option[ScopeKey]
 
 }

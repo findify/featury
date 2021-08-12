@@ -1,6 +1,13 @@
 package io.findify.featury.flink
 
-import io.findify.featury.flink.FeatureJoinTest.{MerchantScope, ProductLine, ProductScope, SearchScope, UserScope}
+import io.findify.featury.flink.FeatureJoinTest.{
+  MerchantScope,
+  ProductLine,
+  ProductScope,
+  SearchScope,
+  UserScope,
+  productJoin
+}
 import io.findify.featury.model.FeatureConfig.{CounterConfig, ScalarConfig}
 import io.findify.featury.model.Key.{FeatureName, Namespace, Scope}
 import io.findify.featury.model.{
@@ -18,7 +25,7 @@ import io.findify.featury.model.Write.{Increment, Put}
 import io.findify.featury.utils.TestKey
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import org.apache.flink.api.scala._
+import io.findify.flinkadt.api._
 
 import scala.concurrent.duration._
 
@@ -98,12 +105,13 @@ object FeatureJoinTest {
     override def join(self: ProductLine, values: List[FeatureValue]): ProductLine =
       self.copy(values = values ++ self.values)
 
-    override def key(value: ProductLine, scope: Scope): ScopeKey = scope match {
+    override def key(value: ProductLine, scope: Scope): Option[ScopeKey] = scope match {
+
       case MerchantScope => ScopeKey.make("dev", "merchant", "1", value.merchant)
       case ProductScope  => ScopeKey.make("dev", "product", "1", value.product)
       case SearchScope   => ScopeKey.make("dev", "search", "1", value.search)
       case UserScope     => ScopeKey.make("dev", "user", "1", value.search)
-      case _             => ???
+      case _             => None
     }
   }
 

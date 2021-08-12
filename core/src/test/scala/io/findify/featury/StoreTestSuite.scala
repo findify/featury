@@ -1,4 +1,4 @@
-package io.findify.featury.values
+package io.findify.featury
 
 import cats.effect.unsafe.implicits.global
 import cats.effect.{IO, Resource}
@@ -6,6 +6,7 @@ import io.findify.featury.model.Key.{FeatureName, Id}
 import io.findify.featury.model.api.{ReadRequest, ReadResponse}
 import io.findify.featury.model.{SString, ScalarValue, Timestamp}
 import io.findify.featury.utils.TestKey
+import io.findify.featury.values.FeatureStore
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{BeforeAndAfterAll, Suite}
@@ -46,7 +47,7 @@ trait StoreTestSuite extends AnyFlatSpec with BeforeAndAfterAll with Matchers { 
     val result = store
       .read(ReadRequest(k.ns, k.scope, k.tenant, List(value1.key.name, value2.key.name), List(k.id)))
       .unsafeRunSync()
-    result shouldBe ReadResponse(List(value2, value1))
+    result.features.toSet shouldBe Set(value2, value1)
   }
 
   it should "overwrite values" in {

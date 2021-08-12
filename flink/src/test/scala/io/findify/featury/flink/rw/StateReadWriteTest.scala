@@ -19,7 +19,7 @@ import org.apache.flink.api.common.eventtime.WatermarkStrategy
 import org.apache.flink.core.fs.Path
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import org.apache.flink.api.scala._
+import io.findify.flinkadt.api._
 
 class StateReadWriteTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
 

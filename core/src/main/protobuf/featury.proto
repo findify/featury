@@ -12,6 +12,7 @@ option (scalapb.options) = {
 };
 
 message Key {
+    option (scalapb.message).companion_extends = "io.findify.featury.model.KeyCompanionOps";
     option (scalapb.message).companion_extends = "io.findify.featury.model.json.KeyJson";
     option (scalapb.message).extends = "io.findify.featury.model.KeyOps";
     message Namespace {
@@ -83,6 +84,11 @@ message NumStatsValue {
     map<int32, double> quantiles = 5;
 }
 
+message MapValue {
+    required Key key = 1;
+    required Timestamp ts = 2;
+    map<string,Scalar> values = 3;
+}
 
 message PeriodicCounterValue {
     message PeriodicValue {
@@ -122,6 +128,7 @@ message FeatureValue {
         PeriodicCounterValue periodicCounterValue = 4;
         FrequencyValue frequencyValue = 5;
         BoundedListValue boundedListValue = 6;
+        MapValue mapValue = 7;
     }
 }
 
@@ -135,6 +142,12 @@ message CounterState {
     required Key key = 1;
     required Timestamp ts = 2;
     required int64 value = 3;
+}
+
+message MapState {
+    required Key key = 1;
+    required Timestamp ts = 2;
+    map<string,Scalar> values = 3;
 }
 
 message PeriodicCounterState {
@@ -174,6 +187,7 @@ message State {
         BoundedListState boundedListState = 4;
         FrequencyState frequencyState = 5;
         StatsState statsState = 6;
+        MapState mapState = 7;
     }
 }
 
