@@ -11,7 +11,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.apache.flink.core.fs.Path
 import io.findify.flinkadt.api._
-
+import io.findify.featury.model.json.FeatureValueJson._
+import io.circe.parser._
 import scala.language.higherKinds
 import scala.concurrent.duration._
 
@@ -32,6 +33,24 @@ class FeatureValuesReadWriteTest extends AnyFlatSpec with Matchers with FlinkStr
       .sinkTo(Featury.writeFeatures(new Path(path.toString()), Compress.ZstdCompression(3)))
     env.execute()
     path.children.isEmpty shouldBe false
+  }
+
+  it should "write events to files in json" in {
+    env
+      .fromCollection[FeatureValue](items)
+      .sinkTo(
+        Featury.writeFeatures(new Path(path.toString()), Compress.NoCompression, BulkCodec.featureValueJsonCodec)
+      )
+    env.execute()
+    val decoded = for {
+      child <- path.listRecursively.filterNot(_.isDirectory).toList
+      line  <- child.lineIterator.toList
+      value <- decode[FeatureValue](line).toOption
+    } yield {
+      value
+    }
+    decoded should contain theSameElementsAs items
+    path.listRecursively.filterNot(_.isDirectory).toList.forall(_.name.endsWith(".jsonl")) shouldBe true
   }
 
   it should "read events from files" in {

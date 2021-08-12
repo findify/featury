@@ -23,6 +23,11 @@ trait BulkCodec[T] extends Serializable {
     */
   def bucket(value: T): String
 
+  /** Suffix to add to the file. Like ".json".
+    * @return
+    */
+  def ext: String
+
   /** Write item to a stream
     * @param value
     * @param stream
@@ -38,6 +43,7 @@ trait BulkCodec[T] extends Serializable {
 
 object BulkCodec {
   lazy val featureValueProtobufCodec = new BulkCodec[FeatureValue] {
+    override def ext: String = ".pb"
     override def read(stream: InputStream): Option[FeatureValue] =
       FeatureValueMessage.parseDelimitedFrom(stream).flatMap(_.toFeatureValue)
     override def write(value: FeatureValue, stream: OutputStream): Unit = value.asMessage.writeDelimitedTo(stream)
@@ -46,6 +52,8 @@ object BulkCodec {
 
   lazy val featureValueJsonCodec = new BulkCodec[FeatureValue] {
     import io.findify.featury.model.json.FeatureValueJson._
+
+    override def ext: String = ".jsonl"
     override def read(stream: InputStream): Option[FeatureValue] = {
       val scanner = new Scanner(stream)
       val json    = scanner.nextLine()
@@ -53,13 +61,14 @@ object BulkCodec {
     }
 
     override def write(value: FeatureValue, stream: OutputStream): Unit = {
-      val json = value.asJson.noSpaces
+      val json = value.asJson.noSpaces + "\n"
       stream.write(json.getBytes())
     }
     override def bucket(value: FeatureValue): String = value.key.fqdn
   }
 
   lazy val stateProtobufCodec = new BulkCodec[State] {
+    override def ext: String                                     = ".pb"
     override def bucket(value: State): String                    = value.key.fqdn
     override def write(value: State, stream: OutputStream): Unit = value.asMessage.writeDelimitedTo(stream)
     override def read(stream: InputStream): Option[State]        = StateMessage.parseDelimitedFrom(stream).flatMap(_.toState)
