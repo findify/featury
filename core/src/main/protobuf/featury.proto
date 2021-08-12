@@ -13,6 +13,7 @@ option (scalapb.options) = {
 
 message Key {
     option (scalapb.message).companion_extends = "io.findify.featury.model.json.KeyJson";
+    option (scalapb.message).extends = "io.findify.featury.model.KeyOps";
     message Namespace {
         option (scalapb.message).extends = "AnyVal";
         required string value = 1;
@@ -165,6 +166,7 @@ message StatsState {
 }
 
 message State {
+    option (scalapb.message).sealed_oneof_extends = "io.findify.featury.model.StateOps";
     oneof sealed_value_optional {
         ScalarState scalarState = 1;
         CounterState counterState = 2;

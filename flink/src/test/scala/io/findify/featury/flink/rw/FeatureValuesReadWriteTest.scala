@@ -1,7 +1,7 @@
 package io.findify.featury.flink.rw
 
 import better.files.File
-import io.findify.featury.flink.FlinkStreamTest
+import io.findify.featury.flink.{Featury, FlinkStreamTest}
 import io.findify.featury.flink.util.Compress
 import io.findify.featury.model.FeatureValueMessage.SealedValueOptional
 import io.findify.featury.model.{FeatureValue, FeatureValueMessage, Key, SString, ScalarValue, Timestamp}
@@ -11,10 +11,11 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.apache.flink.core.fs.Path
 import org.apache.flink.api.scala._
+
 import scala.language.higherKinds
 import scala.concurrent.duration._
 
-class FeatureValuesTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
+class FeatureValuesReadWriteTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
 
   val path = File.newTemporaryDirectory("valuesink").deleteOnExit()
   val k    = TestKey(id = "p1", fname = "f1")
@@ -28,8 +29,7 @@ class FeatureValuesTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
   it should "write events to files" in {
     env
       .fromCollection[FeatureValue](items)
-      .map(_.asMessage)
-      .sinkTo(FeatureValues.writeFile(new Path(path.toString()), Compress.ZstdCompression(3)))
+      .sinkTo(Featury.writeFeatures(new Path(path.toString()), Compress.ZstdCompression(3)))
     env.execute()
     path.children.isEmpty shouldBe false
   }
@@ -37,11 +37,10 @@ class FeatureValuesTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
   it should "read events from files" in {
     val read = env
       .fromSource(
-        FeatureValues.readFile(new Path(path.toString()), Compress.ZstdCompression(3)),
+        Featury.readFeatures(new Path(path.toString()), Compress.ZstdCompression(3)),
         WatermarkStrategy.noWatermarks(),
         "read"
       )
-      .flatMap(m => m.toFeatureValue.toList)
       .executeAndCollect(100)
     read shouldBe items
   }

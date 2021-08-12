@@ -1,7 +1,7 @@
 package io.findify.featury.flink.feature
 
 import io.findify.featury.features.CounterSuite
-import io.findify.featury.flink.{FeaturyFlow, FlinkStreamTest}
+import io.findify.featury.flink.{Featury, FlinkStreamTest}
 import io.findify.featury.model.FeatureConfig.{CounterConfig, ScalarConfig}
 import io.findify.featury.model.{CounterValue, FeatureKey, FeatureValue, Key, SString, Schema, Timestamp, Write}
 import io.findify.featury.model.Key.{FeatureName, Scope, Id, Namespace, Tenant}
@@ -28,7 +28,7 @@ class FlinkCounterTest extends CounterSuite with FlinkStreamTest {
   it should "handle type mismatch" in {
     val conf   = Schema(config.copy(refresh = 1.hour))
     val values = List(Append(k, SString("fff"), now))
-    val result = FeaturyFlow.process(env.fromCollection[Write](values), conf).executeAndCollect(100)
+    val result = Featury.process(env.fromCollection[Write](values), conf).executeAndCollect(100)
     result shouldBe Nil
   }
 
@@ -38,7 +38,7 @@ class FlinkCounterTest extends CounterSuite with FlinkStreamTest {
   }
 
   def writeIncrements(conf: Schema, values: List[Increment]): List[FeatureValue] = {
-    FeaturyFlow.process(env.fromCollection[Write](values), conf).executeAndCollect(100)
+    Featury.process(env.fromCollection[Write](values), conf).executeAndCollect(100)
   }
 
 }

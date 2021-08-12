@@ -46,6 +46,9 @@ import org.apache.flink.streaming.api.functions.KeyedProcessFunction
 import org.apache.flink.util.Collector
 import org.apache.flink.streaming.api.scala._
 
+/** A function to map interactions to features defined in schema. See Featury.process for overview.
+  * @param schema
+  */
 class FeatureProcessFunction(schema: Schema)
     extends KeyedProcessFunction[Key, Write, FeatureValue]
     with CheckpointedFunction {
