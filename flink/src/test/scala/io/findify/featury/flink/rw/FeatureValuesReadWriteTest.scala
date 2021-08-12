@@ -18,24 +18,33 @@ import scala.concurrent.duration._
 
 class FeatureValuesReadWriteTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
 
-  val path = File.newTemporaryDirectory("valuesink").deleteOnExit()
-  val k    = TestKey(id = "p1", fname = "f1")
-  val now  = Timestamp.now
+  val k   = TestKey(id = "p1", fname = "f1")
+  val now = Timestamp.now
   val items = List[FeatureValue](
     ScalarValue(k, now.minus(2.minute), SString("foo")),
     ScalarValue(k, now.minus(1.minute), SString("bar")),
     ScalarValue(k, now, SString("baz"))
   )
 
-  it should "write events to files" in {
+  it should "write/read events to files" in {
+    val path = File.newTemporaryDirectory("valuesink").deleteOnExit()
     env
       .fromCollection[FeatureValue](items)
       .sinkTo(Featury.writeFeatures(new Path(path.toString()), Compress.ZstdCompression(3)))
     env.execute()
     path.children.isEmpty shouldBe false
+    val read = env
+      .fromSource(
+        Featury.readFeatures(new Path(path.toString()), Compress.ZstdCompression(3)),
+        WatermarkStrategy.noWatermarks(),
+        "read"
+      )
+      .executeAndCollect(100)
+    read shouldBe items
   }
 
   it should "write events to files in json" in {
+    val path = File.newTemporaryDirectory("valuesink").deleteOnExit()
     env
       .fromCollection[FeatureValue](items)
       .sinkTo(
@@ -51,17 +60,6 @@ class FeatureValuesReadWriteTest extends AnyFlatSpec with Matchers with FlinkStr
     }
     decoded should contain theSameElementsAs items
     path.listRecursively.filterNot(_.isDirectory).toList.forall(_.name.endsWith(".jsonl")) shouldBe true
-  }
-
-  it should "read events from files" in {
-    val read = env
-      .fromSource(
-        Featury.readFeatures(new Path(path.toString()), Compress.ZstdCompression(3)),
-        WatermarkStrategy.noWatermarks(),
-        "read"
-      )
-      .executeAndCollect(100)
-    read shouldBe items
   }
 
 }
