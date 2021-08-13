@@ -8,9 +8,11 @@ import org.apache.flink.connector.file.src.reader.StreamFormat
 import org.apache.flink.core.fs.{FSDataInputStream, Path}
 import scalapb.GeneratedMessage
 
-import java.io.InputStream
+import java.io.{BufferedInputStream, InputStream}
 
 object CompressedBulkReader {
+  val READ_BUFFER_SIZE = 1024 * 1024
+
   def readFile[T >: Null](path: Path, compress: Compress, codec: BulkCodec[T])(implicit ti: TypeInformation[T]) = {
     FileSource.forRecordStreamFormat[T](CompressedStreamFormat(ti, compress, codec), path).build()
   }
@@ -33,7 +35,7 @@ object CompressedBulkReader {
         fileLen: Long,
         splitEnd: Long
     ): StreamFormat.Reader[T] = {
-      val compStream = compress.read(stream)
+      val compStream = new BufferedInputStream(compress.read(stream), READ_BUFFER_SIZE)
       compStream.skip(restoredOffset)
       CompressedStreamFormatReader(compStream, codec)
     }
