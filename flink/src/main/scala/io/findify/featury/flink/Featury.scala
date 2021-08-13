@@ -13,6 +13,8 @@ import org.apache.flink.connector.file.sink.FileSink
 import org.apache.flink.connector.file.src.FileSource
 import org.apache.flink.core.fs.Path
 
+import scala.concurrent.duration.Duration
+
 /** Featury Flink API
   */
 object Featury {
@@ -63,7 +65,7 @@ object Featury {
     * @param schema
     * @return
     */
-  def process(stream: DataStream[Write], schema: Schema)(implicit
+  def process(stream: DataStream[Write], schema: Schema, lag: Duration)(implicit
       ki: TypeInformation[Key],
       fvi: TypeInformation[FeatureValue],
       longTI: TypeInformation[Long],
@@ -77,7 +79,7 @@ object Featury {
     stream
       .assignTimestampsAndWatermarks(
         WatermarkStrategy
-          .forMonotonousTimestamps()
+          .forBoundedOutOfOrderness(java.time.Duration.ofNanos(lag.toNanos))
           .withTimestampAssigner(new SerializableTimestampAssigner[Write] {
             override def extractTimestamp(element: Write, recordTimestamp: Long): Long = element.ts.ts
           })

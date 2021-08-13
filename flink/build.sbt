@@ -3,7 +3,7 @@ resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repos
 
 name := "featury-flink"
 
-lazy val flinkVersion = "1.13.1"
+lazy val flinkVersion = "1.13.2"
 
 libraryDependencies ++= Seq(
   "org.apache.flink" %% "flink-scala"           % flinkVersion % "provided",

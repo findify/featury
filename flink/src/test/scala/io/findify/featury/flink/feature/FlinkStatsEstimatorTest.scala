@@ -15,7 +15,7 @@ class FlinkStatsEstimatorTest extends StatsEstimatorSuite with FlinkStreamTest {
 
   override def write(values: List[PutStatSample]): Option[FeatureValue] = {
     val conf = Schema(config.copy(refresh = 0.hour))
-    Featury.process(env.fromCollection[Write](values), conf).executeAndCollect(100).lastOption
+    Featury.process(env.fromCollection[Write](values), conf, 10.seconds).executeAndCollect(100).lastOption
   }
 
 }
