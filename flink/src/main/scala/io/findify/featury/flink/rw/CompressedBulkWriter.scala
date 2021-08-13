@@ -12,6 +12,8 @@ import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.
 import java.io.BufferedOutputStream
 
 object CompressedBulkWriter {
+  val WRITE_BUFFER_SIZE = 1024 * 1024
+
   def writeFile[T](
       path: Path,
       compress: Compress,
@@ -35,7 +37,9 @@ object CompressedBulkWriter {
       override def finish(): Unit               = out.close()
     }
     override def create(out: FSDataOutputStream): BulkWriter[T] =
-      new CompressedBulkWriter(new BufferedOutputStream(compress.write(new NoCloseOutputStream(out)), 10 * 1024))
+      new CompressedBulkWriter(
+        new BufferedOutputStream(compress.write(new NoCloseOutputStream(out)), WRITE_BUFFER_SIZE)
+      )
   }
 
   case class SimpleBucketAssigner[T](codec: BulkCodec[T]) extends BucketAssigner[T, String] {
