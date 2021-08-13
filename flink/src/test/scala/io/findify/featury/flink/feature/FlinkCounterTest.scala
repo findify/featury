@@ -28,7 +28,7 @@ class FlinkCounterTest extends CounterSuite with FlinkStreamTest {
   it should "handle type mismatch" in {
     val conf   = Schema(config.copy(refresh = 1.hour))
     val values = List(Append(k, SString("fff"), now))
-    val result = Featury.process(env.fromCollection[Write](values), conf).executeAndCollect(100)
+    val result = Featury.process(env.fromCollection[Write](values), conf, 10.seconds).executeAndCollect(100)
     result shouldBe Nil
   }
 
@@ -38,7 +38,7 @@ class FlinkCounterTest extends CounterSuite with FlinkStreamTest {
   }
 
   def writeIncrements(conf: Schema, values: List[Increment]): List[FeatureValue] = {
-    Featury.process(env.fromCollection[Write](values), conf).executeAndCollect(100)
+    Featury.process(env.fromCollection[Write](values), conf, 10.seconds).executeAndCollect(100)
   }
 
 }

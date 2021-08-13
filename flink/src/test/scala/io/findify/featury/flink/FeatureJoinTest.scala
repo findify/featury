@@ -26,6 +26,7 @@ import io.findify.featury.utils.TestKey
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import io.findify.flinkadt.api._
+import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 
 import scala.concurrent.duration._
 
@@ -33,10 +34,17 @@ class FeatureJoinTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
   val now = Timestamp.now
 
   it should "join with latest value" in {
-    val dev      = Namespace("dev")
-    val session  = ProductLine(merchant = "1", search = "q1", product = "p1", user = "u1", now)
-    val sessions = env.fromCollection(List(session)).assignAscendingTimestamps(_.ts.ts)
-    sessions.executeAndCollect(10)
+    val dev     = Namespace("dev")
+    val session = ProductLine(merchant = "1", search = "q1", product = "p1", user = "u1", now)
+    val sessions = env
+      .fromCollection(List(session))
+      .assignTimestampsAndWatermarks(
+        WatermarkStrategy
+          .forBoundedOutOfOrderness(java.time.Duration.ofSeconds(10))
+          .withTimestampAssigner(new SerializableTimestampAssigner[ProductLine] {
+            override def extractTimestamp(element: ProductLine, recordTimestamp: Long): Long = element.ts.ts
+          })
+      )
     val schema = Schema(
       List(
         ScalarConfig(dev, MerchantScope, FeatureName("lang"), refresh = 0.seconds),
@@ -60,9 +68,8 @@ class FeatureJoinTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
           Increment(TestKey(group = "product", fname = "clicks", id = "p1"), now.minus(5.minute), 1)
         )
       )
-      .assignAscendingTimestamps(_.ts.ts)
 
-    val features = Featury.process(writes, schema)
+    val features = Featury.process(writes, schema, 10.seconds)
 
     val joined =
       Featury.join[ProductLine](

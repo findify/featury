@@ -16,7 +16,7 @@ class FlinkBoundedListTest extends BoundedListSuite with FlinkStreamTest {
   override def write(values: List[Append]): Option[FeatureValue] = {
     val conf = Schema(List(config.copy(refresh = 0.hour)))
     Featury
-      .process(env.fromCollection[Write](values), conf)
+      .process(env.fromCollection[Write](values), conf, 10.seconds)
       .executeAndCollect(100)
       .lastOption
   }
