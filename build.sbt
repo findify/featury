@@ -2,11 +2,13 @@ import Deps._
 
 name := "featury"
 
-version := "0.1.2"
+lazy val featuryVersion = "0.1.3-M1-SNAPSHOT"
+
+version := featuryVersion
 
 lazy val shared = Seq(
   scalaVersion := "2.12.14",
-  version := "0.1.2",
+  version := featuryVersion,
   organization := "io.findify"
 )
 
