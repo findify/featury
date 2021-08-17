@@ -13,6 +13,7 @@ import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction
 import org.apache.flink.streaming.api.scala.OutputTag
 import org.apache.flink.util.Collector
+import org.slf4j.LoggerFactory
 
 /** A function to map interactions to features defined in schema. See Featury.process for overview.
   * @param schema
@@ -27,6 +28,8 @@ class FeatureProcessFunction(schema: Schema)(implicit
     stateTI: TypeInformation[State]
 ) extends KeyedProcessFunction[Key, Write, FeatureValue]
     with CheckpointedFunction {
+
+  private val LOG = LoggerFactory.getLogger(classOf[FeatureProcessFunction])
 
   @transient var features: Map[FeatureKey, Feature[_ <: Write, _ <: FeatureValue, _ <: FeatureConfig, _ <: State]] = _
   @transient var updated: ValueState[Long]                                                                         = _
@@ -55,7 +58,7 @@ class FeatureProcessFunction(schema: Schema)(implicit
   ): Unit = {
     features.get(FeatureKey(ctx.getCurrentKey)) match {
       case None =>
-      // wtf?
+        LOG.warn(s"no features configured for a write $value")
       case Some(feature) =>
         putWrite(feature, value)
         val lastUpdate = Option(updated.value()).map(ts => Timestamp(ts)).getOrElse(Timestamp(0L))
@@ -80,7 +83,8 @@ class FeatureProcessFunction(schema: Schema)(implicit
       case (f: ScalarFeature, w: Put)                 => f.put(w)
       case (f: StatsEstimator, w: PutStatSample)      => f.put(w)
       case (f: MapFeature, w: PutTuple)               => f.put(w)
-      case _                                          => // ignore
+      case (f, w) =>
+        LOG.warn(s"received write $w for a feature $f: type mismatch")
     }
 }
 
