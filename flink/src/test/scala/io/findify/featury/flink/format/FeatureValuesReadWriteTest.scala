@@ -1,20 +1,20 @@
-package io.findify.featury.flink.rw
+package io.findify.featury.flink.format
 
 import better.files.File
+import io.circe.parser._
 import io.findify.featury.flink.{Featury, FlinkStreamTest}
-import io.findify.featury.flink.{FeatureValues, FlinkStreamTest}
 import io.findify.featury.flink.util.Compress
-import io.findify.featury.model.{FeatureValue, FeatureValueMessage, Key, SString, ScalarValue, Timestamp}
+import io.findify.featury.model.json.FeatureValueJson._
+import io.findify.featury.model.{FeatureValue, SString, ScalarValue, Timestamp}
 import io.findify.featury.utils.TestKey
+import io.findify.flinkadt.api._
 import org.apache.flink.api.common.eventtime.WatermarkStrategy
+import org.apache.flink.core.fs.Path
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import org.apache.flink.core.fs.Path
-import io.findify.flinkadt.api._
-import io.findify.featury.model.json.FeatureValueJson._
-import io.circe.parser._
-import scala.language.higherKinds
+
 import scala.concurrent.duration._
+import scala.language.higherKinds
 
 class FeatureValuesReadWriteTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
 
@@ -28,9 +28,12 @@ class FeatureValuesReadWriteTest extends AnyFlatSpec with Matchers with FlinkStr
 
   it should "write/read events to files" in {
     val path = File.newTemporaryDirectory("valuesink").deleteOnExit()
-    env
-      .fromCollection[FeatureValue](items)
-      .sinkTo(Featury.writeFeatures(new Path(path.toString()), Compress.ZstdCompression(3)))
+    Featury.writeFeatures(
+      env.fromCollection[FeatureValue](items),
+      new Path(path.toString()),
+      Compress.ZstdCompression(3)
+    )
+
     env.execute()
     path.children.isEmpty shouldBe false
     val read = env
@@ -45,11 +48,12 @@ class FeatureValuesReadWriteTest extends AnyFlatSpec with Matchers with FlinkStr
 
   it should "write events to files in json" in {
     val path = File.newTemporaryDirectory("valuesink").deleteOnExit()
-    env
-      .fromCollection[FeatureValue](items)
-      .sinkTo(
-        Featury.writeFeatures(new Path(path.toString()), Compress.NoCompression, BulkCodec.featureValueJsonCodec)
-      )
+    Featury.writeFeatures(
+      env.fromCollection[FeatureValue](items),
+      new Path(path.toString()),
+      Compress.NoCompression,
+      BulkCodec.featureValueJsonCodec
+    )
     env.execute()
     val decoded = for {
       child <- path.listRecursively.filterNot(_.isDirectory).toList

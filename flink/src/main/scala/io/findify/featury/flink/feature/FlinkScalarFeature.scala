@@ -1,6 +1,7 @@
 package io.findify.featury.flink.feature
 
 import io.findify.featury.flink.StateTTL
+import io.findify.featury.flink.util.InitContext
 import io.findify.featury.model.Feature.ScalarFeature
 import io.findify.featury.model.FeatureConfig.ScalarConfig
 import io.findify.featury.model.Write.Put
@@ -26,7 +27,7 @@ case class FlinkScalarFeature(config: ScalarConfig, valueState: ValueState[Scala
 
 object FlinkScalarFeature {
 
-  def apply(ctx: KeyedStateStore, config: ScalarConfig)(implicit
+  def apply(ctx: InitContext, config: ScalarConfig)(implicit
       ti: TypeInformation[Scalar]
   ): FlinkScalarFeature = {
     val desc = new ValueStateDescriptor[Scalar](config.fqdn, ti)

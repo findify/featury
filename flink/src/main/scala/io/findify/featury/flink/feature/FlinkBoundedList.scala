@@ -1,6 +1,7 @@
 package io.findify.featury.flink.feature
 
 import io.findify.featury.flink.StateTTL
+import io.findify.featury.flink.util.InitContext
 import io.findify.featury.model.Feature.BoundedList
 import io.findify.featury.model.FeatureConfig.{BoundedListConfig, ScalarConfig}
 import io.findify.featury.model.{BoundedListState, BoundedListValue, Key, Scalar, TimeValue, Timestamp, Write}
@@ -64,7 +65,7 @@ case class FlinkBoundedList(
 }
 
 object FlinkBoundedList {
-  def apply(ctx: KeyedStateStore, config: BoundedListConfig)(implicit
+  def apply(ctx: InitContext, config: BoundedListConfig)(implicit
       ti: TypeInformation[TimeValue],
       tint: TypeInformation[Int],
       tlong: TypeInformation[Long]

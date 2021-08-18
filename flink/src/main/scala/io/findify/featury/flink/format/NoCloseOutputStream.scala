@@ -1,4 +1,4 @@
-package io.findify.featury.flink.rw
+package io.findify.featury.flink.format
 
 import java.io.{FilterOutputStream, OutputStream}
 

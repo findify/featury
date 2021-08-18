@@ -1,6 +1,6 @@
 package io.findify.featury.flink
 
-import io.findify.featury.flink.rw.{BulkCodec, CompressedBulkReader, CompressedBulkWriter}
+import io.findify.featury.flink.format.{BulkCodec, BulkInputFormat, CompressedBulkReader, CompressedBulkWriter}
 import io.findify.featury.flink.util.Compress
 import io.findify.featury.model.Key.Scope
 import io.findify.featury.model.{Schema, ScopeKeyOps, _}
@@ -12,6 +12,7 @@ import org.apache.flink.api.scala._
 import org.apache.flink.connector.file.sink.FileSink
 import org.apache.flink.connector.file.src.FileSource
 import org.apache.flink.core.fs.Path
+import org.apache.flink.streaming.api.datastream.DataStreamSink
 
 import scala.concurrent.duration.Duration
 
@@ -84,12 +85,14 @@ object Featury {
             override def extractTimestamp(element: Write, recordTimestamp: Long): Long = element.ts.ts
           })
       )
+      .id("feature-watermarks")
       .keyingBy(_.key)
       .process(new FeatureProcessFunction(schema))
       .id("feature-process")
   }
 
   /** Write feature values into some path in native format.
+    * @param stream a source of feature values
     * @param path path to write to
     * @param compress should we compress it?
     * @param codec codec to use for writing the binary data. By default it dumps in protobuf format,
@@ -97,14 +100,17 @@ object Featury {
     * @return
     */
   def writeFeatures(
+      stream: DataStream[FeatureValue],
       path: Path,
       compress: Compress,
       codec: BulkCodec[FeatureValue] = BulkCodec.featureValueProtobufCodec
-  ): FileSink[FeatureValue] = CompressedBulkWriter.writeFile(
-    path = path,
-    compress = compress,
-    codec = codec,
-    prefix = "values"
+  ): DataStreamSink[FeatureValue] = stream.sinkTo(
+    CompressedBulkWriter.writeFile(
+      path = path,
+      compress = compress,
+      codec = codec,
+      prefix = "values"
+    )
   )
 
   /** Read feature values from disk. It read recursively from the dir.
@@ -129,20 +135,29 @@ object Featury {
     * @return
     */
   def writeState(
+      stream: DataStream[State],
       path: Path,
       compress: Compress,
       codec: BulkCodec[State] = BulkCodec.stateProtobufCodec
-  ): FileSink[State] =
-    CompressedBulkWriter.writeFile(
-      path = path,
-      compress = compress,
-      codec = codec,
-      prefix = "state"
+  ): DataStreamSink[State] =
+    stream.sinkTo(
+      CompressedBulkWriter.writeFile(
+        path = path,
+        compress = compress,
+        codec = codec,
+        prefix = "state"
+      )
     )
 
-  def readState(path: Path, compress: Compress, codec: BulkCodec[State] = BulkCodec.stateProtobufCodec)(implicit
+  def readState(
+      env: ExecutionEnvironment,
+      path: Path,
+      compress: Compress,
+      codec: BulkCodec[State] = BulkCodec.stateProtobufCodec
+  )(implicit
       ti: TypeInformation[State]
-  ): FileSource[State] =
-    CompressedBulkReader.readFile(path, compress, codec)
+  ): DataSet[State] = {
+    env.readFile(new BulkInputFormat[State](path, codec, compress), path.toString)
+  }
 
 }

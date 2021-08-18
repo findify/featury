@@ -24,6 +24,11 @@ trait FlinkStreamTest extends BeforeAndAfterAll { this: Suite =>
     env
   }
 
+  lazy val batchEnv = {
+    cluster.getTestEnvironment.setAsContext()
+    ExecutionEnvironment.getExecutionEnvironment
+  }
+
   override protected def beforeAll(): Unit = {
     super.beforeAll()
     cluster.before()

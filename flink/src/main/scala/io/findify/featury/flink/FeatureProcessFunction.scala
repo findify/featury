@@ -2,6 +2,7 @@ package io.findify.featury.flink
 
 import io.findify.featury.flink.FeatureProcessFunction.stateTag
 import io.findify.featury.flink.feature._
+import io.findify.featury.flink.util.InitContext.DataStreamContext
 import io.findify.featury.model.Feature._
 import io.findify.featury.model.FeatureConfig._
 import io.findify.featury.model.Write._
@@ -27,26 +28,13 @@ class FeatureProcessFunction(schema: Schema)(implicit
     scalarTI: TypeInformation[Scalar],
     stateTI: TypeInformation[State]
 ) extends KeyedProcessFunction[Key, Write, FeatureValue]
-    with CheckpointedFunction {
+    with CheckpointedFunction
+    with StatefulFeatureFunction {
 
   private val LOG = LoggerFactory.getLogger(classOf[FeatureProcessFunction])
 
-  @transient var features: Map[FeatureKey, Feature[_ <: Write, _ <: FeatureValue, _ <: FeatureConfig, _ <: State]] = _
-  @transient var updated: ValueState[Long]                                                                         = _
-
   override def initializeState(context: FunctionInitializationContext): Unit = {
-    features = schema.configs.map {
-      case (key, c: CounterConfig)         => key -> FlinkCounter(context.getKeyedStateStore, c)
-      case (key, c: PeriodicCounterConfig) => key -> FlinkPeriodicCounter(context.getKeyedStateStore, c)
-      case (key, c: BoundedListConfig)     => key -> FlinkBoundedList(context.getKeyedStateStore, c)
-      case (key, c: FreqEstimatorConfig)   => key -> FlinkFreqEstimator(context.getKeyedStateStore, c)
-      case (key, c: ScalarConfig)          => key -> FlinkScalarFeature(context.getKeyedStateStore, c)
-      case (key, c: StatsEstimatorConfig)  => key -> FlinkStatsEstimator(context.getKeyedStateStore, c)
-      case (key, c: MapConfig)             => key -> FlinkMapFeature(context.getKeyedStateStore, c)
-    }
-    updated = context.getKeyedStateStore.getState(
-      new ValueStateDescriptor[Long]("last-update", implicitly[TypeInformation[Long]])
-    )
+    init(schema, DataStreamContext(context))
   }
 
   override def snapshotState(context: FunctionSnapshotContext): Unit = {}
@@ -56,7 +44,7 @@ class FeatureProcessFunction(schema: Schema)(implicit
       ctx: KeyedProcessFunction[Key, Write, FeatureValue]#Context,
       out: Collector[FeatureValue]
   ): Unit = {
-    features.get(FeatureKey(ctx.getCurrentKey)) match {
+    features.get(FeatureKey(value.key)) match {
       case None =>
         LOG.warn(s"no features configured for a write $value")
       case Some(feature) =>

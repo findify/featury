@@ -1,4 +1,4 @@
-package io.findify.featury.flink.rw
+package io.findify.featury.flink.format
 
 import io.findify.featury.flink.util.Compress
 import org.apache.flink.api.common.serialization.BulkWriter
@@ -6,8 +6,8 @@ import org.apache.flink.connector.file.sink.FileSink
 import org.apache.flink.core.fs.{FSDataOutputStream, Path}
 import org.apache.flink.core.io.SimpleVersionedSerializer
 import org.apache.flink.streaming.api.functions.sink.filesystem.bucketassigners.SimpleVersionedStringSerializer
-import org.apache.flink.streaming.api.functions.sink.filesystem.{BucketAssigner, OutputFileConfig}
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.OnCheckpointRollingPolicy
+import org.apache.flink.streaming.api.functions.sink.filesystem.{BucketAssigner, OutputFileConfig}
 
 import java.io.BufferedOutputStream
 
