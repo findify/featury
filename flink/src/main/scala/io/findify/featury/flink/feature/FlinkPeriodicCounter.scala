@@ -1,6 +1,7 @@
 package io.findify.featury.flink.feature
 
 import io.findify.featury.flink.StateTTL
+import io.findify.featury.flink.util.InitContext
 import io.findify.featury.model.Feature.PeriodicCounter
 import io.findify.featury.model.FeatureConfig.{CounterConfig, PeriodicCounterConfig}
 import io.findify.featury.model.PeriodicCounterState.TimeCounter
@@ -41,7 +42,7 @@ case class FlinkPeriodicCounter(config: PeriodicCounterConfig, counters: MapStat
 }
 
 object FlinkPeriodicCounter {
-  def apply(ctx: KeyedStateStore, config: PeriodicCounterConfig)(implicit
+  def apply(ctx: InitContext, config: PeriodicCounterConfig)(implicit
       ti: TypeInformation[Long]
   ): FlinkPeriodicCounter = {
     val desc = new MapStateDescriptor[Long, Long](config.fqdn, ti, ti)

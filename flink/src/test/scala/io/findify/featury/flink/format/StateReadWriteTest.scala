@@ -1,25 +1,15 @@
-package io.findify.featury.flink.rw
+package io.findify.featury.flink.format
 
 import better.files.File
-import io.findify.featury.flink.{Featury, FlinkStreamTest}
 import io.findify.featury.flink.util.Compress
-import io.findify.featury.model.ScalarMessage.SealedValue.ScalarString
-import io.findify.featury.model.{
-  CounterState,
-  FeatureValue,
-  FrequencyState,
-  SString,
-  ScalarState,
-  State,
-  StatsState,
-  Timestamp
-}
+import io.findify.featury.flink.{Featury, FlinkStreamTest}
+import io.findify.featury.model._
 import io.findify.featury.utils.TestKey
+import io.findify.flinkadt.api._
 import org.apache.flink.api.common.eventtime.WatermarkStrategy
 import org.apache.flink.core.fs.Path
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import io.findify.flinkadt.api._
 
 class StateReadWriteTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
 
@@ -35,21 +25,15 @@ class StateReadWriteTest extends AnyFlatSpec with Matchers with FlinkStreamTest 
   )
 
   it should "write events to files" in {
-    env
-      .fromCollection[State](items)
-      .sinkTo(Featury.writeState(new Path(path.toString()), Compress.ZstdCompression(3)))
+    Featury.writeState(env.fromCollection[State](items), new Path(path.toString()), Compress.ZstdCompression(3))
     env.execute()
     path.children.isEmpty shouldBe false
   }
 
   it should "read events from files" in {
-    val read = env
-      .fromSource(
-        Featury.readState(new Path(path.toString()), Compress.ZstdCompression(3)),
-        WatermarkStrategy.noWatermarks(),
-        "read"
-      )
-      .executeAndCollect(100)
+    val read = Featury
+      .readState(batchEnv, new Path(path.toString()), Compress.ZstdCompression(3), BulkCodec.stateProtobufCodec)
+      .collect()
     read shouldBe items
   }
 

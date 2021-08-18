@@ -1,11 +1,10 @@
-package io.findify.featury.flink.rw
+package io.findify.featury.flink.format
 
-import io.findify.featury.model.{FeatureKey, FeatureValue, FeatureValueMessage, State, StateMessage}
-
-import java.io.{InputStream, InputStreamReader, OutputStream}
 import io.circe.parser._
 import io.circe.syntax._
+import io.findify.featury.model.{FeatureValue, FeatureValueMessage, State, StateMessage}
 
+import java.io.{InputStream, OutputStream}
 import java.util.Scanner
 
 /** A codec describing how to write and read items of type T from disk. There are multiple predefined formats

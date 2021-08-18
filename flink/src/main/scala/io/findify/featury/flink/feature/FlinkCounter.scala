@@ -1,6 +1,7 @@
 package io.findify.featury.flink.feature
 
 import io.findify.featury.flink.StateTTL
+import io.findify.featury.flink.util.InitContext
 import io.findify.featury.model.Feature.Counter
 import io.findify.featury.model.FeatureConfig.CounterConfig
 import io.findify.featury.model.Write.Increment
@@ -26,7 +27,7 @@ case class FlinkCounter(config: CounterConfig, valueState: ValueState[Long]) ext
 }
 
 object FlinkCounter {
-  def apply(ctx: KeyedStateStore, config: CounterConfig)(implicit ti: TypeInformation[Long]): FlinkCounter = {
+  def apply(ctx: InitContext, config: CounterConfig)(implicit ti: TypeInformation[Long]): FlinkCounter = {
     val desc = new ValueStateDescriptor[Long](config.fqdn, ti)
     desc.enableTimeToLive(StateTTL(config.ttl))
     FlinkCounter(config, ctx.getState(desc))

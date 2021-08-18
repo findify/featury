@@ -1,6 +1,7 @@
 package io.findify.featury.flink.feature
 
 import io.findify.featury.flink.StateTTL
+import io.findify.featury.flink.util.InitContext
 import io.findify.featury.model.Feature.StatsEstimator
 import io.findify.featury.model.FeatureConfig.{FreqEstimatorConfig, StatsEstimatorConfig}
 import io.findify.featury.model.{FrequencyValue, Key, NumStatsValue, StatsState, Timestamp, Write}
@@ -47,7 +48,7 @@ case class FlinkStatsEstimator(config: StatsEstimatorConfig, list: ListState[Dou
 }
 
 object FlinkStatsEstimator {
-  def apply(ctx: KeyedStateStore, config: StatsEstimatorConfig)(implicit
+  def apply(ctx: InitContext, config: StatsEstimatorConfig)(implicit
       ts: TypeInformation[Double],
       ti: TypeInformation[Int]
   ): FlinkStatsEstimator = {

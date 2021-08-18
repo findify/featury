@@ -1,6 +1,7 @@
 package io.findify.featury.flink.feature
 
 import io.findify.featury.flink.StateTTL
+import io.findify.featury.flink.util.InitContext
 import io.findify.featury.model
 import io.findify.featury.model.Feature.MapFeature
 import io.findify.featury.model.FeatureConfig.{MapConfig, ScalarConfig}
@@ -44,7 +45,7 @@ case class FlinkMapFeature(config: MapConfig, mapState: MapState[String, Scalar]
 }
 
 object FlinkMapFeature {
-  def apply(ctx: KeyedStateStore, config: MapConfig)(implicit
+  def apply(ctx: InitContext, config: MapConfig)(implicit
       ti: TypeInformation[Scalar],
       si: TypeInformation[String]
   ): FlinkMapFeature = {

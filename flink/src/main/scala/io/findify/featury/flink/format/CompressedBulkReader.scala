@@ -1,4 +1,4 @@
-package io.findify.featury.flink.rw
+package io.findify.featury.flink.format
 
 import io.findify.featury.flink.util.Compress
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -6,7 +6,6 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.connector.file.src.FileSource
 import org.apache.flink.connector.file.src.reader.StreamFormat
 import org.apache.flink.core.fs.{FSDataInputStream, Path}
-import scalapb.GeneratedMessage
 
 import java.io.{BufferedInputStream, InputStream}
 
