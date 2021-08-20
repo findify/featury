@@ -73,5 +73,5 @@ object Feature {
     }
   }
 
-  def shouldSample(rate: Int): Boolean = Random.nextInt(rate) == 0
+  def shouldSample(rate: Double): Boolean = Random.nextDouble() <= rate
 }

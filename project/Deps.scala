@@ -6,4 +6,6 @@ object Deps {
   val circeYamlVersion       = "0.14.0"
   val cassandraDriverVersion = "4.11.1"
   val scalapbVersion         = "0.11.3"
+  val flinkVersion           = "1.13.2"
+
 }

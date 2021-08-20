@@ -2,7 +2,7 @@ import Deps._
 
 name := "featury"
 
-lazy val featuryVersion = "0.1.3-M4-SNAPSHOT"
+lazy val featuryVersion = "0.2.0"
 
 version := featuryVersion
 
@@ -36,7 +36,15 @@ lazy val flink = (project in file("flink"))
   .settings(shared: _*)
   .settings(mavenSettings: _*)
   .dependsOn(core % "test->test;compile->compile")
-  .dependsOn(rocksdb % "test->test;compile->compile")
+//  .dependsOn(rocksdb % "test->test;compile->compile")
+
+lazy val examples = (project in file("examples"))
+  .settings(shared: _*)
+  .settings(mavenSettings: _*)
+  .settings(publishArtifact := false)
+  .dependsOn(core % "test->test;compile->compile")
+  .dependsOn(flink % "test->test;compile->compile")
+  .dependsOn(flink % "test->test;compile->compile")
 
 lazy val api = (project in file("api"))
   .settings(shared: _*)
@@ -63,7 +71,9 @@ lazy val rocksdb = (project in file("connector/rocksdb"))
 lazy val root = (project in file("."))
   .aggregate(core, flink, api, redis, cassandra, rocksdb)
   .settings(
-    name := "Featury"
+    name := "Featury",
+    publishArtifact := false,
+    publish / skip := true
   )
   .settings(shared: _*)
 

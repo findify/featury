@@ -122,8 +122,4 @@ object FeatureJoinTest {
     }
   }
 
-  sealed trait ADT
-  case class Foo(a: Int)       extends ADT
-  case class Bar(a: List[Int]) extends ADT
-
 }

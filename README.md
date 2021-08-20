@@ -4,11 +4,11 @@
 ![Last commit](https://img.shields.io/github/last-commit/findify/featury)
 ![Last release](https://img.shields.io/github/release/findify/featury)
 
-Featury is an end-to-end framework, built to simplify typical scenarios of online-offline ML feature engineering:
-* Online API to serve latest values of ML features.
-* Feature value changes are tracked and persisted into an offline storage (HDFS or S3 bucket).
-* Historical ML feature values can be joined with training data offline in Spark/Flink to do model training,
-  feature boostrapping and offline evaluation.
+Featury is an end-to-end framework built to simplify typical scenarios of online-offline ML feature engineering:
+* Online API to serve the latest values of ML features.
+* Feature value changelog is tracked and persisted into an offline storage (HDFS or S3 bucket).
+* Historical ML feature values can be joined with training data offline in Apache Flink to do model training,
+  feature bootstrapping and offline evaluation.
 
 It differs from existing solutions like Feast/Hopsworks in the following ways:
 * Featury not only handles get-set actions for feature values, but can do stateful processing:
@@ -40,6 +40,19 @@ The problem solved by feature stores is typical for majority of production ML sy
 * Write operations in **Featury** are extremely fast and happening in the background.
 * Feature values are eventually recomputed (like computing running median over a sampled reservoir) and exposed
   in inference API.
+
+## Example usage
+
+
+
+## Stability and versioning
+
+Featury originally was an internal project within [Findify](http://findify.io), built to simplify the complete ML 
+pipeline within the company. Being open-sourced in 2021, it's still used in production to serve workload for 
+thousands merchants and tens of millions of monthly unique visitors.
+
+The project is quite young, and maintains a [semantic versioning](https://semver.org/). 
+While it's not yet reached v1.0, it has no guarantees on backwards-compatibility both for API and data formats.
   
 ## License
 

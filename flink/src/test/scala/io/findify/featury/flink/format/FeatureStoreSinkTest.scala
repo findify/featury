@@ -2,11 +2,11 @@ package io.findify.featury.flink.format
 
 import better.files.File
 import cats.effect.unsafe.implicits.global
-import io.findify.featury.connector.rocksdb.RocksDBStore
 import io.findify.featury.flink.FlinkStreamTest
 import io.findify.featury.model.Key.{FeatureName, Id, Namespace, Scope, Tenant}
 import io.findify.featury.model.api.{ReadRequest, ReadResponse}
 import io.findify.featury.model.{FeatureValue, Key, SString, ScalarValue, Timestamp}
+import io.findify.featury.values.MemoryStore
 import io.findify.featury.values.StoreCodec.ProtobufCodec
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -18,7 +18,7 @@ class FeatureStoreSinkTest extends AnyFlatSpec with Matchers with FlinkStreamTes
 
   it should "write to inmem store" in {
     val path  = File.newTemporaryDirectory("rocksdb_").deleteOnExit()
-    val store = RocksDBStore(path.toString(), ProtobufCodec)
+    val store = MemoryStore()
     val value = ScalarValue(k, now, SString("foo"))
     env
       .fromCollection[FeatureValue](List(value))

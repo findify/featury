@@ -109,7 +109,7 @@ object FeatureConfig {
       scope: Scope,
       name: FeatureName,
       poolSize: Int,
-      sampleRate: Int,
+      sampleRate: Double,
       percentiles: List[Int],
       ttl: FiniteDuration = 365.days,
       refresh: FiniteDuration = 1.hour,
