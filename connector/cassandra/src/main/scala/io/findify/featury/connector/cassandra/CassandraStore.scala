@@ -23,23 +23,24 @@ case class CassandraStore(session: CqlSession, codec: StoreCodec) extends Featur
   lazy val write = session.prepare(
     "insert into features (ns, scope, tenant, name, id, values) values (?,?,?,?,?,?)"
   )
-  override def read(request: ReadRequest): IO[ReadResponse] = {
-    for {
-      bound <- IO {
-        read.bind(
-          request.ns.value,
-          request.scope.value,
-          request.tenant.value,
-          util.Arrays.asList(request.ids.map(_.value): _*),
-          util.Arrays.asList(request.features.map(_.value): _*)
-        )
-      }
-      rows   <- IO.fromCompletableFuture(IO(session.executeAsync(bound).toCompletableFuture))
-      parsed <- parsePage(rows)
-    } yield {
-      ReadResponse(parsed)
-    }
-  }
+  override def read(request: ReadRequest): IO[ReadResponse] = ???
+//  {
+//    for {
+//      bound <- IO {
+//        read.bind(
+//          request.ns.value,
+//          request.tag.scope.value,
+//          request.tenant.value,
+//          util.Arrays.asList(request.ids.map(_.value): _*),
+//          util.Arrays.asList(request.features.map(_.value): _*)
+//        )
+//      }
+//      rows   <- IO.fromCompletableFuture(IO(session.executeAsync(bound).toCompletableFuture))
+//      parsed <- parsePage(rows)
+//    } yield {
+//      ReadResponse(parsed)
+//    }
+//  }
 
   def parsePage(rs: AsyncResultSet, acc: List[FeatureValue] = Nil): IO[List[FeatureValue]] = for {
     values <- rs.currentPage().asScala.toList.traverse(parseRow).map(next => acc ++ next)
@@ -57,23 +58,24 @@ case class CassandraStore(session: CqlSession, codec: StoreCodec) extends Featur
     IO.fromEither(codec.decode(row.getByteBuffer("values").array()))
   }
 
-  override def write(batch: List[FeatureValue]): Unit = {
-    val stmt = batch
-      .foldLeft(BatchStatement.builder(BatchType.UNLOGGED))((builder, value) =>
-        builder.addStatement(
-          write.bind(
-            value.key.ns.value,
-            value.key.scope.value,
-            value.key.tenant.value,
-            value.key.name.value,
-            value.key.id.value,
-            ByteBuffer.wrap(codec.encode(value))
-          )
-        )
-      )
-      .build()
-    session.execute(stmt)
-  }
+  override def write(batch: List[FeatureValue]): Unit = ???
+//  {
+//    val stmt = batch
+//      .foldLeft(BatchStatement.builder(BatchType.UNLOGGED))((builder, value) =>
+//        builder.addStatement(
+//          write.bind(
+//            value.key.ns.value,
+//            value.key.scope.value,
+//            value.key.tenant.value,
+//            value.key.name.value,
+//            value.key.id.value,
+//            ByteBuffer.wrap(codec.encode(value))
+//          )
+//        )
+//      )
+//      .build()
+//    session.execute(stmt)
+//  }
 
   override def close(): Unit = { session.close() }
 

@@ -3,7 +3,7 @@ package io.findify.featury.connector.rocksdb
 import cats.implicits._
 import cats.effect.IO
 import io.findify.featury.model.{FeatureValue, Key}
-import io.findify.featury.model.Key.{Id, Namespace, Scope, Tenant}
+import io.findify.featury.model.Key.{Namespace, Scope, Tenant}
 import io.findify.featury.model.api.{ReadRequest, ReadResponse}
 import io.findify.featury.values.{FeatureStore, StoreCodec}
 import org.rocksdb.{Options, RocksDB}
@@ -18,9 +18,9 @@ case class RocksDBStore(path: String, codec: StoreCodec) extends FeatureStore {
 
   override def read(request: ReadRequest): IO[ReadResponse] = {
     val parsed = for {
-      id   <- request.ids
+      tag  <- request.tags
       name <- request.features
-      key = keyBytes(Key(request.ns, request.scope, name, request.tenant, id))
+      key = keyBytes(Key(request.ns, tag, name, request.tenant))
       value <- Option(db.get(key))
     } yield {
       codec.decode(value)
@@ -31,7 +31,7 @@ case class RocksDBStore(path: String, codec: StoreCodec) extends FeatureStore {
   override def write(batch: List[FeatureValue]): Unit = for {
     value <- batch
   } yield {
-    val key        = keyBytes(Key(value.key.ns, value.key.scope, value.key.name, value.key.tenant, value.key.id))
+    val key        = keyBytes(Key(value.key.ns, value.key.tag, value.key.name, value.key.tenant))
     val valueBytes = codec.encode(value)
     db.put(key, valueBytes)
   }
@@ -41,7 +41,7 @@ case class RocksDBStore(path: String, codec: StoreCodec) extends FeatureStore {
   }
 
   def keyBytes(key: Key): Array[Byte] = {
-    s"${key.ns.value}/${key.scope.value}/${key.tenant.value}/${key.name.value}/${key.id.value}"
+    s"${key.ns.value}/${key.tag.scope.name}/${key.tenant.value}/${key.name.value}/${key.tag.value}"
       .getBytes(StandardCharsets.UTF_8)
   }
 

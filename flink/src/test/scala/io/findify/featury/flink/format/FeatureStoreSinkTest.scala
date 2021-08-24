@@ -3,7 +3,7 @@ package io.findify.featury.flink.format
 import better.files.File
 import cats.effect.unsafe.implicits.global
 import io.findify.featury.flink.FlinkStreamTest
-import io.findify.featury.model.Key.{FeatureName, Id, Namespace, Scope, Tenant}
+import io.findify.featury.model.Key.{FeatureName, Namespace, Scope, Tag, Tenant}
 import io.findify.featury.model.api.{ReadRequest, ReadResponse}
 import io.findify.featury.model.{FeatureValue, Key, SString, ScalarValue, Timestamp}
 import io.findify.featury.values.MemoryStore
@@ -13,7 +13,7 @@ import org.scalatest.matchers.should.Matchers
 import io.findify.flinkadt.api._
 
 class FeatureStoreSinkTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
-  val k   = Key(Namespace("ns"), Scope("s"), FeatureName("f1"), Tenant("1"), Id("x1"))
+  val k   = Key(Namespace("ns"), Tag(Scope("s"), "x1"), FeatureName("f1"), Tenant("1"))
   val now = Timestamp.now
 
   it should "write to inmem store" in {
@@ -24,7 +24,7 @@ class FeatureStoreSinkTest extends AnyFlatSpec with Matchers with FlinkStreamTes
       .fromCollection[FeatureValue](List(value))
       .addSink(FeatureStoreSink(store, 100))
     env.execute()
-    val request = ReadRequest(k.ns, k.scope, k.tenant, List(k.name), List(k.id))
+    val request = ReadRequest(k.ns, List(k.tag), k.tenant, List(k.name))
     store.read(request).unsafeRunSync() shouldBe ReadResponse(List(value))
     store.close()
   }

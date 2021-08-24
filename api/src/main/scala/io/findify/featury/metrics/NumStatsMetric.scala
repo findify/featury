@@ -12,7 +12,7 @@ case class NumStatsMetric(configs: Map[FeatureKey, StatsEstimatorConfig]) extend
     val percentiles = conf.percentiles
       .map(p =>
         p -> Histogram
-          .build(s"featury_${key.ns.value}_${key.scope.value}_${key.feature.value}_value_p$p", "histogram of values")
+          .build(s"featury_${key.ns.value}_${key.scope.name}_${key.feature.value}_value_p$p", "histogram of values")
           .buckets(watchConfig.bucketList: _*)
           .register()
       )

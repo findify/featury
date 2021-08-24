@@ -4,6 +4,7 @@ import io.circe.Decoder
 import io.circe.generic.semiauto._
 import io.circe.yaml.parser
 import io.findify.featury.model.FeatureConfig._
+import io.findify.featury.model.Key._
 
 case class Schema(
     counters: Map[FeatureKey, CounterConfig],
@@ -14,7 +15,11 @@ case class Schema(
     lists: Map[FeatureKey, BoundedListConfig],
     maps: Map[FeatureKey, MapConfig]
 ) {
-  def configs: Map[FeatureKey, FeatureConfig] =
+  lazy val scopeNameCache: Map[(Namespace, Scope), List[FeatureName]] =
+    configs.values.toList.groupBy(c => (c.ns, c.scope)).map { case (k, configs) =>
+      k -> configs.map(_.name)
+    }
+  lazy val configs: Map[FeatureKey, FeatureConfig] =
     (counters ++ scalars ++ periodicCounters ++ freqs ++ stats ++ lists ++ maps)
 }
 

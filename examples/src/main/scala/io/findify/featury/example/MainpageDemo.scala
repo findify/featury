@@ -9,7 +9,7 @@ import io.findify.featury.model.FeatureConfig.{
   ScalarConfig,
   StatsEstimatorConfig
 }
-import io.findify.featury.model.Key.{FeatureName, Id, Namespace, Scope, Tenant}
+import io.findify.featury.model.Key.{FeatureName, Namespace, Scope, Tenant}
 import io.findify.featury.model.Write.{Increment, PeriodicIncrement, Put, PutStatSample}
 import io.findify.featury.model.{Key, SDouble, SString, Schema, Timestamp, Write}
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
@@ -28,8 +28,7 @@ object MainpageDemo {
   // when user interacted with item `id`
   case class Click(id: String, user: String, ts: Timestamp) extends Event
 
-
-  case class Clickthrough(user: String,)
+  case class Clickthrough(user: String)
 
   // a set of helper values
   val now    = Timestamp.now
@@ -99,26 +98,26 @@ object MainpageDemo {
     )
 
     // now we need to convert our business events into Write actions
-    val writes: DataStream[Write] = events.flatMap(_ match {
-      case Metadata(id, title, price, ts) =>
-        List(
-          Put(Key(productTitle, tenant, Id(id)), ts, SString(title)),         // put title
-          Put(Key(productCount, tenant, Id(id)), ts, SDouble(price)),         // put count
-          PutStatSample(Key(countStats, tenant, Id(tenant.value)), ts, price) // sample count
-        )
-      case Impression(ids, user, ts) =>
-        ids.map(id =>
-          PeriodicIncrement(Key(productImpressions, tenant, Id(id)), ts, 1)
-        ) // count per product impressions
-      case Click(id, user, ts) =>
-        List(
-          PeriodicIncrement(Key(productClicks, tenant, Id(id)), ts, 1), // per-product clicks
-          Increment(Key(userClicks, tenant, Id(user)), ts, 1)           // per-user clicks
-        )
-    })
+//    val writes: DataStream[Write] = events.flatMap(_ match {
+//      case Metadata(id, title, price, ts) =>
+//        List(
+//          Put(Key(productTitle, tenant, Id(id)), ts, SString(title)),         // put title
+//          Put(Key(productCount, tenant, Id(id)), ts, SDouble(price)),         // put count
+//          PutStatSample(Key(countStats, tenant, Id(tenant.value)), ts, price) // sample count
+//        )
+//      case Impression(ids, user, ts) =>
+//        ids.map(id =>
+//          PeriodicIncrement(Key(productImpressions, tenant, Id(id)), ts, 1)
+//        ) // count per product impressions
+//      case Click(id, user, ts) =>
+//        List(
+//          PeriodicIncrement(Key(productClicks, tenant, Id(id)), ts, 1), // per-product clicks
+//          Increment(Key(userClicks, tenant, Id(user)), ts, 1)           // per-user clicks
+//        )
+//    })
 
     // here we pipe writes through schema and compute feature update changelog
-    val features = Featury.process(writes, schema, 10.seconds)
+    //val features = Featury.process(writes, schema, 10.seconds)
 
   }
 }

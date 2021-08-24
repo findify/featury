@@ -10,7 +10,7 @@ case class ScalarMetric(configs: Map[FeatureKey, ScalarConfig]) extends FeatureM
     watchConfig <- conf.monitorValues
   } yield {
     key -> Histogram
-      .build(s"featury_${key.ns.value}_${key.scope.value}_${key.feature.value}_value", "histogram of values")
+      .build(s"featury_${key.ns.value}_${key.scope.name}_${key.feature.value}_value", "histogram of values")
       .buckets(buckets(watchConfig.min, watchConfig.max, watchConfig.buckets): _*)
       .register()
   }

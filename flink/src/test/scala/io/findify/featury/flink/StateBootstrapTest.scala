@@ -37,8 +37,8 @@ class StateBootstrapTest extends AnyFlatSpec with Matchers with FlinkStreamTest 
     val path = File.newTemporaryDirectory("state_test_").deleteOnExit()
     val source = env.fromCollection[State](
       List(
-        ScalarState(TestKey(group = "merchant", fname = "lang", id = "1"), now, SString("foo")),
-        ScalarState(TestKey(group = "merchant", fname = "lang", id = "2"), now, SString("bar"))
+        ScalarState(TestKey(scope = "merchant", fname = "lang", id = "1"), now, SString("foo")),
+        ScalarState(TestKey(scope = "merchant", fname = "lang", id = "2"), now, SString("bar"))
       )
     )
     Featury.writeState(source, new Path(path.toString()), NoCompression)

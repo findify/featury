@@ -15,7 +15,7 @@ sealed trait FeatureConfig {
   def ttl: FiniteDuration
   def refresh: FiniteDuration
   def monitorLag: Option[Boolean]
-  def fqdn = s"${ns.value}.${scope.value}.${name.value}"
+  def fqdn = s"${ns.value}.${scope.name}.${name.value}"
 }
 
 object FeatureConfig {
@@ -119,7 +119,7 @@ object FeatureConfig {
 
   case class ConfigParsingError(msg: String) extends Exception(msg)
   implicit val featureNameDecoder = Decoder.decodeString.map(FeatureName.apply)
-  implicit val groupDecoder       = Decoder.decodeString.map(Scope.apply)
+  implicit val tagDecoder         = deriveDecoder[Tag]
   implicit val namespaceDecoder   = Decoder.decodeString.map(Namespace.apply)
 
   val durationFormat = "([0-9]+)\\s*([a-zA-z]+)".r

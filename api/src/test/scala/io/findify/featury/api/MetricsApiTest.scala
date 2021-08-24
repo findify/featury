@@ -1,25 +1,25 @@
 package io.findify.featury.api
 
 import io.findify.featury.model.FeatureConfig.{MonitorValuesConfig, ScalarConfig}
-import io.findify.featury.model.Key.{FeatureName, Id, Namespace, Scope, Tenant}
+import io.findify.featury.model.Key.{FeatureName, Namespace, Scope, Tag, Tenant}
 import io.findify.featury.model.{Key, SDouble, ScalarValue, Schema, Timestamp}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
 import scala.collection.JavaConverters._
 
 class MetricsApiTest extends AnyFlatSpec with Matchers {
   it should "collect scalar metrics" in {
     val key = Key(
       ns = Namespace("ns"),
-      scope = Scope("s"),
+      tag = Tag(Scope("s"), "a"),
       name = FeatureName("f1"),
-      tenant = Tenant("1"),
-      id = Id("a")
+      tenant = Tenant("1")
     )
     val schema = Schema(
       ScalarConfig(
         ns = key.ns,
-        scope = key.scope,
+        scope = key.tag.scope,
         name = key.name,
         monitorValues = Some(MonitorValuesConfig(0, 1, 10)),
         monitorLag = Some(true)

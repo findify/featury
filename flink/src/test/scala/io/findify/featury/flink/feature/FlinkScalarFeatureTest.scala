@@ -13,14 +13,14 @@ import io.findify.featury.model.{
   Schema,
   Write
 }
-import io.findify.featury.model.Key.{Id, Tenant}
+import io.findify.featury.model.Key.{Tag, Tenant}
 import io.findify.featury.model.Write.{Append, Put}
 
 import scala.concurrent.duration._
 import io.findify.flinkadt.api._
 
 class FlinkScalarFeatureTest extends ScalarFeatureSuite with FlinkStreamTest {
-  val k = Key(config.ns, config.scope, config.name, Tenant("1"), Id("x1"))
+  val k = Key(config.ns, Tag(config.scope, "x1"), config.name, Tenant("1"))
 
   override def write(values: List[Put]): Option[FeatureValue] = {
     val conf = Schema(config.copy(refresh = 0.hour))

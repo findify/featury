@@ -9,18 +9,8 @@ import io.findify.featury.flink.FeatureJoinTest.{
   productJoin
 }
 import io.findify.featury.model.FeatureConfig.{CounterConfig, ScalarConfig}
-import io.findify.featury.model.Key.{FeatureName, Namespace, Scope}
-import io.findify.featury.model.{
-  CounterValue,
-  FeatureValue,
-  SString,
-  ScalarValue,
-  Schema,
-  ScopeKey,
-  ScopeKeyOps,
-  Timestamp,
-  Write
-}
+import io.findify.featury.model.Key.{FeatureName, Namespace, Scope, Tag, Tenant}
+import io.findify.featury.model.{CounterValue, FeatureValue, JoinKey, SString, ScalarValue, Schema, Timestamp, Write}
 import io.findify.featury.model.Write.{Increment, Put}
 import io.findify.featury.utils.TestKey
 import org.scalatest.flatspec.AnyFlatSpec
@@ -58,14 +48,14 @@ class FeatureJoinTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
     val writes = env
       .fromCollection(
         List[Write](
-          Put(TestKey(group = "merchant", fname = "lang", id = "1"), now.minus(2.minute), SString("en")),
-          Put(TestKey(group = "product", fname = "title", id = "p1"), now.minus(10.minute), SString("socks")),
-          Put(TestKey(group = "product", fname = "title", id = "p1"), now.minus(5.minute), SString("xsocks")),
-          Increment(TestKey(group = "search", fname = "count", id = "q1"), now.minus(10.minute), 1),
-          Increment(TestKey(group = "search", fname = "count", id = "q1"), now.minus(9.minute), 1),
-          Increment(TestKey(group = "search", fname = "count", id = "q1"), now.minus(8.minute), 1),
-          Increment(TestKey(group = "product", fname = "clicks", id = "p1"), now.minus(10.minute), 1),
-          Increment(TestKey(group = "product", fname = "clicks", id = "p1"), now.minus(5.minute), 1)
+          Put(TestKey(scope = "merchant", fname = "lang", id = "1"), now.minus(2.minute), SString("en")),
+          Put(TestKey(scope = "product", fname = "title", id = "p1"), now.minus(10.minute), SString("socks")),
+          Put(TestKey(scope = "product", fname = "title", id = "p1"), now.minus(5.minute), SString("xsocks")),
+          Increment(TestKey(scope = "search", fname = "count", id = "q1"), now.minus(10.minute), 1),
+          Increment(TestKey(scope = "search", fname = "count", id = "q1"), now.minus(9.minute), 1),
+          Increment(TestKey(scope = "search", fname = "count", id = "q1"), now.minus(8.minute), 1),
+          Increment(TestKey(scope = "product", fname = "clicks", id = "p1"), now.minus(10.minute), 1),
+          Increment(TestKey(scope = "product", fname = "clicks", id = "p1"), now.minus(5.minute), 1)
         )
       )
 
@@ -75,21 +65,18 @@ class FeatureJoinTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
       Featury.join[ProductLine](
         features,
         sessions,
-        List(MerchantScope, ProductScope, SearchScope, UserScope),
-        FeatureJoinTest.productJoin
+        FeatureJoinTest.productJoin,
+        schema
       )
 
     val result = joined.executeAndCollect(100)
-    result.headOption shouldBe Some(
-      session.copy(values =
-        List(
-          CounterValue(TestKey(group = "search", fname = "count", id = "q1"), now.minus(8.minute), 3),
-          CounterValue(TestKey(group = "product", fname = "clicks", id = "p1"), now.minus(5.minute), 2L),
-          ScalarValue(TestKey(group = "product", fname = "title", id = "p1"), now.minus(5.minute), SString("xsocks")),
-          ScalarValue(TestKey(group = "merchant", fname = "lang", id = "1"), now.minus(2.minute), SString("en"))
-        )
-      )
+    result.head.values should contain theSameElementsAs List(
+      CounterValue(TestKey(scope = "search", fname = "count", id = "q1"), now.minus(8.minute), 3),
+      CounterValue(TestKey(scope = "product", fname = "clicks", id = "p1"), now.minus(5.minute), 2L),
+      ScalarValue(TestKey(scope = "product", fname = "title", id = "p1"), now.minus(5.minute), SString("xsocks")),
+      ScalarValue(TestKey(scope = "merchant", fname = "lang", id = "1"), now.minus(2.minute), SString("en"))
     )
+
   }
 
 }
@@ -112,13 +99,15 @@ object FeatureJoinTest {
     override def join(self: ProductLine, values: List[FeatureValue]): ProductLine =
       self.copy(values = values ++ self.values)
 
-    override def key(value: ProductLine, scope: Scope): Option[ScopeKey] = scope match {
+    override def by(left: ProductLine): JoinKey = JoinKey(Namespace("dev"), Tenant(left.merchant))
 
-      case MerchantScope => ScopeKey.make("dev", "merchant", "1", value.merchant)
-      case ProductScope  => ScopeKey.make("dev", "product", "1", value.product)
-      case SearchScope   => ScopeKey.make("dev", "search", "1", value.search)
-      case UserScope     => ScopeKey.make("dev", "user", "1", value.search)
-      case _             => None
+    override def tags(left: ProductLine): List[Tag] = {
+      List(
+        Tag(Scope("merchant"), left.merchant),
+        Tag(Scope("product"), left.product),
+        Tag(Scope("search"), left.search),
+        Tag(Scope("user"), left.user)
+      )
     }
   }
 

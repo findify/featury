@@ -1,19 +1,45 @@
 package io.findify.featury.model.json
 
-import io.circe.{Codec, Decoder, Encoder}
+import io.circe.{Codec, Decoder, Encoder, Json, JsonObject}
 import io.findify.featury.model.Key
 import io.circe.generic.semiauto._
-import io.findify.featury.model.Key.{FeatureName, Id, Namespace, Scope, Tenant}
+import io.findify.featury.model.Key.{FeatureName, Namespace, Scope, Tag, Tenant}
 
 trait KeyJson {
 
   implicit val nsCodec: Codec[Namespace]     = stringCodec(_.value, Namespace.apply)
-  implicit val scopeCodec: Codec[Scope]      = stringCodec(_.value, Scope.apply)
+  implicit val tagCodec: Codec[Tag]          = deriveCodec[Tag]
+  implicit val scopeCodec: Codec[Scope]      = stringCodec(_.name, Scope.apply)
   implicit val nameCodec: Codec[FeatureName] = stringCodec(_.value, FeatureName.apply)
   implicit val tenantCodec: Codec[Tenant]    = stringCodec(_.value, Tenant.apply)
-  implicit val idCodec: Codec[Id]            = stringCodec(_.value, Id.apply)
 
-  implicit val keyCodec: Codec[Key] = deriveCodec[Key]
+  implicit val keyEncoder: Encoder[Key] = Encoder.instance(key =>
+    Json.fromJsonObject(
+      JsonObject.fromMap(
+        Map(
+          "ns"     -> nsCodec(key.ns),
+          "scope"  -> scopeCodec(key.tag.scope),
+          "id"     -> Json.fromString(key.tag.value),
+          "name"   -> nameCodec(key.name),
+          "tenant" -> tenantCodec(key.tenant)
+        )
+      )
+    )
+  )
+
+  implicit val keyDecoder: Decoder[Key] = Decoder.instance(c =>
+    for {
+      ns     <- c.downField("ns").as[Namespace]
+      scope  <- c.downField("scope").as[Scope]
+      id     <- c.downField("id").as[String]
+      name   <- c.downField("name").as[FeatureName]
+      tenant <- c.downField("tenant").as[Tenant]
+    } yield {
+      Key(ns, Tag(scope, id), name, tenant)
+    }
+  )
+
+  implicit val keyCodec: Codec[Key] = Codec.from(keyDecoder, keyEncoder)
 
   def stringCodec[T](toString: T => String, fromString: String => T) =
     Codec.from(Decoder.decodeString.map(fromString), Encoder.encodeString.contramap(toString))
