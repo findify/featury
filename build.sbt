@@ -2,7 +2,7 @@ import Deps._
 
 name := "featury"
 
-lazy val featuryVersion = "0.2.0"
+lazy val featuryVersion = "0.2.0-M3-SNAPSHOT"
 
 version := featuryVersion
 
