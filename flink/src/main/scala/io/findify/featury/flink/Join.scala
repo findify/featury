@@ -1,7 +1,7 @@
 package io.findify.featury.flink
 
-import io.findify.featury.model.Key.{Scope, Tag}
-import io.findify.featury.model.{FeatureValue, JoinKey, Key, Schema}
+import io.findify.featury.model.Key.{Tag, Tenant}
+import io.findify.featury.model.FeatureValue
 
 /** Defines on how a feature join should be performed. Feature join is like a well-known CQL-like
   * inner join of a user-specified left part (for example, a session class for a customer or whatever) with a set of
@@ -25,7 +25,7 @@ trait Join[T] extends Serializable {
     * @param left the left part
     * @return
     */
-  def by(left: T): JoinKey
+  def by(left: T): Tenant
 
   /** Feature value keys to load
     * @param left

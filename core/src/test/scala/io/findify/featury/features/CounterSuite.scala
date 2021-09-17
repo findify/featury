@@ -2,7 +2,7 @@ package io.findify.featury.features
 
 import io.findify.featury.model.Feature.Counter
 import io.findify.featury.model.FeatureConfig.CounterConfig
-import io.findify.featury.model.Key.{FeatureName, Scope, Namespace}
+import io.findify.featury.model.Key.{FeatureName, Scope}
 import io.findify.featury.model.{CounterValue, Timestamp}
 import io.findify.featury.model.Write.Increment
 import io.findify.featury.utils.TestKey
@@ -10,7 +10,7 @@ import scala.concurrent.duration._
 import scala.util.Random
 
 trait CounterSuite extends FeatureSuite[Increment] {
-  val config = CounterConfig(Namespace("n1"), Scope("g1"), FeatureName("c1"))
+  val config = CounterConfig(Scope("g1"), FeatureName("c1"))
 
   it should "increment once" in {
     val key      = TestKey(config, id = "p11")

@@ -20,7 +20,7 @@ trait FeatureMetric {
   } yield {
     val buckets = LAG_BUCKETS.map(lag => conf.refresh.toSeconds * lag)
     key -> Histogram
-      .build(s"featury_${key.ns.value}_${key.scope.name}_${key.feature.value}_lag", "lag of values")
+      .build(s"featury_${key.scope.name}_${key.feature.value}_lag", "lag of values")
       .buckets(buckets: _*)
       .register()
   }

@@ -20,7 +20,7 @@ import scala.concurrent.duration._
 import io.findify.flinkadt.api._
 
 class FlinkScalarFeatureTest extends ScalarFeatureSuite with FlinkStreamTest {
-  val k = Key(config.ns, Tag(config.scope, "x1"), config.name, Tenant("1"))
+  val k = Key(Tag(config.scope, "x1"), config.name, Tenant("1"))
 
   override def write(values: List[Put]): Option[FeatureValue] = {
     val conf = Schema(config.copy(refresh = 0.hour))

@@ -11,9 +11,7 @@ import io.findify.featury.api.{MetricsApi, ValuesApi}
 import io.findify.featury.config.{ApiConfig, Args}
 import io.findify.featury.connector.cassandra.CassandraStore
 import io.findify.featury.connector.redis.RedisStore
-import io.findify.featury.model.FeatureConfig.{MonitorValuesConfig, ScalarConfig}
-import io.findify.featury.model.Key.{FeatureName, Namespace, Scope, Tenant}
-import io.findify.featury.model.{Key, SDouble, ScalarValue, Schema, Timestamp}
+import io.findify.featury.model.Schema
 import io.findify.featury.model.api.{ReadRequest, ReadResponse}
 import io.findify.featury.util.ForkJoinExecutor
 import io.findify.featury.values.{FeatureStore, MemoryStore}

@@ -1,7 +1,7 @@
 package io.findify.featury.features
 
 import io.findify.featury.model.FeatureConfig.MapConfig
-import io.findify.featury.model.Key.{FeatureName, Namespace, Scope}
+import io.findify.featury.model.Key.{FeatureName, Scope}
 import io.findify.featury.model.{MapValue, SString, ScalarValue}
 import io.findify.featury.model.Write.{Put, PutTuple}
 import io.findify.featury.utils.TestKey
@@ -9,7 +9,7 @@ import io.findify.featury.utils.TestKey
 import scala.concurrent.duration._
 
 trait MapFeatureSuite extends FeatureSuite[PutTuple] {
-  val config = MapConfig(ns = Namespace("a"), scope = Scope("b"), FeatureName("counter"), 1.day)
+  val config = MapConfig(scope = Scope("b"), FeatureName("counter"), 1.day)
   val k      = TestKey(config, id = "p11")
 
   it should "write-read" in {

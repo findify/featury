@@ -2,14 +2,13 @@ package io.findify.featury.flink
 
 import io.findify.featury.flink.format.{BulkCodec, BulkInputFormat, CompressedBulkReader, CompressedBulkWriter}
 import io.findify.featury.flink.util.Compress
-import io.findify.featury.model.Key.Scope
-import io.findify.featury.model.{Schema, JoinKeyOps, _}
+import io.findify.featury.model.Key.Tenant
+import io.findify.featury.model.{Schema, _}
 import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.api.scala.extensions._
 import org.apache.flink.api.scala._
-import org.apache.flink.connector.file.sink.FileSink
 import org.apache.flink.connector.file.src.FileSource
 import org.apache.flink.core.fs.Path
 import org.apache.flink.streaming.api.datastream.DataStreamSink
@@ -42,13 +41,13 @@ object Featury {
     */
   def join[T](values: DataStream[FeatureValue], events: DataStream[T], j: Join[T], schema: Schema)(implicit
       ti: TypeInformation[T],
-      ki: TypeInformation[JoinKey],
+      ki: TypeInformation[Tenant],
       si: TypeInformation[String],
       fvi: TypeInformation[FeatureValue]
   ): DataStream[T] =
     events
       .connect(values)
-      .keyBy[JoinKey](t => j.by(t), t => JoinKey(t.key))
+      .keyBy[Tenant](t => j.by(t), t => t.key.tenant)
       .process(new FeatureJoinFunction[T](schema, j))
       .id(s"join")
 

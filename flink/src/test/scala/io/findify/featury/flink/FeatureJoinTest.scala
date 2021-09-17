@@ -9,8 +9,8 @@ import io.findify.featury.flink.FeatureJoinTest.{
   productJoin
 }
 import io.findify.featury.model.FeatureConfig.{CounterConfig, ScalarConfig}
-import io.findify.featury.model.Key.{FeatureName, Namespace, Scope, Tag, Tenant}
-import io.findify.featury.model.{CounterValue, FeatureValue, JoinKey, SString, ScalarValue, Schema, Timestamp, Write}
+import io.findify.featury.model.Key.{FeatureName, Scope, Tag, Tenant}
+import io.findify.featury.model.{CounterValue, FeatureValue, SString, ScalarValue, Schema, Timestamp, Write}
 import io.findify.featury.model.Write.{Increment, Put}
 import io.findify.featury.utils.TestKey
 import org.scalatest.flatspec.AnyFlatSpec
@@ -24,7 +24,6 @@ class FeatureJoinTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
   val now = Timestamp.now
 
   it should "join with latest value" in {
-    val dev     = Namespace("dev")
     val session = ProductLine(merchant = "1", search = "q1", product = "p1", user = "u1", now)
     val sessions = env
       .fromCollection(List(session))
@@ -37,11 +36,11 @@ class FeatureJoinTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
       )
     val schema = Schema(
       List(
-        ScalarConfig(dev, MerchantScope, FeatureName("lang"), refresh = 0.seconds),
-        ScalarConfig(dev, ProductScope, FeatureName("title"), refresh = 0.seconds),
-        CounterConfig(dev, SearchScope, FeatureName("count"), refresh = 0.seconds),
-        CounterConfig(dev, UserScope, FeatureName("count"), refresh = 0.seconds),
-        CounterConfig(dev, ProductScope, FeatureName("clicks"), refresh = 0.seconds)
+        ScalarConfig(MerchantScope, FeatureName("lang"), refresh = 0.seconds),
+        ScalarConfig(ProductScope, FeatureName("title"), refresh = 0.seconds),
+        CounterConfig(SearchScope, FeatureName("count"), refresh = 0.seconds),
+        CounterConfig(UserScope, FeatureName("count"), refresh = 0.seconds),
+        CounterConfig(ProductScope, FeatureName("clicks"), refresh = 0.seconds)
       )
     )
 
@@ -99,7 +98,7 @@ object FeatureJoinTest {
     override def join(self: ProductLine, values: List[FeatureValue]): ProductLine =
       self.copy(values = values ++ self.values)
 
-    override def by(left: ProductLine): JoinKey = JoinKey(Namespace("dev"), Tenant(left.merchant))
+    override def by(left: ProductLine): Tenant = Tenant(left.merchant)
 
     override def tags(left: ProductLine): List[Tag] = {
       List(

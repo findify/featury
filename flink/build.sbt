@@ -10,6 +10,6 @@ libraryDependencies ++= Seq(
   "org.apache.flink" %% "flink-streaming-scala"      % flinkVersion % "provided",
   "org.apache.flink" %% "flink-statebackend-rocksdb" % flinkVersion % "provided",
   "org.apache.flink" %% "flink-state-processor-api"  % flinkVersion, // not bundled as it's typically not in dist
-  "com.github.luben"  % "zstd-jni"                   % "1.5.0-2",
+  "com.github.luben"  % "zstd-jni"                   % "1.5.0-4",
   "io.findify"       %% "flink-adt"                  % "0.4.3"
 )

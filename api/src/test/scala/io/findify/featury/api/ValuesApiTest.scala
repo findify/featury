@@ -2,7 +2,7 @@ package io.findify.featury.api
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import io.findify.featury.model.Key.{FeatureName, Namespace, Scope, Tag, Tenant}
+import io.findify.featury.model.Key.{FeatureName, Scope, Tag, Tenant}
 import io.findify.featury.model.api.{ReadRequest, ReadResponse}
 import io.findify.featury.values.MemoryStore
 import org.http4s.headers.`Content-Type`
@@ -18,13 +18,11 @@ class ValuesApiTest extends AnyFlatSpec with Matchers {
   lazy val store   = new MemoryStore()
   lazy val service = ValuesApi(store, Slf4jLogger.getLogger[IO], MetricsApi(Schema(Nil)))
 
-  lazy val k =
-    Key(ns = Namespace("ns"), tag = Tag(Scope("s"), "1"), tenant = Tenant("t"), name = FeatureName("f1"))
+  lazy val k   = Key(tag = Tag(Scope("s"), "1"), tenant = Tenant("t"), name = FeatureName("f1"))
   lazy val now = Timestamp.now
 
   it should "return nil" in {
     val request = ReadRequest(
-      ns = Namespace("ns"),
       tags = List(Tag(Scope("s"), "a")),
       tenant = Tenant("t"),
       features = List(FeatureName("f"))
@@ -36,7 +34,6 @@ class ValuesApiTest extends AnyFlatSpec with Matchers {
   it should "return values" in {
     store.cache.put(k, ScalarValue(k, now, SString("foo")))
     val request = ReadRequest(
-      ns = Namespace("ns"),
       tags = List(Tag(Scope("s"), "1")),
       tenant = Tenant("t"),
       features = List(FeatureName("f1"))

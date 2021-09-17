@@ -16,7 +16,7 @@ case class MemoryStore() extends FeatureStore {
     val values = for {
       tag   <- request.tags
       name  <- request.features
-      value <- cache.get(Key(request.ns, tag, name, request.tenant))
+      value <- cache.get(Key(tag, name, request.tenant))
     } yield {
       value
     }

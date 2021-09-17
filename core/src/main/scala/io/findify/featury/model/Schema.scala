@@ -15,8 +15,8 @@ case class Schema(
     lists: Map[FeatureKey, BoundedListConfig],
     maps: Map[FeatureKey, MapConfig]
 ) {
-  lazy val scopeNameCache: Map[(Namespace, Scope), List[FeatureName]] =
-    configs.values.toList.groupBy(c => (c.ns, c.scope)).map { case (k, configs) =>
+  lazy val scopeNameCache: Map[Scope, List[FeatureName]] =
+    configs.values.toList.groupBy(_.scope).map { case (k, configs) =>
       k -> configs.map(_.name)
     }
   lazy val configs: Map[FeatureKey, FeatureConfig] =
@@ -41,7 +41,7 @@ object Schema {
     val configs = for {
       c <- confs
     } yield {
-      FeatureKey(c.ns, c.scope, c.name) -> c
+      FeatureKey(c.scope, c.name) -> c
     }
     new Schema(
       counters = configs.collect { case (key, c: CounterConfig) => key -> c }.toMap,

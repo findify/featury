@@ -5,7 +5,9 @@ import io.findify.featury.model.{
   BoundedListState,
   CounterState,
   Feature,
+  FeatureConfig,
   FeatureKey,
+  FeatureValue,
   FrequencyState,
   Key,
   MapState,
@@ -15,11 +17,14 @@ import io.findify.featury.model.{
   Schema,
   State,
   StatsState,
-  TimeValue
+  TimeValue,
+  Write
 }
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.state.api.functions.KeyedStateBootstrapFunction
+import org.apache.flink.streaming.api.functions.KeyedProcessFunction
+import org.apache.flink.util.Collector
 import org.slf4j.LoggerFactory
 
 class FeatureBootstrapFunction(schema: Schema)(implicit
@@ -40,20 +45,24 @@ class FeatureBootstrapFunction(schema: Schema)(implicit
   }
 
   override def processElement(value: State, ctx: KeyedStateBootstrapFunction[Key, State]#Context): Unit = {
-    features.get(FeatureKey(value.key)) match {
-      case None => LOG.warn(s"no feature configured for a key ${value.key} of state $value")
-      case Some(feature) =>
-        (feature, value) match {
-          case (scalar: Feature.ScalarFeature, state: ScalarState)             => scalar.writeState(state)
-          case (map: Feature.MapFeature, state: MapState)                      => map.writeState(state)
-          case (counter: Feature.Counter, state: CounterState)                 => counter.writeState(state)
-          case (list: Feature.BoundedList, state: BoundedListState)            => list.writeState(state)
-          case (freq: Feature.FreqEstimator, state: FrequencyState)            => freq.writeState(state)
-          case (counter: Feature.PeriodicCounter, state: PeriodicCounterState) => counter.writeState(state)
-          case (stats: Feature.StatsEstimator, state: StatsState)              => stats.writeState(state)
-          case _ =>
-            LOG.warn(s"received state $value for a feature $feature: type mismatch")
-        }
+    value match {
+      case s: ScalarState          => writeState(scalars.get(FeatureKey(value.key)), s)
+      case s: CounterState         => writeState(counters.get(FeatureKey(value.key)), s)
+      case s: MapState             => writeState(maps.get(FeatureKey(value.key)), s)
+      case s: PeriodicCounterState => writeState(periodicCounters.get(FeatureKey(value.key)), s)
+      case s: BoundedListState     => writeState(lists.get(FeatureKey(value.key)), s)
+      case s: FrequencyState       => writeState(freqs.get(FeatureKey(value.key)), s)
+      case s: StatsState           => writeState(stats.get(FeatureKey(value.key)), s)
     }
+  }
+
+  def writeState[S <: State](
+      featureOption: Option[Feature[_ <: Write, _ <: FeatureValue, _ <: FeatureConfig, S]],
+      state: S
+  ) = featureOption match {
+    case Some(feature) =>
+      feature.writeState(state)
+    case None =>
+      LOG.warn(s"no feature configured for a key ${state.key}")
   }
 }

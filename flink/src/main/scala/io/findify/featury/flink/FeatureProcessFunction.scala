@@ -44,36 +44,49 @@ class FeatureProcessFunction(schema: Schema)(implicit
       ctx: KeyedProcessFunction[Key, Write, FeatureValue]#Context,
       out: Collector[FeatureValue]
   ): Unit = {
-    features.get(FeatureKey(value.key)) match {
-      case None =>
-        LOG.warn(s"no features configured for a write $value")
-      case Some(feature) =>
-        putWrite(feature, value)
-        val lastUpdate = Option(updated.value()).map(ts => Timestamp(ts)).getOrElse(Timestamp(0L))
-        if (lastUpdate.diff(value.ts) >= feature.config.refresh) {
-          updated.update(value.ts.ts)
-          feature
-            .computeValue(value.key, value.ts)
-            .foreach(value => {
-              out.collect(value)
-            })
-          feature.readState(value.key, value.ts).foreach(state => ctx.output(stateTag, state))
-        }
+    value match {
+      case w: Put               => putWrite(scalars.get(FeatureKey(value.key)), w, ctx, out)
+      case w: PutTuple          => putWrite(maps.get(FeatureKey(value.key)), w, ctx, out)
+      case w: Increment         => putWrite(counters.get(FeatureKey(value.key)), w, ctx, out)
+      case w: PeriodicIncrement => putWrite(periodicCounters.get(FeatureKey(value.key)), w, ctx, out)
+      case w: Append            => putWrite(lists.get(FeatureKey(value.key)), w, ctx, out)
+      case w: PutStatSample     => putWrite(stats.get(FeatureKey(value.key)), w, ctx, out)
+      case w: PutFreqSample     => putWrite(freqs.get(FeatureKey(value.key)), w, ctx, out)
     }
   }
 
-  private def putWrite(feature: Feature[_ <: Write, _ <: FeatureValue, _ <: FeatureConfig, _ <: State], write: Write) =
-    (feature, write) match {
-      case (f: Counter, w: Increment)                 => f.put(w)
-      case (f: BoundedList, w: Append)                => f.put(w)
-      case (f: FreqEstimator, w: PutFreqSample)       => f.put(w)
-      case (f: PeriodicCounter, w: PeriodicIncrement) => f.put(w)
-      case (f: ScalarFeature, w: Put)                 => f.put(w)
-      case (f: StatsEstimator, w: PutStatSample)      => f.put(w)
-      case (f: MapFeature, w: PutTuple)               => f.put(w)
-      case (f, w) =>
-        LOG.warn(s"received write $w for a feature $f: type mismatch")
+  private def putWrite[W <: Write, T <: FeatureValue](
+      featureOption: Option[Feature[W, T, _ <: FeatureConfig, _ <: State]],
+      write: W,
+      ctx: KeyedProcessFunction[Key, Write, FeatureValue]#Context,
+      out: Collector[FeatureValue]
+  ) = {
+    featureOption match {
+      case None =>
+        LOG.warn(s"no features configured for a write $write")
+      case Some(feature) =>
+        feature.put(write)
+        val lastUpdate = Option(updated.value()).map(ts => Timestamp(ts)).getOrElse(Timestamp(0L))
+        if (lastUpdate.diff(write.ts) >= feature.config.refresh) {
+          updated.update(write.ts.ts)
+          feature
+            .computeValue(write.key, write.ts)
+            .foreach(value => {
+              (value, write) match {
+                case (_: ScalarValue, _: Put)                        => // ok
+                case (_: NumStatsValue, _: PutStatSample)            => // ok
+                case (_: FrequencyValue, _: PutFreqSample)           => // ok
+                case (_: CounterValue, _: Increment)                 => // ok
+                case (_: PeriodicCounterValue, _: PeriodicIncrement) => // ok
+                case (v, w) =>
+                  LOG.warn(s"write $w produced value $v")
+              }
+              out.collect(value)
+            })
+          feature.readState(write.key, write.ts).foreach(state => ctx.output(stateTag, state))
+        }
     }
+  }
 }
 
 object FeatureProcessFunction {

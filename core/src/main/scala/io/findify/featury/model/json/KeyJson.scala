@@ -3,11 +3,10 @@ package io.findify.featury.model.json
 import io.circe.{Codec, Decoder, Encoder, Json, JsonObject}
 import io.findify.featury.model.Key
 import io.circe.generic.semiauto._
-import io.findify.featury.model.Key.{FeatureName, Namespace, Scope, Tag, Tenant}
+import io.findify.featury.model.Key.{FeatureName, Scope, Tag, Tenant}
 
 trait KeyJson {
 
-  implicit val nsCodec: Codec[Namespace]     = stringCodec(_.value, Namespace.apply)
   implicit val tagCodec: Codec[Tag]          = deriveCodec[Tag]
   implicit val scopeCodec: Codec[Scope]      = stringCodec(_.name, Scope.apply)
   implicit val nameCodec: Codec[FeatureName] = stringCodec(_.value, FeatureName.apply)
@@ -17,7 +16,6 @@ trait KeyJson {
     Json.fromJsonObject(
       JsonObject.fromMap(
         Map(
-          "ns"     -> nsCodec(key.ns),
           "scope"  -> scopeCodec(key.tag.scope),
           "id"     -> Json.fromString(key.tag.value),
           "name"   -> nameCodec(key.name),
@@ -29,13 +27,12 @@ trait KeyJson {
 
   implicit val keyDecoder: Decoder[Key] = Decoder.instance(c =>
     for {
-      ns     <- c.downField("ns").as[Namespace]
       scope  <- c.downField("scope").as[Scope]
       id     <- c.downField("id").as[String]
       name   <- c.downField("name").as[FeatureName]
       tenant <- c.downField("tenant").as[Tenant]
     } yield {
-      Key(ns, Tag(scope, id), name, tenant)
+      Key(Tag(scope, id), name, tenant)
     }
   )
 

@@ -9,13 +9,12 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Try}
 
 sealed trait FeatureConfig {
-  def ns: Namespace
   def scope: Scope
   def name: FeatureName
   def ttl: FiniteDuration
   def refresh: FiniteDuration
   def monitorLag: Option[Boolean]
-  def fqdn = s"${ns.value}.${scope.name}.${name.value}"
+  def fqdn = s"${scope.name}.${name.value}"
 }
 
 object FeatureConfig {
@@ -33,7 +32,6 @@ object FeatureConfig {
   }
 
   case class CounterConfig(
-      ns: Namespace,
       scope: Scope,
       name: FeatureName,
       ttl: FiniteDuration = 365.days,
@@ -43,7 +41,6 @@ object FeatureConfig {
   ) extends FeatureConfig
 
   case class ScalarConfig(
-      ns: Namespace,
       scope: Scope,
       name: FeatureName,
       ttl: FiniteDuration = 365.days,
@@ -53,7 +50,6 @@ object FeatureConfig {
   ) extends FeatureConfig
 
   case class MapConfig(
-      ns: Namespace,
       scope: Scope,
       name: FeatureName,
       ttl: FiniteDuration = 365.days,
@@ -64,7 +60,6 @@ object FeatureConfig {
   ) extends FeatureConfig
 
   case class BoundedListConfig(
-      ns: Namespace,
       scope: Scope,
       name: FeatureName,
       count: Int = Int.MaxValue,
@@ -76,7 +71,6 @@ object FeatureConfig {
   ) extends FeatureConfig
 
   case class FreqEstimatorConfig(
-      ns: Namespace,
       scope: Scope,
       name: FeatureName,
       poolSize: Int,
@@ -89,7 +83,6 @@ object FeatureConfig {
 
   case class PeriodRange(startOffset: Int, endOffset: Int)
   case class PeriodicCounterConfig(
-      ns: Namespace,
       scope: Scope,
       name: FeatureName,
       period: FiniteDuration,
@@ -105,7 +98,6 @@ object FeatureConfig {
   }
 
   case class StatsEstimatorConfig(
-      ns: Namespace,
       scope: Scope,
       name: FeatureName,
       poolSize: Int,
@@ -120,7 +112,6 @@ object FeatureConfig {
   case class ConfigParsingError(msg: String) extends Exception(msg)
   implicit val featureNameDecoder = Decoder.decodeString.map(FeatureName.apply)
   implicit val tagDecoder         = deriveDecoder[Tag]
-  implicit val namespaceDecoder   = Decoder.decodeString.map(Namespace.apply)
 
   val durationFormat = "([0-9]+)\\s*([a-zA-z]+)".r
   def decodeDuration(str: String) = str match {

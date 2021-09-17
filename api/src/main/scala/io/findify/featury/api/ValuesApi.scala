@@ -18,7 +18,7 @@ case class ValuesApi(store: FeatureStore, logger: Logger[IO], metrics: MetricsAp
       for {
         read <- post.as[ReadRequest]
         _ <- logger.debug(
-          s"received request: ns=${read.ns} tenant=${read.tenant} features=${read.features
+          s"received request: tenant=${read.tenant} features=${read.features
             .map(_.value)} tags=${read.tags.map(t => s"${t.scope.name}:${t.value}")}"
         )
         response <- store.read(read)

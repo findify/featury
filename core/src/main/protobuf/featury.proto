@@ -15,10 +15,6 @@ message Key {
     option (scalapb.message).companion_extends = "io.findify.featury.model.KeyCompanionOps";
     option (scalapb.message).companion_extends = "io.findify.featury.model.json.KeyJson";
     option (scalapb.message).extends = "io.findify.featury.model.KeyOps";
-    message Namespace {
-        option (scalapb.message).extends = "AnyVal";
-        required string value = 1;
-    }
     message Scope {
         option (scalapb.message).extends = "AnyVal";
         required string name = 1;
@@ -36,10 +32,9 @@ message Key {
         required string value = 1;
     }
 
-    required Namespace ns = 1;
-    required Tag tag = 2;
-    required FeatureName name = 3;
-    required Tenant tenant = 4;
+    required Tag tag = 1;
+    required FeatureName name = 2;
+    required Tenant tenant = 3;
 }
 
 message Timestamp {
@@ -188,12 +183,6 @@ message State {
         StatsState statsState = 6;
         MapState mapState = 7;
     }
-}
-
-message JoinKey {
-    option (scalapb.message).companion_extends = "io.findify.featury.model.JoinKeyOps";
-    required Key.Namespace ns = 1;
-    required Key.Tenant tenant = 2;
 }
 
 message StateKey {

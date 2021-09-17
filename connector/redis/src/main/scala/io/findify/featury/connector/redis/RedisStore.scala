@@ -2,7 +2,7 @@ package io.findify.featury.connector.redis
 
 import cats.effect.{IO, Resource}
 import io.findify.featury.connector.redis.RedisStore.RedisKey
-import io.findify.featury.model.Key.{Namespace, Scope, Tag, Tenant}
+import io.findify.featury.model.Key.{Scope, Tag, Tenant}
 import io.findify.featury.model.api.{ReadRequest, ReadResponse}
 import io.findify.featury.model.{FeatureValue, Key}
 import io.findify.featury.values.StoreCodec.DecodingError
@@ -28,7 +28,7 @@ case class RedisStore(client: Jedis, codec: StoreCodec) extends FeatureStore {
       tag <- request.tags
     } {
       transaction.hmget(
-        RedisKey(request.ns, request.tenant, tag).bytes,
+        RedisKey(request.tenant, tag).bytes,
         request.features.map(_.value.getBytes(StandardCharsets.UTF_8)): _*
       )
     }
@@ -67,14 +67,14 @@ case class RedisStore(client: Jedis, codec: StoreCodec) extends FeatureStore {
 
 object RedisStore {
 
-  case class RedisKey(ns: Namespace, tenant: Tenant, tag: Tag) {
-    val bytes = s"${ns.value}/${tag.scope.name}/${tenant.value}/${tag.value}".getBytes(StandardCharsets.UTF_8)
+  case class RedisKey(tenant: Tenant, tag: Tag) {
+    val bytes = s"${tag.scope.name}/${tenant.value}/${tag.value}".getBytes(StandardCharsets.UTF_8)
   }
   object RedisKey {
-    def apply(key: Key): RedisKey = new RedisKey(key.ns, key.tenant, key.tag)
+    def apply(key: Key): RedisKey = new RedisKey(key.tenant, key.tag)
     def apply(bytes: Array[Byte]): RedisKey = {
       val tokens = new String(bytes, StandardCharsets.UTF_8).split('/')
-      new RedisKey(Namespace(tokens(0)), Tenant(tokens(2)), Tag(Scope(tokens(1)), tokens(3)))
+      new RedisKey(Tenant(tokens(2)), Tag(Scope(tokens(1)), tokens(3)))
     }
   }
 
