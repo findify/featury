@@ -49,9 +49,7 @@ object Main extends IOApp {
     result <- config.store match {
       case redisConfig: RedisConfig =>
         logger.info("using Redis client") *>
-          RedisStore
-            .makeRedisClient(redisConfig)
-            .use(redis => serve(config, RedisStore(redis, redisConfig.codec), logger))
+          Resource.make(IO(RedisStore(redisConfig)))(s => IO(s.close())).use(redis => serve(config, redis, logger))
       case cassandraConfig: CassandraConfig =>
         logger.info("using Cassandra client") *>
           CassandraStore

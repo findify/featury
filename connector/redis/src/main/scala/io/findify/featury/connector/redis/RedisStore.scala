@@ -14,11 +14,13 @@ import java.nio.charset.StandardCharsets
 import scala.collection.JavaConverters._
 import scala.language.higherKinds
 
-case class RedisStore(client: Jedis, codec: StoreCodec) extends FeatureStore {
+case class RedisStore(config: RedisConfig) extends FeatureStore {
+
+  @transient lazy val client: Jedis = new Jedis(config.host, config.port)
 
   override def write(batch: List[FeatureValue]): Unit = {
     val transaction = client.multi()
-    batch.foreach(fv => transaction.hset(RedisKey(fv.key).bytes, fv.key.name.value.getBytes, codec.encode(fv)))
+    batch.foreach(fv => transaction.hset(RedisKey(fv.key).bytes, fv.key.name.value.getBytes, config.codec.encode(fv)))
     transaction.exec()
   }
 
@@ -56,7 +58,7 @@ case class RedisStore(client: Jedis, codec: StoreCodec) extends FeatureStore {
       case Nil          => IO.pure(acc)
       case null :: tail => decodeResponse(tail, acc)
       case head :: tail =>
-        codec.decode(head) match {
+        config.codec.decode(head) match {
           case Left(err)    => IO.raiseError(err)
           case Right(value) => decodeResponse(tail, value :: acc)
         }

@@ -16,15 +16,12 @@ class FeatureStoreSinkTest extends AnyFlatSpec with Matchers with FlinkStreamTes
   val now = Timestamp.now
 
   it should "write to inmem store" in {
-    val path  = File.newTemporaryDirectory("rocksdb_").deleteOnExit()
     val store = MemoryStore()
     val value = ScalarValue(k, now, SString("foo"))
     env
       .fromCollection[FeatureValue](List(value))
       .addSink(FeatureStoreSink(store, 100))
     env.execute()
-    val request = ReadRequest(List(k.tag), k.tenant, List(k.name))
-    store.read(request).unsafeRunSync() shouldBe ReadResponse(List(value))
     store.close()
   }
 }
