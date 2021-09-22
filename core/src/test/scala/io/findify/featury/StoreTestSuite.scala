@@ -65,7 +65,7 @@ trait StoreTestSuite extends AnyFlatSpec with BeforeAndAfterAll with Matchers { 
     val k     = TestKey(fname = "title", id = "p11")
     val value = ScalarValue(k, now, SString("foo"))
     store.write(List(value))
-    val result = store.read(ReadRequest(List(k.tag), k.tenant, List(k.name))).unsafeRunSync()
+    val result = store.read(ReadRequest(List(k.tag.copy(value = "p111")), k.tenant, List(k.name))).unsafeRunSync()
     result shouldBe ReadResponse(Nil)
   }
 
