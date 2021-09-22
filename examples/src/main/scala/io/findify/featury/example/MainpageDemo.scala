@@ -132,6 +132,7 @@ object MainpageDemo {
     // here we pipe writes through schema and compute feature update changelog
     val features = Featury.process(writes, schema, 10.seconds)
 
+    // an example clickthrough session
     val sessions = env
       .fromCollection(
         List(
@@ -148,14 +149,19 @@ object MainpageDemo {
     val join = new Join[Clickthrough] {
       override def by(left: Clickthrough): Tenant = tenant
 
+      // by which fields to we want to make a join?
       override def tags(left: Clickthrough): List[Key.Tag] = {
-        List(Tag(MerchantScope, "1"), Tag(UserScope, left.user)) ++ left.impressions.map(p => Tag(ProductScope, p))
+        List(
+          Tag(MerchantScope, "1"),                           // so join all merchant-wide features
+          Tag(UserScope, left.user)                          // also user-specific ones
+        ) ++ left.impressions.map(p => Tag(ProductScope, p)) // and also per-product ones
       }
 
+      // how to merge our custom Clickthrough and FeatureValues
       override def join(left: Clickthrough, values: List[FeatureValue]): Clickthrough =
         left.copy(values = left.values ++ values)
     }
+    // here we see all the joined feature values for each tag
     val joined = Featury.join(features, sessions, join, schema).executeAndCollect(100)
-    val br     = 1
   }
 }

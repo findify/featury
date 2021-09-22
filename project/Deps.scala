@@ -1,7 +1,7 @@
 object Deps {
-  val http4sVersion          = "1.0.0-M25"
+  val http4sVersion          = "1.0.0-M27"
   val log4catsVersion        = "2.1.1"
-  val scalatestVersion       = "3.2.9"
+  val scalatestVersion       = "3.2.10"
   val circeVersion           = "0.14.1"
   val circeYamlVersion       = "0.14.1"
   val cassandraDriverVersion = "4.13.0"

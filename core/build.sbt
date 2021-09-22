@@ -16,7 +16,7 @@ libraryDependencies ++= Seq(
   "io.circe"              %% "circe-generic"        % circeVersion,
   "io.circe"              %% "circe-generic-extras" % circeVersion,
   "io.circe"              %% "circe-parser"         % circeVersion,
-  "org.typelevel"         %% "cats-effect"          % "3.2.8",
+  "org.typelevel"         %% "cats-effect"          % "3.2.9",
   "com.github.pureconfig" %% "pureconfig"           % "0.16.0",
   "org.typelevel"         %% "log4cats-core"        % log4catsVersion,
   "org.typelevel"         %% "log4cats-slf4j"       % log4catsVersion,

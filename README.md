@@ -41,9 +41,34 @@ The problem solved by feature stores is typical for majority of production ML sy
 * Feature values are eventually recomputed (like computing running median over a sampled reservoir) and exposed
   in inference API.
 
+## Data formats
+
+Featury "ML features" accept a set of operations as an input, for example:
+* counter accepts increments
+* periodic counter accepts timestamped increments
+* scalar accepts puts
+* ... etc
+
+These operations are defined as [protobuf structures](https://github.com/findify/featury/blob/master/core/src/main/protobuf/featury.proto),
+ so it listens for operations and applies them.
+
+## Components
+
+Featury contains of multiple parts:
+1. Online API to serve feature values
+2. Online Flink-based data processing job, which accepts operations and modifies the feature values inside.
+3. Offline Flink-based historical processing job, which can bootstrap or rebuild feature values.
+4. Feature changelog files. Both offline and online jobs are emitting periodic updates to feature values, and the
+ complete change history is written to a set of files (on S3, for example)
+
 ## Example usage
 
+[Here is](https://github.com/findify/featury/blob/master/examples/src/main/scala/io/findify/featury/example) a small Featury example.
 
+The example is basically doing the following:
+* defines feature configuration (so what we're going to compute)
+* pipes a set of sample events thru the online Featury job
+* joins sample clickthrough with the latest feature values
 
 ## Stability and versioning
 
