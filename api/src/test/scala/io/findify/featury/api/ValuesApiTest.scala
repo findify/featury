@@ -23,9 +23,13 @@ class ValuesApiTest extends AnyFlatSpec with Matchers {
 
   it should "return nil" in {
     val request = ReadRequest(
-      tags = List(Tag(Scope("s"), "a")),
-      tenant = Tenant("t"),
-      features = List(FeatureName("f"))
+      List(
+        Key(
+          tag = Tag(Scope("s"), "a"),
+          tenant = Tenant("t"),
+          name = FeatureName("f")
+        )
+      )
     )
     val result = get(request)
     result.map(_.status.code) shouldBe Some(200)
@@ -34,9 +38,13 @@ class ValuesApiTest extends AnyFlatSpec with Matchers {
   it should "return values" in {
     store.cache.put(k, ScalarValue(k, now, SString("foo")))
     val request = ReadRequest(
-      tags = List(Tag(Scope("s"), "1")),
-      tenant = Tenant("t"),
-      features = List(FeatureName("f1"))
+      List(
+        Key(
+          tag = Tag(Scope("s"), "1"),
+          tenant = Tenant("t"),
+          name = FeatureName("f1")
+        )
+      )
     )
     val result = get(request)
     result.map(_.status.code) shouldBe Some(200)

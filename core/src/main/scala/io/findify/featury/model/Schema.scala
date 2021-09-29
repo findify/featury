@@ -13,14 +13,13 @@ case class Schema(
     freqs: Map[FeatureKey, FreqEstimatorConfig],
     stats: Map[FeatureKey, StatsEstimatorConfig],
     lists: Map[FeatureKey, BoundedListConfig],
-    maps: Map[FeatureKey, MapConfig]
+    maps: Map[FeatureKey, MapConfig],
+    configs: Map[FeatureKey, FeatureConfig]
 ) {
-  lazy val scopeNameCache: Map[Scope, List[FeatureName]] =
+  val scopeNameCache: Map[Scope, List[FeatureName]] =
     configs.values.toList.groupBy(_.scope).map { case (k, configs) =>
       k -> configs.map(_.name)
     }
-  lazy val configs: Map[FeatureKey, FeatureConfig] =
-    (counters ++ scalars ++ periodicCounters ++ freqs ++ stats ++ lists ++ maps)
 }
 
 object Schema {
@@ -50,7 +49,8 @@ object Schema {
       freqs = configs.collect { case (key, c: FreqEstimatorConfig) => key -> c }.toMap,
       stats = configs.collect { case (key, c: StatsEstimatorConfig) => key -> c }.toMap,
       lists = configs.collect { case (key, c: BoundedListConfig) => key -> c }.toMap,
-      maps = configs.collect { case (key, c: MapConfig) => key -> c }.toMap
+      maps = configs.collect { case (key, c: MapConfig) => key -> c }.toMap,
+      configs = configs.toMap
     )
   }
   implicit val schemaDecoder: Decoder[Schema] = deriveDecoder[SchemaYaml].map(s => Schema(s.features))

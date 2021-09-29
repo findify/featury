@@ -65,6 +65,21 @@ class FeatureProcessFunction(schema: Schema)(implicit
       case None =>
         LOG.warn(s"no features configured for a write $write")
       case Some(feature) =>
+        schema.configs.get(FeatureKey(write.key)) match {
+          case Some(conf) => // ok
+          case None       => LOG.warn(s"config missing for write $write")
+        }
+        (feature, write) match {
+          case (feature: ScalarFeature, w: Put)                 => // ok
+          case (feature: MapFeature, w: PutTuple)               => // ok
+          case (counter: Counter, w: Increment)                 => // ok
+          case (list: BoundedList, w: Append)                   => // ok
+          case (estimator: FreqEstimator, w: PutFreqSample)     => // ok
+          case (counter: PeriodicCounter, w: PeriodicIncrement) => // ok
+          case (estimator: StatsEstimator, w: PutStatSample)    => // ok
+          case (f, w) =>
+            LOG.warn(s"type mismatch: feature=$f write=$w")
+        }
         feature.put(write)
         val lastUpdate = Option(updated.value()).map(ts => Timestamp(ts)).getOrElse(Timestamp(0L))
         if (lastUpdate.diff(write.ts) >= feature.config.refresh) {
@@ -72,14 +87,19 @@ class FeatureProcessFunction(schema: Schema)(implicit
           feature
             .computeValue(write.key, write.ts)
             .foreach(value => {
-              (value, write) match {
-                case (_: ScalarValue, _: Put)                        => // ok
-                case (_: NumStatsValue, _: PutStatSample)            => // ok
-                case (_: FrequencyValue, _: PutFreqSample)           => // ok
-                case (_: CounterValue, _: Increment)                 => // ok
-                case (_: PeriodicCounterValue, _: PeriodicIncrement) => // ok
-                case (v, w) =>
-                  LOG.warn(s"write $w produced value $v")
+              (value, write, schema.configs.get(FeatureKey(write.key))) match {
+                case (v: ScalarValue, w: Put, Some(c: ScalarConfig))
+                    if (w.key == v.key) && (c.name == v.key.name) && (c.scope == v.key.tag.scope) && (c.name == v.key.name) => // ok
+                case (v: NumStatsValue, w: PutStatSample, Some(c: StatsEstimatorConfig))
+                    if (w.key == v.key) && (c.name == v.key.name) && (c.scope == v.key.tag.scope) && (c.name == v.key.name) => // ok
+                case (v: FrequencyValue, w: PutFreqSample, Some(c: FreqEstimatorConfig))
+                    if (w.key == v.key) && (c.name == v.key.name) && (c.scope == v.key.tag.scope) && (c.name == v.key.name) => // ok
+                case (v: CounterValue, w: Increment, Some(c: CounterConfig))
+                    if (w.key == v.key) && (c.name == v.key.name) && (c.scope == v.key.tag.scope) && (c.name == v.key.name) => // ok
+                case (v: PeriodicCounterValue, w: PeriodicIncrement, Some(c: PeriodicCounterConfig))
+                    if (w.key == v.key) && (c.name == v.key.name) && (c.scope == v.key.tag.scope) && (c.name == v.key.name) => // ok
+                case (v, w, c) =>
+                  LOG.warn(s"write $w produced value $v for config $c")
               }
               out.collect(value)
             })

@@ -18,10 +18,9 @@ case class RocksDBStore(path: String, codec: StoreCodec) extends FeatureStore {
 
   override def read(request: ReadRequest): IO[ReadResponse] = {
     val parsed = for {
-      tag  <- request.tags
-      name <- request.features
-      key = keyBytes(Key(tag, name, request.tenant))
-      value <- Option(db.get(key))
+      key <- request.keys
+      keyb = keyBytes(key)
+      value <- Option(db.get(keyb))
     } yield {
       codec.decode(value)
     }

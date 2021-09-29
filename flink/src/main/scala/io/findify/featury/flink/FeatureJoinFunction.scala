@@ -78,19 +78,34 @@ class FeatureJoinFunction[T](schema: Schema, join: Join[T])(implicit
   ): Unit = {
     value match {
       case s @ ScalarValue(key, ts, value) =>
-        schema.scalars.get(FeatureKey(key)) match {
+        val fk = FeatureKey(key)
+        schema.scalars.get(fk) match {
           case Some(_) =>
-          case None    => LOG.warn(s"got scalar value $s, but the schema type is ${schema.configs.get(FeatureKey(key))}")
+          case None =>
+            LOG.warn(
+              s"for (t=${ctx.getCurrentKey} key=$key fk=$fk) got scalar value $s, but the schema type is ${schema.configs
+                .get(FeatureKey(key))}"
+            )
         }
       case ns @ NumStatsValue(key, ts, min, max, quantiles) =>
-        schema.stats.get(FeatureKey(key)) match {
+        val fk = FeatureKey(key)
+        schema.stats.get(fk) match {
           case Some(_) =>
-          case None    => LOG.warn(s"got ns value $ns, but the schema type is ${schema.configs.get(FeatureKey(key))}")
+          case None =>
+            LOG.warn(
+              s"for (t=${ctx.getCurrentKey} key=$key fk=$fk) got ns value $ns, but the schema type is ${schema.configs
+                .get(FeatureKey(key))}"
+            )
         }
       case pc @ PeriodicCounterValue(key, ts, values) =>
-        schema.periodicCounters.get(FeatureKey(key)) match {
+        val fk = FeatureKey(key)
+        schema.periodicCounters.get(fk) match {
           case Some(_) =>
-          case None    => LOG.warn(s"got pc value $pc, but the schema type is ${schema.configs.get(FeatureKey(key))}")
+          case None =>
+            LOG.warn(
+              s"for (t=${ctx.getCurrentKey} key=$key fk=$fk) got pc value $pc, but the schema type is ${schema.configs
+                .get(FeatureKey(key))}"
+            )
         }
       case _ => // ok
     }

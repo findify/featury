@@ -26,7 +26,7 @@ class MetricsApiTest extends AnyFlatSpec with Matchers {
     val metrics = MetricsApi(schema)
     metrics.collectFeatureValues(ScalarValue(key, Timestamp.now, SDouble(3.0)))
     val samples = metrics.registry.metricFamilySamples().asIterator().asScala.flatMap(_.samples.asScala).toList
-    samples.exists(_.name == "featury_ns_s_f1_value_bucket") shouldBe true
-    samples.exists(_.name == "featury_ns_s_f1_lag_bucket") shouldBe true
+    samples.exists(_.name == "featury_s_f1_value_bucket") shouldBe true
+    samples.exists(_.name == "featury_s_f1_lag_bucket") shouldBe true
   }
 }

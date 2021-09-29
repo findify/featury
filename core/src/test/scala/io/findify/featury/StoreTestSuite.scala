@@ -4,7 +4,7 @@ import cats.effect.unsafe.implicits.global
 import cats.effect.{IO, Resource}
 import io.findify.featury.model.Key.{FeatureName, Tag}
 import io.findify.featury.model.api.{ReadRequest, ReadResponse}
-import io.findify.featury.model.{SString, ScalarValue, Timestamp}
+import io.findify.featury.model.{Key, SString, ScalarValue, Timestamp}
 import io.findify.featury.utils.TestKey
 import io.findify.featury.values.FeatureStore
 import org.scalatest.flatspec.AnyFlatSpec
@@ -35,7 +35,7 @@ trait StoreTestSuite extends AnyFlatSpec with BeforeAndAfterAll with Matchers { 
     val k     = TestKey(fname = "title", id = "p")
     val value = ScalarValue(k, now, SString("foo"))
     store.write(List(value))
-    val result = store.read(ReadRequest(List(k.tag), k.tenant, List(k.name))).unsafeRunSync()
+    val result = store.read(ReadRequest(List(Key(k.tag, k.name, k.tenant)))).unsafeRunSync()
     result shouldBe ReadResponse(List(value))
   }
 
@@ -46,7 +46,7 @@ trait StoreTestSuite extends AnyFlatSpec with BeforeAndAfterAll with Matchers { 
     val value2 = ScalarValue(k.copy(name = FeatureName("foo2")), now, SString("foo"))
     store.write(List(value2))
     val result = store
-      .read(ReadRequest(List(k.tag), k.tenant, List(value1.key.name, value2.key.name)))
+      .read(ReadRequest(List(Key(k.tag, value1.key.name, k.tenant), Key(k.tag, value2.key.name, k.tenant))))
       .unsafeRunSync()
     result.features.toSet shouldBe Set(value2, value1)
   }
@@ -57,7 +57,7 @@ trait StoreTestSuite extends AnyFlatSpec with BeforeAndAfterAll with Matchers { 
     store.write(List(value1))
     val value2 = ScalarValue(k.copy(name = FeatureName("foo1")), now.plus(10.seconds), SString("foo"))
     store.write(List(value2))
-    val result = store.read(ReadRequest(List(k.tag), k.tenant, List(value1.key.name))).unsafeRunSync()
+    val result = store.read(ReadRequest(List(Key(k.tag, value1.key.name, k.tenant)))).unsafeRunSync()
     result shouldBe ReadResponse(List(value2))
   }
 
@@ -65,7 +65,7 @@ trait StoreTestSuite extends AnyFlatSpec with BeforeAndAfterAll with Matchers { 
     val k     = TestKey(fname = "title", id = "p11")
     val value = ScalarValue(k, now, SString("foo"))
     store.write(List(value))
-    val result = store.read(ReadRequest(List(k.tag.copy(value = "p111")), k.tenant, List(k.name))).unsafeRunSync()
+    val result = store.read(ReadRequest(List(Key(k.tag.copy(value = "p111"), k.name, k.tenant)))).unsafeRunSync()
     result shouldBe ReadResponse(Nil)
   }
 
@@ -74,7 +74,7 @@ trait StoreTestSuite extends AnyFlatSpec with BeforeAndAfterAll with Matchers { 
     val value = ScalarValue(k, now, SString("foo"))
     store.write(List(value))
     val result =
-      store.read(ReadRequest(List(k.tag), k.tenant, List(FeatureName("non-existent")))).unsafeRunSync()
+      store.read(ReadRequest(List(Key(k.tag, FeatureName("non-existent"), k.tenant)))).unsafeRunSync()
     result shouldBe ReadResponse(Nil)
 
   }
