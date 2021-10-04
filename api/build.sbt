@@ -8,10 +8,10 @@ libraryDependencies ++= Seq(
   "org.http4s"       %% "http4s-blaze-client"  % http4sVersion,
   "org.http4s"       %% "http4s-circe"         % http4sVersion,
   "com.github.scopt" %% "scopt"                % "4.0.1",
-  "ch.qos.logback"    % "logback-classic"      % "1.2.3",
-  "io.prometheus"     % "simpleclient"         % "0.10.0",
-  "io.prometheus"     % "simpleclient_hotspot" % "0.10.0",
-  "io.prometheus"     % "simpleclient_common"  % "0.10.0"
+  "ch.qos.logback"    % "logback-classic"      % logbackVersion,
+  "io.prometheus"     % "simpleclient"         % prometheusVersion,
+  "io.prometheus"     % "simpleclient_hotspot" % prometheusVersion,
+  "io.prometheus"     % "simpleclient_common"  % prometheusVersion
 )
 
 scalacOptions += "-Ypartial-unification"

@@ -8,24 +8,19 @@ import scala.util.Random
 object TestKey {
   def apply(c: FeatureConfig, id: String) = {
     Key(
-      ns = c.ns,
-      scope = c.scope,
+      tag = Tag(c.scope, id),
       name = c.name,
-      tenant = Tenant("1"),
-      id = Id(id)
+      tenant = Tenant("1")
     )
   }
   def apply(
-      ns: String = "dev",
-      group: String = "product",
+      scope: String = "product",
       fname: String = "f" + Random.nextInt(1000),
       tenant: Int = 1,
       id: String = "p1"
   ) = Key(
-    ns = Namespace(ns),
-    scope = Scope(group),
+    tag = Tag(Scope(scope), id),
     name = FeatureName(fname),
-    tenant = Tenant(tenant.toString),
-    id = Id(id)
+    tenant = Tenant(tenant.toString)
   )
 }

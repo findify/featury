@@ -1,14 +1,26 @@
 package io.findify.featury.flink
 
-import io.findify.featury.model.{FeatureValue, ScopeKey}
+import io.findify.featury.model.Key.Tenant
+import io.findify.featury.model.{
+  BoundedListValue,
+  CounterValue,
+  FeatureKey,
+  FeatureValue,
+  FrequencyValue,
+  MapValue,
+  NumStatsValue,
+  PeriodicCounterValue,
+  ScalarValue,
+  Schema,
+  StateKey
+}
 import org.apache.flink.api.common.state.{MapState, MapStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.runtime.state.{FunctionInitializationContext, FunctionSnapshotContext}
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
 import org.apache.flink.streaming.api.functions.co.KeyedCoProcessFunction
 import org.apache.flink.util.Collector
-
-import scala.collection.JavaConverters._
+import org.slf4j.LoggerFactory
 
 /** A temporal join function. See Featury.join for usage.
   *
@@ -23,45 +35,81 @@ import scala.collection.JavaConverters._
   * @param vi
   * @tparam T
   */
-class FeatureJoinFunction[T](join: Join[T])(implicit
-    ki: TypeInformation[String],
+class FeatureJoinFunction[T](schema: Schema, join: Join[T])(implicit
+    ki: TypeInformation[StateKey],
     vi: TypeInformation[FeatureValue]
-) extends KeyedCoProcessFunction[Option[ScopeKey], T, FeatureValue, T]
+) extends KeyedCoProcessFunction[Tenant, T, FeatureValue, T]
     with CheckpointedFunction {
+  private val LOG = LoggerFactory.getLogger(classOf[FeatureJoinFunction[T]])
 
   // to keep track of the latest feature value.
   // map key is feature name
-  // the whole state is keyed by a ScopeKey (so  ns+scope+tenant+id)
-  var lastValues: MapState[String, FeatureValue] = _
+  // the whole state is keyed by a ns+tenant
+  var values: MapState[StateKey, FeatureValue] = _
 
   override def initializeState(context: FunctionInitializationContext): Unit = {
-    val desc = new MapStateDescriptor[String, FeatureValue]("last", ki, vi)
-    lastValues = context.getKeyedStateStore.getMapState(desc)
+    val desc = new MapStateDescriptor[StateKey, FeatureValue]("last", ki, vi)
+    values = context.getKeyedStateStore.getMapState(desc)
   }
 
   override def snapshotState(context: FunctionSnapshotContext): Unit = {}
 
   override def processElement1(
       value: T,
-      ctx: KeyedCoProcessFunction[Option[ScopeKey], T, FeatureValue, T]#Context,
+      ctx: KeyedCoProcessFunction[Tenant, T, FeatureValue, T]#Context,
       out: Collector[T]
   ): Unit = {
-    if (ctx.getCurrentKey.isDefined) {
-      // just emit all the features we have for current timestamp for this ScopeKey
-      val values = lastValues.values().asScala.toList
-      out.collect(join.join(value, values))
+    val loaded = for {
+      tag         <- join.tags(value)
+      features    <- schema.scopeNameCache.get(tag.scope).toList
+      featureName <- features
+      fv          <- Option(values.get(StateKey(tag, featureName)))
+    } yield {
+      fv
     }
+    // just emit all the features we have for current timestamp for this ScopeKey
+    out.collect(join.join(value, loaded))
   }
 
   override def processElement2(
       value: FeatureValue,
-      ctx: KeyedCoProcessFunction[Option[ScopeKey], T, FeatureValue, T]#Context,
+      ctx: KeyedCoProcessFunction[Tenant, T, FeatureValue, T]#Context,
       out: Collector[T]
   ): Unit = {
-    // replace previous feature value by a new one
-    if (ctx.getCurrentKey.isDefined) {
-      lastValues.put(value.key.name.value, value)
+    value match {
+      case s @ ScalarValue(key, ts, value) =>
+        val fk = FeatureKey(key)
+        schema.scalars.get(fk) match {
+          case Some(_) =>
+          case None =>
+            LOG.warn(
+              s"for (t=${ctx.getCurrentKey} key=$key fk=$fk) got scalar value $s, but the schema type is ${schema.configs
+                .get(FeatureKey(key))}"
+            )
+        }
+      case ns @ NumStatsValue(key, ts, min, max, quantiles) =>
+        val fk = FeatureKey(key)
+        schema.stats.get(fk) match {
+          case Some(_) =>
+          case None =>
+            LOG.warn(
+              s"for (t=${ctx.getCurrentKey} key=$key fk=$fk) got ns value $ns, but the schema type is ${schema.configs
+                .get(FeatureKey(key))}"
+            )
+        }
+      case pc @ PeriodicCounterValue(key, ts, values) =>
+        val fk = FeatureKey(key)
+        schema.periodicCounters.get(fk) match {
+          case Some(_) =>
+          case None =>
+            LOG.warn(
+              s"for (t=${ctx.getCurrentKey} key=$key fk=$fk) got pc value $pc, but the schema type is ${schema.configs
+                .get(FeatureKey(key))}"
+            )
+        }
+      case _ => // ok
     }
+    values.put(StateKey(value.key.tag, value.key.name), value)
   }
 
 }

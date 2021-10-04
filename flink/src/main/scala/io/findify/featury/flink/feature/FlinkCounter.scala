@@ -17,8 +17,9 @@ case class FlinkCounter(config: CounterConfig, valueState: ValueState[Long]) ext
       valueState.update(action.inc)
   }
 
-  override def computeValue(key: Key, ts: Timestamp): Option[CounterValue] =
+  override def computeValue(key: Key, ts: Timestamp): Option[CounterValue] = {
     Option(valueState.value()).map(v => CounterValue(key, ts, v))
+  }
 
   override def writeState(state: CounterState): Unit = valueState.update(state.value)
 

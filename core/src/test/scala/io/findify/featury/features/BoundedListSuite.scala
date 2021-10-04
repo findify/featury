@@ -13,7 +13,6 @@ import scala.concurrent.duration._
 trait BoundedListSuite extends FeatureSuite[Append] {
   val config = BoundedListConfig(
     name = FeatureName("example"),
-    ns = Namespace("a"),
     scope = Scope("b"),
     count = 10,
     duration = 5.hour

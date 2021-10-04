@@ -2,12 +2,12 @@ import Deps._
 
 name := "featury"
 
-lazy val featuryVersion = "0.1.3-M4-SNAPSHOT"
+lazy val featuryVersion = "0.2.1-M10-SNAPSHOT"
 
 version := featuryVersion
 
 lazy val shared = Seq(
-  scalaVersion := "2.12.14",
+  scalaVersion := "2.12.15",
   version := featuryVersion,
   organization := "io.findify"
 )
@@ -36,7 +36,12 @@ lazy val flink = (project in file("flink"))
   .settings(shared: _*)
   .settings(mavenSettings: _*)
   .dependsOn(core % "test->test;compile->compile")
-  .dependsOn(rocksdb % "test->test;compile->compile")
+
+lazy val examples = (project in file("examples"))
+  .settings(shared: _*)
+  .settings(mavenSettings: _*)
+  .settings(publishArtifact := false)
+  .dependsOn(flink % "test->test;compile->compile")
 
 lazy val api = (project in file("api"))
   .settings(shared: _*)
@@ -61,12 +66,16 @@ lazy val rocksdb = (project in file("connector/rocksdb"))
   .dependsOn(core % "test->test;compile->compile")
 
 lazy val root = (project in file("."))
-  .aggregate(core, flink, api, redis, cassandra, rocksdb)
+  .aggregate(core, flink, api, redis, cassandra, rocksdb, examples)
   .settings(
-    name := "Featury"
+    name := "Featury",
+    publishArtifact := false,
+    publish / skip := true
   )
   .settings(shared: _*)
 
 sonatypeProfileName := "io.findify"
 
 usePgpKeyHex("6CFDF5062176DE9FB05578013C45A82BD53DADD4")
+
+ThisBuild / evictionErrorLevel := Level.Info

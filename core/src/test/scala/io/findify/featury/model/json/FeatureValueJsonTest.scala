@@ -12,7 +12,7 @@ class FeatureValueJsonTest extends AnyFlatSpec with Matchers {
   import FeatureValueJson._
 
   val kjson = """{"ns":"dev","scope":"product","tenant":"a","name":"feature","id":"123"}"""
-  val k     = Key(Namespace("dev"), Scope("product"), FeatureName("feature"), Tenant("a"), Id("123"))
+  val k     = Key(Tag(Scope("product"), "123"), FeatureName("feature"), Tenant("a"))
 
   it should "decode string scalar" in {
     val result = decode[FeatureValue](s"""{"type":"scalar", "key": $kjson, "ts": 0, "value":"foo"}""")

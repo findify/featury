@@ -45,7 +45,7 @@ case class MetricsApi(schema: Schema) {
   }
 
   def keyLabels(key: Key): List[String] = {
-    List(key.ns.value, key.scope.value, key.tenant.value, key.name.value)
+    List(key.tag.scope.name, key.tenant.value, key.name.value)
   }
 
 }

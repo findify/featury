@@ -16,11 +16,8 @@ case class ValuesApi(store: FeatureStore, logger: Logger[IO], metrics: MetricsAp
     case GET -> Root / "status" => Ok("")
     case post @ POST -> Root / "api" / "values" =>
       for {
-        read <- post.as[ReadRequest]
-        _ <- logger.debug(
-          s"received request: ns=${read.ns} scope=${read.scope} tenant=${read.tenant} features=${read.features
-            .map(_.value)} ids=${read.ids.map(_.value)}"
-        )
+        read     <- post.as[ReadRequest]
+        _        <- logger.debug(s"received request: keys=${read.keys}")
         response <- store.read(read)
         _        <- IO(response.features.foreach(metrics.collectFeatureValues))
         _        <- logger.debug(s"read ${response.features.size} values")

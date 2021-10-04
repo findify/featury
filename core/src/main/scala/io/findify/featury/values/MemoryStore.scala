@@ -14,9 +14,8 @@ case class MemoryStore() extends FeatureStore {
 
   override def read(request: ReadRequest): IO[ReadResponse] = IO {
     val values = for {
-      id    <- request.ids
-      name  <- request.features
-      value <- cache.get(Key(request.ns, request.scope, name, request.tenant, id))
+      key   <- request.keys
+      value <- cache.get(key)
     } yield {
       value
     }

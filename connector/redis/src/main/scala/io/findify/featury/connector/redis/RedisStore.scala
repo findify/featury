@@ -2,61 +2,54 @@ package io.findify.featury.connector.redis
 
 import cats.effect.{IO, Resource}
 import io.findify.featury.connector.redis.RedisStore.RedisKey
-import io.findify.featury.model.Key.{Id, Namespace, Scope, Tenant}
+import io.findify.featury.model.Key.{FeatureName, Scope, Tag, Tenant}
 import io.findify.featury.model.api.{ReadRequest, ReadResponse}
-import io.findify.featury.model.{FeatureValue, Key}
-import io.findify.featury.values.StoreCodec.DecodingError
+import io.findify.featury.model.{FeatureKey, FeatureValue, Key}
 import io.findify.featury.values.ValueStoreConfig.RedisConfig
 import io.findify.featury.values.{FeatureStore, StoreCodec}
 import redis.clients.jedis.Jedis
 
 import java.nio.charset.StandardCharsets
 import scala.collection.JavaConverters._
+import scala.concurrent.duration.FiniteDuration
 import scala.language.higherKinds
+import scala.concurrent.duration._
 
-case class RedisStore(client: Jedis, codec: StoreCodec) extends FeatureStore {
+case class RedisStore(config: RedisConfig, expires: Map[FeatureKey, FiniteDuration] = Map.empty) extends FeatureStore {
+
+  @transient lazy val client: Jedis = new Jedis(config.host, config.port)
+  val DEFAULT_EXPIRE                = 60.days
 
   override def write(batch: List[FeatureValue]): Unit = {
-    val transaction = client.multi()
-    batch.foreach(fv => transaction.hset(RedisKey(fv.key).bytes, fv.key.name.value.getBytes, codec.encode(fv)))
-    transaction.exec()
+    val values = batch.flatMap(fv => List(RedisKey(fv.key).bytes, config.codec.encode(fv)))
+    client.mset(values: _*)
+    val tx = client.multi()
+    for {
+      fv <- batch
+      expire = expires.getOrElse(FeatureKey(fv.key), DEFAULT_EXPIRE)
+      key    = RedisKey(fv.key).bytes
+    } {
+      tx.expire(key, expire.toSeconds)
+    }
+    tx.exec()
   }
 
   override def read(request: ReadRequest): IO[ReadResponse] = {
-    val transaction = client.multi()
+    val keys = request.keys.map(RedisKey.apply)
     for {
-      id <- request.ids
-    } {
-      transaction.hmget(
-        RedisKey(request.ns, request.scope, request.tenant, id).bytes,
-        request.features.map(_.value.getBytes(StandardCharsets.UTF_8)): _*
-      )
-    }
-    for {
-      response <- IO(transaction.exec())
-      decoded  <- decodeResponses(response.asScala.toList)
+      response <- IO(client.mget(keys.map(_.bytes): _*))
+      decoded  <- decodeResponse(response.asScala.toList)
     } yield {
       ReadResponse(decoded)
     }
   }
 
-  private def decodeResponses(responses: List[AnyRef], acc: List[FeatureValue] = Nil): IO[List[FeatureValue]] =
+  private def decodeResponse(responses: List[Array[Byte]], acc: List[FeatureValue] = Nil): IO[List[FeatureValue]] =
     responses match {
-      case Nil => IO.pure(acc)
-      case head :: tail =>
-        head match {
-          case bytes: java.util.List[Array[Byte]] =>
-            decodeResponse(bytes.asScala.toList).flatMap(values => decodeResponses(tail, values ++ acc))
-          case _ => IO.raiseError(DecodingError(""))
-        }
-    }
-
-  private def decodeResponse(response: List[Array[Byte]], acc: List[FeatureValue] = Nil): IO[List[FeatureValue]] =
-    response match {
       case Nil          => IO.pure(acc)
       case null :: tail => decodeResponse(tail, acc)
       case head :: tail =>
-        codec.decode(head) match {
+        config.codec.decode(head) match {
           case Left(err)    => IO.raiseError(err)
           case Right(value) => decodeResponse(tail, value :: acc)
         }
@@ -67,17 +60,15 @@ case class RedisStore(client: Jedis, codec: StoreCodec) extends FeatureStore {
 
 object RedisStore {
 
-  case class RedisKey(ns: Namespace, scope: Scope, tenant: Tenant, id: Id) {
-    val bytes = s"${ns.value}/${scope.value}/${tenant.value}/${id.value}".getBytes(StandardCharsets.UTF_8)
+  case class RedisKey(key: Key) {
+    val bytes =
+      s"${key.tag.scope.name}/${key.tenant.value}/${key.name.value}/${key.tag.value}".getBytes(StandardCharsets.UTF_8)
   }
   object RedisKey {
-    def apply(key: Key) = new RedisKey(key.ns, key.scope, key.tenant, key.id)
-    def apply(bytes: Array[Byte]) = {
+    def apply(bytes: Array[Byte]): RedisKey = {
       val tokens = new String(bytes, StandardCharsets.UTF_8).split('/')
-      new RedisKey(Namespace(tokens(0)), Scope(tokens(1)), Tenant(tokens(2)), Id(tokens(3)))
+      new RedisKey(Key(tag = Tag(Scope(tokens(0)), tokens(3)), name = FeatureName(tokens(2)), Tenant(tokens(1))))
     }
   }
 
-  def makeRedisClient(config: RedisConfig): Resource[IO, Jedis] =
-    Resource.make(IO(new Jedis(config.host, config.port)))(client => IO(client.close()))
 }

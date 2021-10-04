@@ -38,8 +38,10 @@ case class FeatureStoreSink(dest: FeatureStore, batchSize: Int)(implicit
 
   private def commit() = {
     val batch = buffer.get().asScala.toList
-    dest.write(batch)
-    buffer.clear()
-    size = 0
+    if (batch.nonEmpty) {
+      dest.write(batch)
+      buffer.clear()
+      size = 0
+    }
   }
 }

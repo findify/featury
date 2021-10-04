@@ -4,6 +4,7 @@ import io.circe.Decoder
 import io.circe.generic.semiauto._
 import io.circe.yaml.parser
 import io.findify.featury.model.FeatureConfig._
+import io.findify.featury.model.Key._
 
 case class Schema(
     counters: Map[FeatureKey, CounterConfig],
@@ -12,10 +13,13 @@ case class Schema(
     freqs: Map[FeatureKey, FreqEstimatorConfig],
     stats: Map[FeatureKey, StatsEstimatorConfig],
     lists: Map[FeatureKey, BoundedListConfig],
-    maps: Map[FeatureKey, MapConfig]
+    maps: Map[FeatureKey, MapConfig],
+    configs: Map[FeatureKey, FeatureConfig]
 ) {
-  def configs: Map[FeatureKey, FeatureConfig] =
-    (counters ++ scalars ++ periodicCounters ++ freqs ++ stats ++ lists ++ maps)
+  val scopeNameCache: Map[Scope, List[FeatureName]] =
+    configs.values.toList.groupBy(_.scope).map { case (k, configs) =>
+      k -> configs.map(_.name)
+    }
 }
 
 object Schema {
@@ -36,7 +40,7 @@ object Schema {
     val configs = for {
       c <- confs
     } yield {
-      FeatureKey(c.ns, c.scope, c.name) -> c
+      FeatureKey(c.scope, c.name) -> c
     }
     new Schema(
       counters = configs.collect { case (key, c: CounterConfig) => key -> c }.toMap,
@@ -45,7 +49,8 @@ object Schema {
       freqs = configs.collect { case (key, c: FreqEstimatorConfig) => key -> c }.toMap,
       stats = configs.collect { case (key, c: StatsEstimatorConfig) => key -> c }.toMap,
       lists = configs.collect { case (key, c: BoundedListConfig) => key -> c }.toMap,
-      maps = configs.collect { case (key, c: MapConfig) => key -> c }.toMap
+      maps = configs.collect { case (key, c: MapConfig) => key -> c }.toMap,
+      configs = configs.toMap
     )
   }
   implicit val schemaDecoder: Decoder[Schema] = deriveDecoder[SchemaYaml].map(s => Schema(s.features))

@@ -1,7 +1,7 @@
 package io.findify.featury
 
 import io.findify.featury.model.FeatureConfig.ScalarConfig
-import io.findify.featury.model.Key.{FeatureName, Scope, Namespace}
+import io.findify.featury.model.Key.{FeatureName, Scope}
 import io.findify.featury.model.{FeatureConfig, Schema}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -33,7 +33,6 @@ class SchemaTest extends AnyFlatSpec with Matchers {
         List(
           ScalarConfig(
             name = FeatureName("title"),
-            ns = Namespace("dev"),
             scope = Scope("product"),
             ttl = 1.day,
             refresh = 0.seconds
@@ -63,7 +62,6 @@ class SchemaTest extends AnyFlatSpec with Matchers {
         List(
           ScalarConfig(
             name = FeatureName("title"),
-            ns = Namespace("dev"),
             scope = Scope("product"),
             ttl = 1.day,
             refresh = 0.seconds,

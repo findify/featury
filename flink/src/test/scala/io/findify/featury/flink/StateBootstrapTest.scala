@@ -5,7 +5,7 @@ import io.findify.featury.flink.FeatureJoinTest.{MerchantScope, ProductScope, Se
 import io.findify.featury.flink.format.{BulkCodec, BulkInputFormat}
 import io.findify.featury.flink.util.Compress.NoCompression
 import io.findify.featury.model.FeatureConfig.{CounterConfig, ScalarConfig}
-import io.findify.featury.model.Key.{FeatureName, Namespace}
+import io.findify.featury.model.Key.FeatureName
 import io.findify.featury.model.{Key, SString, ScalarState, Schema, State, Timestamp}
 import io.findify.featury.utils.TestKey
 import org.scalatest.flatspec.AnyFlatSpec
@@ -21,14 +21,13 @@ import scala.concurrent.duration._
 
 class StateBootstrapTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
   val now = Timestamp.now
-  val dev = Namespace("dev")
   val schema = Schema(
     List(
-      ScalarConfig(dev, MerchantScope, FeatureName("lang"), refresh = 0.seconds),
-      ScalarConfig(dev, ProductScope, FeatureName("title"), refresh = 0.seconds),
-      CounterConfig(dev, SearchScope, FeatureName("count"), refresh = 0.seconds),
-      CounterConfig(dev, UserScope, FeatureName("count"), refresh = 0.seconds),
-      CounterConfig(dev, ProductScope, FeatureName("clicks"), refresh = 0.seconds)
+      ScalarConfig(MerchantScope, FeatureName("lang"), refresh = 0.seconds),
+      ScalarConfig(ProductScope, FeatureName("title"), refresh = 0.seconds),
+      CounterConfig(SearchScope, FeatureName("count"), refresh = 0.seconds),
+      CounterConfig(UserScope, FeatureName("count"), refresh = 0.seconds),
+      CounterConfig(ProductScope, FeatureName("clicks"), refresh = 0.seconds)
     )
   )
 
@@ -37,8 +36,8 @@ class StateBootstrapTest extends AnyFlatSpec with Matchers with FlinkStreamTest 
     val path = File.newTemporaryDirectory("state_test_").deleteOnExit()
     val source = env.fromCollection[State](
       List(
-        ScalarState(TestKey(group = "merchant", fname = "lang", id = "1"), now, SString("foo")),
-        ScalarState(TestKey(group = "merchant", fname = "lang", id = "2"), now, SString("bar"))
+        ScalarState(TestKey(scope = "merchant", fname = "lang", id = "1"), now, SString("foo")),
+        ScalarState(TestKey(scope = "merchant", fname = "lang", id = "2"), now, SString("bar"))
       )
     )
     Featury.writeState(source, new Path(path.toString()), NoCompression)

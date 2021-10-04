@@ -2,14 +2,13 @@ package io.findify.featury.flink
 
 import io.findify.featury.flink.format.{BulkCodec, BulkInputFormat, CompressedBulkReader, CompressedBulkWriter}
 import io.findify.featury.flink.util.Compress
-import io.findify.featury.model.Key.Scope
-import io.findify.featury.model.{Schema, ScopeKeyOps, _}
+import io.findify.featury.model.Key.Tenant
+import io.findify.featury.model.{Schema, _}
 import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.api.scala.extensions._
 import org.apache.flink.api.scala._
-import org.apache.flink.connector.file.sink.FileSink
 import org.apache.flink.connector.file.src.FileSource
 import org.apache.flink.core.fs.Path
 import org.apache.flink.streaming.api.datastream.DataStreamSink
@@ -36,28 +35,21 @@ object Featury {
     * @param values a stream of feature values. See Featury.process for details how to build one.
     * @param events a stream of timestamped session events. Timestamp info is taken from watermark (or event timestamps)
     *               from flink itself.
-    * @param scopes a set of scopes to make join over. This function recursively joins each scope one by one.
-    * @param by join definition
+    * @param j join definition
     * @tparam T
     * @return a stream of original session events, but with corresponsing feature values attached.
     */
-  def join[T](values: DataStream[FeatureValue], events: DataStream[T], scopes: List[Scope], by: Join[T])(implicit
+  def join[T](values: DataStream[FeatureValue], events: DataStream[T], j: Join[T], schema: Schema)(implicit
       ti: TypeInformation[T],
-      ki: TypeInformation[Option[ScopeKey]],
+      ki: TypeInformation[Tenant],
       si: TypeInformation[String],
       fvi: TypeInformation[FeatureValue]
   ): DataStream[T] =
-    scopes match {
-      case Nil => events
-      case head :: tail =>
-        val result = events
-          .connect(values)
-          .keyBy[Option[ScopeKey]](t => by.key(t, head), t => Some(ScopeKey(t.key)))
-          .process(new FeatureJoinFunction[T](by))
-          .id(s"join-$head")
-        join(values, result, tail, by)
-
-    }
+    events
+      .connect(values)
+      .keyBy[Tenant](t => j.by(t), t => t.key.tenant)
+      .process(new FeatureJoinFunction[T](schema, j))
+      .id(s"join")
 
   /** Process a set of source interactions according to the defined feature schema. This function:
     * - for each interaction will update the corresponding feature value

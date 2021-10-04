@@ -10,6 +10,15 @@ import io.findify.featury.flink.feature.{
   FlinkStatsEstimator
 }
 import io.findify.featury.flink.util.InitContext
+import io.findify.featury.model.Feature.{
+  BoundedList,
+  Counter,
+  FreqEstimator,
+  MapFeature,
+  PeriodicCounter,
+  ScalarFeature,
+  StatsEstimator
+}
 import io.findify.featury.model.FeatureConfig.{
   BoundedListConfig,
   CounterConfig,
@@ -38,8 +47,14 @@ import org.apache.flink.api.common.typeinfo.TypeInformation
   */
 trait StatefulFeatureFunction {
 
-  @transient var features: Map[FeatureKey, Feature[_ <: Write, _ <: FeatureValue, _ <: FeatureConfig, _ <: State]] = _
-  @transient var updated: ValueState[Long]                                                                         = _
+  @transient var counters: Map[FeatureKey, Counter]                 = _
+  @transient var periodicCounters: Map[FeatureKey, PeriodicCounter] = _
+  @transient var lists: Map[FeatureKey, BoundedList]                = _
+  @transient var freqs: Map[FeatureKey, FreqEstimator]              = _
+  @transient var scalars: Map[FeatureKey, ScalarFeature]            = _
+  @transient var stats: Map[FeatureKey, StatsEstimator]             = _
+  @transient var maps: Map[FeatureKey, MapFeature]                  = _
+  @transient var updated: ValueState[Long]                          = _
 
   def init(schema: Schema, context: InitContext)(implicit
       longTI: TypeInformation[Long],
@@ -50,15 +65,14 @@ trait StatefulFeatureFunction {
       scalarTI: TypeInformation[Scalar],
       stateTI: TypeInformation[State]
   ) = {
-    features = schema.configs.map {
-      case (key, c: CounterConfig)         => key -> FlinkCounter(context, c)
-      case (key, c: PeriodicCounterConfig) => key -> FlinkPeriodicCounter(context, c)
-      case (key, c: BoundedListConfig)     => key -> FlinkBoundedList(context, c)
-      case (key, c: FreqEstimatorConfig)   => key -> FlinkFreqEstimator(context, c)
-      case (key, c: ScalarConfig)          => key -> FlinkScalarFeature(context, c)
-      case (key, c: StatsEstimatorConfig)  => key -> FlinkStatsEstimator(context, c)
-      case (key, c: MapConfig)             => key -> FlinkMapFeature(context, c)
-    }
+    counters = schema.counters.map { case (key, c) => key -> FlinkCounter(context, c) }
+    periodicCounters = schema.periodicCounters.map { case (key, c) => key -> FlinkPeriodicCounter(context, c) }
+    lists = schema.lists.map { case (key, c) => key -> FlinkBoundedList(context, c) }
+    freqs = schema.freqs.map { case (key, c) => key -> FlinkFreqEstimator(context, c) }
+    scalars = schema.scalars.map { case (key, c) => key -> FlinkScalarFeature(context, c) }
+    stats = schema.stats.map { case (key, c) => key -> FlinkStatsEstimator(context, c) }
+    maps = schema.maps.map { case (key, c) => key -> FlinkMapFeature(context, c) }
+
     updated = context.getState(
       new ValueStateDescriptor[Long]("last-update", implicitly[TypeInformation[Long]])
     )

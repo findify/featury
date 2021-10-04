@@ -11,9 +11,7 @@ import io.findify.featury.api.{MetricsApi, ValuesApi}
 import io.findify.featury.config.{ApiConfig, Args}
 import io.findify.featury.connector.cassandra.CassandraStore
 import io.findify.featury.connector.redis.RedisStore
-import io.findify.featury.model.FeatureConfig.{MonitorValuesConfig, ScalarConfig}
-import io.findify.featury.model.Key.{FeatureName, Id, Namespace, Scope, Tenant}
-import io.findify.featury.model.{Key, SDouble, ScalarValue, Schema, Timestamp}
+import io.findify.featury.model.Schema
 import io.findify.featury.model.api.{ReadRequest, ReadResponse}
 import io.findify.featury.util.ForkJoinExecutor
 import io.findify.featury.values.{FeatureStore, MemoryStore}
@@ -51,9 +49,7 @@ object Main extends IOApp {
     result <- config.store match {
       case redisConfig: RedisConfig =>
         logger.info("using Redis client") *>
-          RedisStore
-            .makeRedisClient(redisConfig)
-            .use(redis => serve(config, RedisStore(redis, redisConfig.codec), logger))
+          Resource.make(IO(RedisStore(redisConfig)))(s => IO(s.close())).use(redis => serve(config, redis, logger))
       case cassandraConfig: CassandraConfig =>
         logger.info("using Cassandra client") *>
           CassandraStore
