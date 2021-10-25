@@ -93,6 +93,8 @@ object MainpageDemo {
     val events = env
       .fromCollection[Event](
         List(
+          Impression(List("p1", "p2", "p3"), "u0", now),
+          Click("p2", "u0", now.plus(1.second)),
           // some product metadata at first
           Metadata("p1", "socks", 10, now),
           Metadata("p2", "pants", 100, now.plus(1.minute)),
@@ -114,11 +116,11 @@ object MainpageDemo {
 
     // now we need to convert our business events into Write actions
     val writes: DataStream[Write] = events.flatMap(_ match {
-      case Metadata(id, title, price, ts) =>
+      case Metadata(id, title, count, ts) =>
         List(
           Put(Key(productTitle, tenant, id), ts, SString(title)),         // put title
-          Put(Key(productCount, tenant, id), ts, SDouble(price)),         // put count
-          PutStatSample(Key(countStats, tenant, tenant.value), ts, price) // sample count
+          Put(Key(productCount, tenant, id), ts, SDouble(count)),         // put count
+          PutStatSample(Key(countStats, tenant, tenant.value), ts, count) // sample count
         )
       case Impression(ids, user, ts) =>
         ids.map(id => PeriodicIncrement(Key(productImpressions, tenant, id), ts, 1)) // count per product impressions
@@ -130,7 +132,9 @@ object MainpageDemo {
     })
 
     // here we pipe writes through schema and compute feature update changelog
-    val features = Featury.process(writes, schema, 10.seconds)
+    val features       = Featury.process(writes, schema, 10.seconds)
+    val featuresList   = features.executeAndCollect().toList
+    val breakpointHere = 0
 
     // an example clickthrough session
     val sessions = env
@@ -162,6 +166,8 @@ object MainpageDemo {
         left.copy(values = left.values ++ values)
     }
     // here we see all the joined feature values for each tag
-    val joined = Featury.join(features, sessions, join, schema).executeAndCollect(100)
+    val joined          = Featury.join(features, sessions, join, schema)
+    val joinedValues    = joined.executeAndCollect().toList
+    val breakpointHere2 = 1
   }
 }

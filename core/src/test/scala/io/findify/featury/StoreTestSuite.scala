@@ -13,11 +13,11 @@ import org.scalatest.{BeforeAndAfterAll, Suite}
 
 import scala.concurrent.duration._
 
-trait StoreTestSuite extends AnyFlatSpec with BeforeAndAfterAll with Matchers { this: Suite =>
-  def storeResource: Resource[IO, FeatureStore]
-  private var store: FeatureStore = _
-  private var shutdown: IO[Unit]  = _
-  val now                         = Timestamp.now
+trait StoreTestSuite[T <: FeatureStore] extends AnyFlatSpec with BeforeAndAfterAll with Matchers { this: Suite =>
+  def storeResource: Resource[IO, T]
+  var store: T                   = _
+  private var shutdown: IO[Unit] = _
+  val now                        = Timestamp.now
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -34,7 +34,7 @@ trait StoreTestSuite extends AnyFlatSpec with BeforeAndAfterAll with Matchers { 
   it should "write/read to the store" in {
     val k     = TestKey(fname = "title", id = "p")
     val value = ScalarValue(k, now, SString("foo"))
-    store.write(List(value))
+    store.write(List(value)).unsafeRunSync()
     val result = store.read(ReadRequest(List(Key(k.tag, k.name, k.tenant)))).unsafeRunSync()
     result shouldBe ReadResponse(List(value))
   }
@@ -42,9 +42,9 @@ trait StoreTestSuite extends AnyFlatSpec with BeforeAndAfterAll with Matchers { 
   it should "append features" in {
     val k      = TestKey(id = "p10")
     val value1 = ScalarValue(k.copy(name = FeatureName("foo1")), now, SString("foo"))
-    store.write(List(value1))
+    store.write(List(value1)).unsafeRunSync()
     val value2 = ScalarValue(k.copy(name = FeatureName("foo2")), now, SString("foo"))
-    store.write(List(value2))
+    store.write(List(value2)).unsafeRunSync()
     val result = store
       .read(ReadRequest(List(Key(k.tag, value1.key.name, k.tenant), Key(k.tag, value2.key.name, k.tenant))))
       .unsafeRunSync()
@@ -54,9 +54,9 @@ trait StoreTestSuite extends AnyFlatSpec with BeforeAndAfterAll with Matchers { 
   it should "overwrite values" in {
     val k      = TestKey(id = "p10")
     val value1 = ScalarValue(k.copy(name = FeatureName("foo1")), now, SString("foo"))
-    store.write(List(value1))
+    store.write(List(value1)).unsafeRunSync()
     val value2 = ScalarValue(k.copy(name = FeatureName("foo1")), now.plus(10.seconds), SString("foo"))
-    store.write(List(value2))
+    store.write(List(value2)).unsafeRunSync()
     val result = store.read(ReadRequest(List(Key(k.tag, value1.key.name, k.tenant)))).unsafeRunSync()
     result shouldBe ReadResponse(List(value2))
   }
@@ -64,7 +64,7 @@ trait StoreTestSuite extends AnyFlatSpec with BeforeAndAfterAll with Matchers { 
   it should "read non-existing keys" in {
     val k     = TestKey(fname = "title", id = "p11")
     val value = ScalarValue(k, now, SString("foo"))
-    store.write(List(value))
+    store.write(List(value)).unsafeRunSync()
     val result = store.read(ReadRequest(List(Key(k.tag.copy(value = "p111"), k.name, k.tenant)))).unsafeRunSync()
     result shouldBe ReadResponse(Nil)
   }
@@ -72,7 +72,7 @@ trait StoreTestSuite extends AnyFlatSpec with BeforeAndAfterAll with Matchers { 
   it should "read non-existing features" in {
     val k     = TestKey(fname = "title", id = "p11")
     val value = ScalarValue(k, now, SString("foo"))
-    store.write(List(value))
+    store.write(List(value)).unsafeRunSync()
     val result =
       store.read(ReadRequest(List(Key(k.tag, FeatureName("non-existent"), k.tenant)))).unsafeRunSync()
     result shouldBe ReadResponse(Nil)
