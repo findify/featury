@@ -58,7 +58,7 @@ case class CassandraStore(session: CqlSession, codec: StoreCodec) extends Featur
     IO.fromEither(codec.decode(row.getByteBuffer("values").array()))
   }
 
-  override def write(batch: List[FeatureValue]): Unit = ???
+  override def write(batch: List[FeatureValue]): IO[Unit] = ???
 //  {
 //    val stmt = batch
 //      .foldLeft(BatchStatement.builder(BatchType.UNLOGGED))((builder, value) =>
@@ -77,7 +77,7 @@ case class CassandraStore(session: CqlSession, codec: StoreCodec) extends Featur
 //    session.execute(stmt)
 //  }
 
-  override def close(): Unit = { session.close() }
+  override def close(): IO[Unit] = IO { session.close() }
 
 }
 

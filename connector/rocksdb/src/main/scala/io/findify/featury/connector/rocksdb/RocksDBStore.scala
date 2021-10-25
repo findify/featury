@@ -27,15 +27,17 @@ case class RocksDBStore(path: String, codec: StoreCodec) extends FeatureStore {
     parsed.traverse(x => IO.fromEither(x)).map(ReadResponse.apply)
   }
 
-  override def write(batch: List[FeatureValue]): Unit = for {
-    value <- batch
-  } yield {
-    val key        = keyBytes(Key(value.key.tag, value.key.name, value.key.tenant))
-    val valueBytes = codec.encode(value)
-    db.put(key, valueBytes)
+  override def write(batch: List[FeatureValue]): IO[Unit] = IO {
+    for {
+      value <- batch
+    } yield {
+      val key        = keyBytes(Key(value.key.tag, value.key.name, value.key.tenant))
+      val valueBytes = codec.encode(value)
+      db.put(key, valueBytes)
+    }
   }
 
-  override def close(): Unit = {
+  override def close() = IO {
     db.close()
   }
 

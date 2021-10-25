@@ -7,41 +7,49 @@ import io.findify.featury.model.api.{ReadRequest, ReadResponse}
 import io.findify.featury.model.{FeatureKey, FeatureValue, Key}
 import io.findify.featury.values.ValueStoreConfig.RedisConfig
 import io.findify.featury.values.{FeatureStore, StoreCodec}
-import redis.clients.jedis.Jedis
+import redis.clients.jedis.{Jedis, JedisPool}
 
+import java.net.URI
 import java.nio.charset.StandardCharsets
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.FiniteDuration
 import scala.language.higherKinds
 import scala.concurrent.duration._
+import scala.util.Try
 
 case class RedisStore(config: RedisConfig, expires: Map[FeatureKey, FiniteDuration] = Map.empty) extends FeatureStore {
 
-  @transient lazy val client: Jedis = new Jedis(config.host, config.port)
-  val DEFAULT_EXPIRE                = 60.days
+  @transient lazy val clientPool = RedisConnectionPool(config.host, config.port)
+  val DEFAULT_EXPIRE             = 60.days
 
-  override def write(batch: List[FeatureValue]): Unit = {
-    val values = batch.flatMap(fv => List(RedisKey(fv.key).bytes, config.codec.encode(fv)))
-    client.mset(values: _*)
-    val tx = client.multi()
-    for {
-      fv <- batch
-      expire = expires.getOrElse(FeatureKey(fv.key), DEFAULT_EXPIRE)
-      key    = RedisKey(fv.key).bytes
-    } {
-      tx.expire(key, expire.toSeconds)
-    }
-    tx.exec()
+  override def write(batch: List[FeatureValue]): IO[Unit] = {
+    clientPool.client.use(client =>
+      IO {
+        val values = batch.flatMap(fv => List(RedisKey(fv.key).bytes, config.codec.encode(fv)))
+        client.mset(values: _*)
+        val tx = client.multi()
+        for {
+          fv <- batch
+          expire = expires.getOrElse(FeatureKey(fv.key), DEFAULT_EXPIRE)
+          key    = RedisKey(fv.key).bytes
+        } {
+          tx.expire(key, expire.toSeconds)
+        }
+        tx.exec()
+      }
+    )
   }
 
   override def read(request: ReadRequest): IO[ReadResponse] = {
     val keys = request.keys.map(RedisKey.apply)
-    for {
-      response <- IO(client.mget(keys.map(_.bytes): _*))
-      decoded  <- decodeResponse(response.asScala.toList)
-    } yield {
-      ReadResponse(decoded)
-    }
+    clientPool.client.use(client => {
+      for {
+        response <- IO(client.mget(keys.map(_.bytes): _*))
+        decoded  <- decodeResponse(response.asScala.toList)
+      } yield {
+        ReadResponse(decoded)
+      }
+    })
   }
 
   private def decodeResponse(responses: List[Array[Byte]], acc: List[FeatureValue] = Nil): IO[List[FeatureValue]] =
@@ -55,7 +63,8 @@ case class RedisStore(config: RedisConfig, expires: Map[FeatureKey, FiniteDurati
         }
     }
 
-  override def close(): Unit = { client.close() }
+  override def close(): IO[Unit] = IO { clientPool.pool.close() }
+
 }
 
 object RedisStore {

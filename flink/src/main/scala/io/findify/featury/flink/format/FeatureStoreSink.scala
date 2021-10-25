@@ -1,5 +1,6 @@
 package io.findify.featury.flink.format
 
+import cats.effect.unsafe.implicits.global // yolo
 import io.findify.featury.model.{FeatureValue, FeatureValueMessage}
 import io.findify.featury.values.FeatureStore
 import org.apache.flink.api.common.state.{ListState, ListStateDescriptor, ValueState, ValueStateDescriptor}
@@ -39,7 +40,7 @@ case class FeatureStoreSink(dest: FeatureStore, batchSize: Int)(implicit
   private def commit() = {
     val batch = buffer.get().asScala.toList
     if (batch.nonEmpty) {
-      dest.write(batch)
+      dest.write(batch).unsafeRunSync()
       buffer.clear()
       size = 0
     }
