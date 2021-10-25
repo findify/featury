@@ -26,8 +26,7 @@ case class RedisStore(config: RedisConfig, expires: Map[FeatureKey, FiniteDurati
     clientPool.client.use(client =>
       IO {
         val values = batch.flatMap(fv => List(RedisKey(fv.key).bytes, config.codec.encode(fv)))
-        client.mset(values: _*)
-        val tx = client.multi()
+        val tx     = client.multi()
         for {
           fv <- batch
           expire = expires.getOrElse(FeatureKey(fv.key), DEFAULT_EXPIRE)
@@ -35,6 +34,7 @@ case class RedisStore(config: RedisConfig, expires: Map[FeatureKey, FiniteDurati
         } {
           tx.expire(key, expire.toSeconds)
         }
+        tx.mset(values: _*)
         tx.exec()
       }
     )
