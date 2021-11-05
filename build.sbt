@@ -13,6 +13,7 @@ lazy val shared = Seq(
 )
 
 lazy val mavenSettings = Seq(
+  scalacOptions ++= Seq("-feature", "-deprecation", "-Ypartial-unification"),
   publishMavenStyle := true,
   publishTo := sonatypePublishToBundle.value,
   licenses := Seq("APL2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")),
