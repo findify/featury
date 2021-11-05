@@ -48,6 +48,7 @@ message Scalar {
     oneof sealed_value {
         SString scalarString = 1;
         SDouble scalarDouble = 2;
+        SBoolean scalarBoolean = 3;
     }
 }
 
@@ -56,6 +57,9 @@ message SString {
 }
 message SDouble {
     required double value = 1;
+}
+message SBoolean {
+    required bool value = 1;
 }
 
 message ScalarValue {

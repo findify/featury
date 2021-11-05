@@ -1,7 +1,7 @@
 package io.findify.featury.model.json
 
 import io.circe.{Codec, Decoder, Encoder, Json}
-import io.findify.featury.model.{SDouble, SString, Scalar}
+import io.findify.featury.model.{SBoolean, SDouble, SString, Scalar}
 
 object ScalarJson {
 
@@ -11,9 +11,13 @@ object ScalarJson {
   implicit val doubleCodec: Codec[SDouble] =
     Codec.from(Decoder.decodeDouble.map(SDouble.apply), Encoder.encodeDouble.contramap[SDouble](_.value))
 
+  implicit val booleanCodec: Codec[SBoolean] =
+    Codec.from(Decoder.decodeBoolean.map(SBoolean.apply), Encoder.encodeBoolean.contramap[SBoolean](_.value))
+
   implicit val scalarEncoder: Encoder[Scalar] = Encoder.instance {
     case s: SString   => stringCodec(s)
     case d: SDouble   => doubleCodec(d)
+    case b: SBoolean  => booleanCodec(b)
     case Scalar.Empty => Json.Null // this should not happen
   }
 
