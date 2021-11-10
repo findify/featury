@@ -9,5 +9,5 @@ import io.findify.featury.values.StoreCodec.ProtobufCodec
 class RocksDBStoreTest extends StoreTestSuite[RocksDBStore] {
   lazy val path = File.newTemporaryDirectory("rocksdb_").deleteOnExit()
   override def storeResource =
-    Resource.make(IO(RocksDBStore(path.toString(), ProtobufCodec)))(x => IO(x.close()))
+    Resource.make(IO(RocksDBStore(path.toString(), ProtobufCodec, false)))(x => IO(x.close()))
 }

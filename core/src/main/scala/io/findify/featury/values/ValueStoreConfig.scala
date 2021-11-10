@@ -31,6 +31,7 @@ object ValueStoreConfig {
   implicit val redisDecoder: Decoder[RedisConfig]         = deriveDecoder
   implicit val memDecoder: Decoder[MemoryConfig]          = deriveDecoder
   implicit val cassandraDecoder: Decoder[CassandraConfig] = deriveDecoder
+
   implicit val config = Configuration.default
     .withDiscriminator("type")
     .copy(transformConstructorNames = {
