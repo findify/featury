@@ -10,11 +10,12 @@ import org.rocksdb.{Options, RocksDB}
 
 import java.nio.charset.StandardCharsets
 
-case class RocksDBStore(path: String, codec: StoreCodec) extends FeatureStore {
+case class RocksDBStore(path: String, codec: StoreCodec, readOnly: Boolean) extends FeatureStore {
   @transient lazy val opts = new Options()
     .setCreateIfMissing(true)
     .setCreateMissingColumnFamilies(true)
-  @transient lazy val db = RocksDB.open(opts, path)
+
+  @transient lazy val db = if (readOnly) RocksDB.openReadOnly(opts, path) else RocksDB.open(opts, path)
 
   override def read(request: ReadRequest): IO[ReadResponse] = {
     val parsed = for {
@@ -26,8 +27,10 @@ case class RocksDBStore(path: String, codec: StoreCodec) extends FeatureStore {
     }
     parsed.traverse(x => IO.fromEither(x)).map(ReadResponse.apply)
   }
+  override def write(batch: List[FeatureValue]): IO[Unit] =
+    if (readOnly) IO.raiseError(new IllegalAccessError()) else writeDo(batch)
 
-  override def write(batch: List[FeatureValue]): IO[Unit] = IO {
+  private def writeDo(batch: List[FeatureValue]): IO[Unit] = IO {
     for {
       value <- batch
     } yield {

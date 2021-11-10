@@ -2,7 +2,7 @@ import Deps._
 
 name := "featury"
 
-lazy val featuryVersion = "0.2.1"
+lazy val featuryVersion = "0.3.0-M2"
 
 version := featuryVersion
 
@@ -29,7 +29,7 @@ lazy val mavenSettings = Seq(
   )
 )
 
-scalaVersion := "2.12.14"
+scalaVersion := "2.12.15"
 
 lazy val core = (project in file("core")).settings(shared: _*).settings(mavenSettings: _*)
 
@@ -37,6 +37,7 @@ lazy val flink = (project in file("flink"))
   .settings(shared: _*)
   .settings(mavenSettings: _*)
   .dependsOn(core % "test->test;compile->compile")
+  .dependsOn(rocksdb % "test->test;compile->compile")
 
 lazy val examples = (project in file("examples"))
   .settings(shared: _*)
@@ -65,6 +66,12 @@ lazy val rocksdb = (project in file("connector/rocksdb"))
   .settings(shared: _*)
   .settings(mavenSettings: _*)
   .dependsOn(core % "test->test;compile->compile")
+
+lazy val memory = (project in file("connector/memory"))
+  .settings(shared: _*)
+  .settings(mavenSettings: _*)
+  .dependsOn(core % "test->test;compile->compile")
+  .dependsOn(redis % "test->test;compile->compile")
 
 lazy val root = (project in file("."))
   .aggregate(core, flink, api, redis, cassandra, rocksdb, examples)
