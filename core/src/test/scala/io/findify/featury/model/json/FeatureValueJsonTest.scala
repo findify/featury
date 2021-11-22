@@ -23,6 +23,15 @@ class FeatureValueJsonTest extends AnyFlatSpec with Matchers {
     val result = decode[FeatureValue](s"""{"type":"scalar", "key": $kjson, "ts": 0, "value": 123.4}""")
     result shouldBe Right(ScalarValue(k, Timestamp(0), SDouble(123.4)))
   }
+  it should "decode string list scalar" in {
+    val result = decode[FeatureValue](s"""{"type":"scalar", "key": $kjson, "ts": 0, "value":["foo","bar"]}""")
+    result shouldBe Right(ScalarValue(k, Timestamp(0), SStringList(List("foo", "bar"))))
+  }
+
+  it should "decode num list scalar" in {
+    val result = decode[FeatureValue](s"""{"type":"scalar", "key": $kjson, "ts": 0, "value": [123.4, 5]}""")
+    result shouldBe Right(ScalarValue(k, Timestamp(0), SDoubleList(List(123.4, 5))))
+  }
 
   it should "decode counter" in {
     val result = decode[FeatureValue](s"""{"type":"counter", "key": $kjson, "ts": 0, "value": 123}""")

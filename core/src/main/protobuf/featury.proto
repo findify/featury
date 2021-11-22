@@ -49,6 +49,8 @@ message Scalar {
         SString scalarString = 1;
         SDouble scalarDouble = 2;
         SBoolean scalarBoolean = 3;
+        SStringList scalarStringList = 4;
+        SDoubleList scalarDoubleList = 5;
     }
 }
 
@@ -60,6 +62,12 @@ message SDouble {
 }
 message SBoolean {
     required bool value = 1;
+}
+message SStringList {
+    repeated string value = 1;
+}
+message SDoubleList {
+    repeated double value = 1;
 }
 
 message ScalarValue {
