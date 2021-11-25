@@ -98,6 +98,8 @@ class FeatureProcessFunction(schema: Schema)(implicit
                     if (w.key == v.key) && (c.name == v.key.name) && (c.scope == v.key.tag.scope) && (c.name == v.key.name) => // ok
                 case (v: PeriodicCounterValue, w: PeriodicIncrement, Some(c: PeriodicCounterConfig))
                     if (w.key == v.key) && (c.name == v.key.name) && (c.scope == v.key.tag.scope) && (c.name == v.key.name) => // ok
+                case (v: BoundedListValue, w: Append, Some(c: BoundedListConfig))
+                    if (w.key == v.key) && (c.name == v.key.name) && (c.scope == v.key.tag.scope) && (c.name == v.key.name) => // ok
                 case (v, w, c) =>
                   LOG.warn(s"write $w produced value $v for config $c")
               }
