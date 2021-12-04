@@ -49,7 +49,6 @@ object Featury {
       .connect(values)
       .keyBy[Tenant](t => j.by(t), t => t.key.tenant)
       .process(new FeatureJoinFunction[T](schema, j))
-      .id(s"join")
 
   /** Process a set of source interactions according to the defined feature schema. This function:
     * - for each interaction will update the corresponding feature value
@@ -77,10 +76,8 @@ object Featury {
             override def extractTimestamp(element: Write, recordTimestamp: Long): Long = element.ts.ts
           })
       )
-      .id("feature-watermarks")
       .keyingBy(_.key)
       .process(new FeatureProcessFunction(schema))
-      .id("feature-process")
   }
 
   /** Write feature values into some path in native format.
