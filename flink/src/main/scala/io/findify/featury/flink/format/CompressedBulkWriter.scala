@@ -12,7 +12,7 @@ import org.apache.flink.streaming.api.functions.sink.filesystem.{BucketAssigner,
 import java.io.BufferedOutputStream
 
 object CompressedBulkWriter {
-  val WRITE_BUFFER_SIZE = 1024 * 1024
+  val WRITE_BUFFER_SIZE = 10 * 1024 * 1024
 
   def writeFile[T](
       path: Path,
@@ -36,10 +36,12 @@ object CompressedBulkWriter {
       override def flush(): Unit                = out.flush()
       override def finish(): Unit               = out.close()
     }
-    override def create(out: FSDataOutputStream): BulkWriter[T] =
+    override def create(out: FSDataOutputStream): BulkWriter[T] = {
+      val outBuffer = new BufferedOutputStream(new NoCloseOutputStream(out), WRITE_BUFFER_SIZE)
       new CompressedBulkWriter(
-        new BufferedOutputStream(compress.write(new NoCloseOutputStream(out)), WRITE_BUFFER_SIZE)
+        new BufferedOutputStream(compress.write(outBuffer), WRITE_BUFFER_SIZE)
       )
+    }
   }
 
   case class SimpleBucketAssigner[T](codec: BulkCodec[T]) extends BucketAssigner[T, String] {

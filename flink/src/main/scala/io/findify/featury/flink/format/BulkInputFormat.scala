@@ -31,6 +31,6 @@ class BulkInputFormat[T >: Null](path: Path, codec: BulkCodec[T], compress: Comp
   override def open(fileSplit: FileInputSplit): Unit = {
     val fs = fileSplit.getPath.getFileSystem
     stream = fs.open(fileSplit.getPath, 1024 * 1024)
-    compressed = compress.read(stream)
+    compressed = new BufferedInputStream(compress.read(stream), 1024 * 1024)
   }
 }
