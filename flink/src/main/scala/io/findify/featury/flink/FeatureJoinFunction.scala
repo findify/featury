@@ -17,6 +17,7 @@ import io.findify.featury.model.{
 import org.apache.flink.api.common.state.{MapState, MapStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.runtime.state.{FunctionInitializationContext, FunctionSnapshotContext}
+import org.apache.flink.state.api.functions.KeyedStateBootstrapFunction
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
 import org.apache.flink.streaming.api.functions.co.KeyedCoProcessFunction
 import org.apache.flink.util.Collector
@@ -111,5 +112,28 @@ class FeatureJoinFunction[T](schema: Schema, join: Join[T])(implicit
     }
     values.put(StateKey(value.key.tag, value.key.name), value)
   }
+}
 
+object FeatureJoinFunction {
+  class FeatureJoinBootstrapFunction(implicit
+      ki: TypeInformation[StateKey],
+      vi: TypeInformation[FeatureValue]
+  ) extends KeyedStateBootstrapFunction[Tenant, FeatureValue]
+      with CheckpointedFunction {
+    var values: MapState[StateKey, FeatureValue] = _
+
+    override def initializeState(context: FunctionInitializationContext): Unit = {
+      val desc = new MapStateDescriptor[StateKey, FeatureValue]("last", ki, vi)
+      values = context.getKeyedStateStore.getMapState(desc)
+    }
+
+    override def snapshotState(context: FunctionSnapshotContext): Unit = {}
+
+    override def processElement(
+        value: FeatureValue,
+        ctx: KeyedStateBootstrapFunction[Tenant, FeatureValue]#Context
+    ): Unit = {
+      values.put(StateKey(value.key.tag, value.key.name), value)
+    }
+  }
 }
