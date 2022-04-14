@@ -37,7 +37,8 @@ case class FlinkPeriodicCounter(config: PeriodicCounterConfig, counters: MapStat
   }
 
   override def writeState(state: PeriodicCounterState): Unit = {
-    state.values.foreach(tc => counters.put(tc.ts.ts, tc.count))
+    val batch = state.values.map(tc => tc.ts.ts -> tc.count).toMap.asJava
+    counters.putAll(batch)
   }
 }
 

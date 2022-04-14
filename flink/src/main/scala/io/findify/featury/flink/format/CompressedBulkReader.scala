@@ -13,7 +13,10 @@ object CompressedBulkReader {
   val READ_BUFFER_SIZE = 1024 * 1024
 
   def readFile[T >: Null](path: Path, compress: Compress, codec: BulkCodec[T])(implicit ti: TypeInformation[T]) = {
-    FileSource.forRecordStreamFormat[T](CompressedStreamFormat(ti, compress, codec), path).build()
+    FileSource
+      .forRecordStreamFormat[T](CompressedStreamFormat(ti, compress, codec), path)
+      .processStaticFileSet()
+      .build()
   }
 
   case class CompressedStreamFormat[T >: Null](ti: TypeInformation[T], compress: Compress, codec: BulkCodec[T])
