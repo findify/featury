@@ -6,9 +6,11 @@ import io.findify.featury.flink.{Featury, FlinkStreamTest}
 import io.findify.featury.model._
 import io.findify.featury.utils.TestKey
 import io.findify.flinkadt.api._
+import org.apache.flink.api.common.eventtime.WatermarkStrategy
 import org.apache.flink.core.fs.Path
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
 import scala.language.higherKinds
 
 class StateReadWriteTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
@@ -31,10 +33,14 @@ class StateReadWriteTest extends AnyFlatSpec with Matchers with FlinkStreamTest 
   }
 
   it should "read events from files" in {
-    val read = Featury
-      .readState(env, new Path(path.toString()), Compress.ZstdCompression(3), BulkCodec.stateProtobufCodec)
+    val read = env
+      .fromSource(
+        Featury.readState(new Path(path.toString()), Compress.ZstdCompression(3), BulkCodec.stateProtobufCodec),
+        WatermarkStrategy.noWatermarks(),
+        "sdf"
+      )
       .executeAndCollect()
-    read shouldBe items
+    read.toList shouldBe items
   }
 
 }

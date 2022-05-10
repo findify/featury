@@ -137,14 +137,13 @@ object Featury {
     )
 
   def readState(
-      env: StreamExecutionEnvironment,
       path: Path,
       compress: Compress,
       codec: BulkCodec[State] = BulkCodec.stateProtobufCodec
   )(implicit
       ti: TypeInformation[State]
-  ): DataStream[State] = {
-    env.readFile(new BulkInputFormat[State](path, codec, compress), path.toString)
+  ): FileSource[State] = {
+    CompressedBulkReader.readFile(path, compress, codec)
   }
 
 }

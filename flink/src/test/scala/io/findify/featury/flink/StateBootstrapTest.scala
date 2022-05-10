@@ -11,11 +11,13 @@ import io.findify.featury.utils.TestKey
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import io.findify.flinkadt.api._
+import org.apache.flink.api.common.eventtime.WatermarkStrategy
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.functions.KeySelector
 import org.apache.flink.contrib.streaming.state.{EmbeddedRocksDBStateBackend, RocksDBStateBackend}
 import org.apache.flink.core.fs.Path
 import org.apache.flink.state.api.{OperatorTransformation, Savepoint, SavepointWriter}
+
 import scala.language.higherKinds
 import scala.concurrent.duration._
 
@@ -44,10 +46,14 @@ class StateBootstrapTest extends AnyFlatSpec with Matchers with FlinkStreamTest 
     path.listRecursively.toList.size should be > 1
 
     val read =
-      Featury.readState(env, new Path(path.toString()), NoCompression, BulkCodec.stateProtobufCodec).javaStream
+      env.fromSource(
+        Featury.readState(new Path(path.toString()), NoCompression, BulkCodec.stateProtobufCodec),
+        WatermarkStrategy.noWatermarks(),
+        "sdf"
+      )
 
     val transformation = OperatorTransformation
-      .bootstrapWith(read)
+      .bootstrapWith(read.javaStream)
       .keyBy[Key](
         new KeySelector[State, Key] {
           override def getKey(value: State): Key = value.key
