@@ -37,8 +37,8 @@ object Feature {
         range         <- config.sumPeriodRanges
         lastTimestamp <- map.keys.toList.sortBy(_.ts).lastOption
       } yield {
-        val start = lastTimestamp.minus(range.startOffset * config.period)
-        val end   = lastTimestamp.minus(range.endOffset * config.period).plus(config.period)
+        val start = lastTimestamp.minus(config.period * range.startOffset)
+        val end   = lastTimestamp.minus(config.period * range.endOffset).plus(config.period)
         val sum =
           map.filterKeys(ts => ts.isBeforeOrEquals(end) && ts.isAfterOrEquals(start)).values.toList match {
             case Nil      => 0L
@@ -50,7 +50,7 @@ object Feature {
   }
 
   trait StatsEstimator extends Feature[PutStatSample, NumStatsValue, StatsEstimatorConfig, StatsState] {
-    import scala.collection.JavaConverters._
+    import scala.jdk.CollectionConverters._
     override def put(action: PutStatSample): Unit =
       if (Feature.shouldSample(config.sampleRate)) putSampled(action)
     def putSampled(action: PutStatSample): Unit

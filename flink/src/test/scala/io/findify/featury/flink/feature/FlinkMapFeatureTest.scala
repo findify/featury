@@ -7,6 +7,7 @@ import io.findify.featury.model.Write.PutTuple
 import io.findify.flinkadt.api._
 
 import scala.concurrent.duration._
+import scala.language.higherKinds
 
 class FlinkMapFeatureTest extends MapFeatureSuite with FlinkStreamTest {
   override def write(values: List[PutTuple]): Option[FeatureValue] = {

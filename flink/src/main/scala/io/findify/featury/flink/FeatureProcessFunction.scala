@@ -1,18 +1,16 @@
 package io.findify.featury.flink
 
 import io.findify.featury.flink.FeatureProcessFunction.stateTag
-import io.findify.featury.flink.feature._
 import io.findify.featury.flink.util.InitContext.DataStreamContext
 import io.findify.featury.model.Feature._
 import io.findify.featury.model.FeatureConfig._
 import io.findify.featury.model.Write._
 import io.findify.featury.model._
-import org.apache.flink.api.common.state.{KeyedStateStore, ValueState, ValueStateDescriptor}
+import io.findify.flink.api.OutputTag
 import org.apache.flink.api.common.typeinfo.{TypeInfo, TypeInformation}
 import org.apache.flink.runtime.state.{FunctionInitializationContext, FunctionSnapshotContext}
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction
-import org.apache.flink.streaming.api.scala.OutputTag
 import org.apache.flink.util.Collector
 import org.slf4j.LoggerFactory
 

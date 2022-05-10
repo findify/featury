@@ -1,10 +1,9 @@
 package io.findify.featury.flink
 
+import io.findify.flink.api.StreamExecutionEnvironment
 import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
-import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.test.util.MiniClusterWithClientResource
 import org.scalatest.{BeforeAndAfterAll, Suite}
 
@@ -22,11 +21,6 @@ trait FlinkStreamTest extends BeforeAndAfterAll { this: Suite =>
     env.setRestartStrategy(RestartStrategies.noRestart())
     env.getConfig.disableGenericTypes()
     env
-  }
-
-  lazy val batchEnv = {
-    cluster.getTestEnvironment.setAsContext()
-    ExecutionEnvironment.getExecutionEnvironment
   }
 
   override protected def beforeAll(): Unit = {

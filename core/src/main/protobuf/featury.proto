@@ -13,7 +13,6 @@ option (scalapb.options) = {
 
 message Key {
     option (scalapb.message).companion_extends = "io.findify.featury.model.KeyCompanionOps";
-    option (scalapb.message).companion_extends = "io.findify.featury.model.json.KeyJson";
     option (scalapb.message).extends = "io.findify.featury.model.KeyOps";
     message Scope {
         option (scalapb.message).extends = "AnyVal";
@@ -40,7 +39,6 @@ message Key {
 message Timestamp {
     option (scalapb.message).companion_extends = "io.findify.featury.model.TimestampOps.TimestampCompanion";
     option (scalapb.message).extends = "io.findify.featury.model.TimestampOps";
-    option (scalapb.message).companion_extends = "io.findify.featury.model.json.TimestampJson";
     required int64 ts = 1;
 }
 

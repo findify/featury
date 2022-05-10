@@ -7,15 +7,10 @@ import io.findify.featury.model.api.{ReadRequest, ReadResponse}
 import io.findify.featury.model.{FeatureKey, FeatureValue, Key}
 import io.findify.featury.values.ValueStoreConfig.RedisConfig
 import io.findify.featury.values.{FeatureStore, StoreCodec}
-import redis.clients.jedis.{Jedis, JedisPool}
-
-import java.net.URI
 import java.nio.charset.StandardCharsets
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.duration.FiniteDuration
-import scala.language.higherKinds
 import scala.concurrent.duration._
-import scala.util.Try
 
 case class RedisStore(config: RedisConfig, expires: Map[FeatureKey, FiniteDuration] = Map.empty) extends FeatureStore {
 

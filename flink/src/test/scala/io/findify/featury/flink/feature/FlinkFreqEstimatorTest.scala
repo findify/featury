@@ -8,6 +8,7 @@ import io.findify.featury.model.{FeatureKey, FeatureValue, FrequencyValue, Key, 
 import io.findify.flinkadt.api._
 
 import scala.concurrent.duration._
+import scala.language.higherKinds
 
 class FlinkFreqEstimatorTest extends FreqEstimatorSuite with FlinkStreamTest {
   val k = Key(Tag(config.scope, "x1"), config.name, Tenant("1"))

@@ -9,7 +9,7 @@ import io.findify.featury.model.{Key, MapValue, Scalar, Timestamp, Write}
 import org.apache.flink.api.common.state.{KeyedStateStore, MapState, MapStateDescriptor, ValueStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class FlinkMapFeature(config: MapConfig, mapState: MapState[String, Scalar]) extends MapFeature {
   override def put(action: Write.PutTuple): Unit = {

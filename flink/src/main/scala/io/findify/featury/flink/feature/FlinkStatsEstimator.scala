@@ -14,7 +14,7 @@ import org.apache.flink.api.common.state.{
 }
 import org.apache.flink.api.common.typeinfo.TypeInformation
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class FlinkStatsEstimator(config: StatsEstimatorConfig, list: ListState[Double], size: ValueState[Int])
     extends StatsEstimator {

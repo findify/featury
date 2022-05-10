@@ -17,7 +17,7 @@ case class MemPeriodicCounter(config: PeriodicCounterConfig, cache: Cache[Key, M
         val timeKey = action.ts.toStartOfPeriod(config.period)
         val incremented = counters.get(timeKey) match {
           case Some(count) => count + action.inc
-          case None        => action.inc
+          case None        => action.inc.toLong
         }
         cache.put(action.key, counters + (timeKey -> incremented))
     }

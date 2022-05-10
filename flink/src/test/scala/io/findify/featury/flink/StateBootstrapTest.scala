@@ -15,8 +15,8 @@ import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.functions.KeySelector
 import org.apache.flink.contrib.streaming.state.{EmbeddedRocksDBStateBackend, RocksDBStateBackend}
 import org.apache.flink.core.fs.Path
-import org.apache.flink.state.api.{OperatorTransformation, Savepoint}
-
+import org.apache.flink.state.api.{OperatorTransformation, Savepoint, SavepointWriter}
+import scala.language.higherKinds
 import scala.concurrent.duration._
 
 class StateBootstrapTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
@@ -32,7 +32,6 @@ class StateBootstrapTest extends AnyFlatSpec with Matchers with FlinkStreamTest 
   )
 
   it should "write/read state dumps" in {
-    import org.apache.flink.ScalaJavaDataset._
     val path = File.newTemporaryDirectory("state_test_").deleteOnExit()
     val source = env.fromCollection[State](
       List(
@@ -45,7 +44,7 @@ class StateBootstrapTest extends AnyFlatSpec with Matchers with FlinkStreamTest 
     path.listRecursively.toList.size should be > 1
 
     val read =
-      Featury.readState(batchEnv, new Path(path.toString()), NoCompression, BulkCodec.stateProtobufCodec).toJava
+      Featury.readState(env, new Path(path.toString()), NoCompression, BulkCodec.stateProtobufCodec).javaStream
 
     val transformation = OperatorTransformation
       .bootstrapWith(read)
@@ -58,12 +57,12 @@ class StateBootstrapTest extends AnyFlatSpec with Matchers with FlinkStreamTest 
       .transform(new FeatureBootstrapFunction(schema))
 
     val savepointPath = File.newTemporaryDirectory("savepoint_tmp_").deleteOnExit()
-    Savepoint
-      .create(new EmbeddedRocksDBStateBackend(), 10)
+    SavepointWriter
+      .newSavepoint(new EmbeddedRocksDBStateBackend(), 10)
       .withOperator("whatever", transformation)
       .write(s"file://$savepointPath")
 
-    batchEnv.execute()
+    env.execute()
     savepointPath.listRecursively.toList.size should be > 0
   }
 }

@@ -1,6 +1,6 @@
 package io.findify.featury.flink.util
 
-import org.apache.flink.streaming.api.scala.DataStream
+import io.findify.flink.api.DataStream
 
 object StreamName {
 

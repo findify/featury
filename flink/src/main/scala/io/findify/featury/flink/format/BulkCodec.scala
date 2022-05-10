@@ -49,23 +49,6 @@ object BulkCodec {
     override def bucket(value: FeatureValue): String                    = value.key.fqdn
   }
 
-  lazy val featureValueJsonCodec = new BulkCodec[FeatureValue] {
-    import io.findify.featury.model.json.FeatureValueJson._
-
-    override def ext: String = ".jsonl"
-    override def read(stream: InputStream): Option[FeatureValue] = {
-      val scanner = new Scanner(stream)
-      val json    = scanner.nextLine()
-      decode[FeatureValue](json).toOption
-    }
-
-    override def write(value: FeatureValue, stream: OutputStream): Unit = {
-      val json = value.asJson.noSpaces + "\n"
-      stream.write(json.getBytes())
-    }
-    override def bucket(value: FeatureValue): String = value.key.fqdn
-  }
-
   lazy val stateProtobufCodec = new BulkCodec[State] {
     override def ext: String                                     = ".pb"
     override def bucket(value: State): String                    = value.key.fqdn

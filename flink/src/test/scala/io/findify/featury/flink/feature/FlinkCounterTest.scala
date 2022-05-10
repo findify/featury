@@ -9,6 +9,7 @@ import io.findify.featury.model.Write.{Append, Increment}
 import io.findify.flinkadt.api._
 
 import scala.concurrent.duration._
+import scala.language.higherKinds
 
 class FlinkCounterTest extends CounterSuite with FlinkStreamTest {
 

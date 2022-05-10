@@ -2,18 +2,19 @@ import Deps._
 
 name := "featury"
 
-lazy val featuryVersion = "0.3.0-M9-SNAPSHOT"
+lazy val featuryVersion = "0.3.0-M10-SNAPSHOT"
 
 version := featuryVersion
 
 lazy val shared = Seq(
-  scalaVersion := "2.12.15",
+  scalaVersion := "2.13.8",
+  crossScalaVersions := Seq("2.12.15", "2.13.8"),
   version := featuryVersion,
   organization := "io.findify"
 )
 
 lazy val mavenSettings = Seq(
-  scalacOptions ++= Seq("-feature", "-deprecation", "-Ypartial-unification"),
+  scalacOptions ++= Seq("-feature", "-deprecation"),
   publishMavenStyle := true,
   publishTo := sonatypePublishToBundle.value,
   licenses := Seq("APL2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")),
@@ -29,15 +30,12 @@ lazy val mavenSettings = Seq(
   )
 )
 
-scalaVersion := "2.12.15"
-
 lazy val core = (project in file("core")).settings(shared: _*).settings(mavenSettings: _*)
 
 lazy val flink = (project in file("flink"))
   .settings(shared: _*)
   .settings(mavenSettings: _*)
   .dependsOn(core % "test->test;compile->compile")
-  .dependsOn(rocksdb % "test->test;compile->compile")
 
 lazy val examples = (project in file("examples"))
   .settings(shared: _*)
@@ -45,36 +43,13 @@ lazy val examples = (project in file("examples"))
   .settings(publishArtifact := false)
   .dependsOn(flink % "test->test;compile->compile")
 
-lazy val api = (project in file("api"))
-  .settings(shared: _*)
-  .settings(mavenSettings: _*)
-  .dependsOn(core % "test->test;compile->compile")
-  .dependsOn(redis % "test->test;compile->compile")
-  .dependsOn(cassandra % "test->test;compile->compile")
-
 lazy val redis = (project in file("connector/redis"))
   .settings(shared: _*)
   .settings(mavenSettings: _*)
   .dependsOn(core % "test->test;compile->compile")
 
-lazy val cassandra = (project in file("connector/cassandra"))
-  .settings(shared: _*)
-  .settings(mavenSettings: _*)
-  .dependsOn(core % "test->test;compile->compile")
-
-lazy val rocksdb = (project in file("connector/rocksdb"))
-  .settings(shared: _*)
-  .settings(mavenSettings: _*)
-  .dependsOn(core % "test->test;compile->compile")
-
-lazy val memory = (project in file("connector/memory"))
-  .settings(shared: _*)
-  .settings(mavenSettings: _*)
-  .dependsOn(core % "test->test;compile->compile")
-  .dependsOn(redis % "test->test;compile->compile")
-
 lazy val root = (project in file("."))
-  .aggregate(core, flink, api, redis, cassandra, rocksdb, examples)
+  .aggregate(core, flink, redis, examples)
   .settings(
     name := "Featury",
     publishArtifact := false,

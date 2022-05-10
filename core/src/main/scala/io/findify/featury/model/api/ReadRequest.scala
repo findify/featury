@@ -6,7 +6,3 @@ import io.findify.featury.model.Key
 import io.findify.featury.model.Key.{FeatureName, Tag, Tenant}
 
 case class ReadRequest(keys: List[Key])
-
-object ReadRequest {
-  implicit val readRequestCodec: Codec[ReadRequest] = deriveCodec
-}

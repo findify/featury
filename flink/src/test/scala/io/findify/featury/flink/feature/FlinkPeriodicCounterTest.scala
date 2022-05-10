@@ -18,6 +18,7 @@ import io.findify.featury.model.Write.{Append, PeriodicIncrement}
 import io.findify.flinkadt.api._
 
 import scala.concurrent.duration._
+import scala.language.higherKinds
 
 class FlinkPeriodicCounterTest extends PeriodicCounterSuite with FlinkStreamTest {
   val k = Key(Tag(config.scope, "x1"), config.name, Tenant("1"))

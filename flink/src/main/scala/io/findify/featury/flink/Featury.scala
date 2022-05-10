@@ -6,13 +6,10 @@ import io.findify.featury.model.Key.Tenant
 import io.findify.featury.model.{Schema, _}
 import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.flink.streaming.api.scala.extensions._
-import org.apache.flink.api.scala._
 import org.apache.flink.connector.file.src.FileSource
 import org.apache.flink.core.fs.Path
 import org.apache.flink.streaming.api.datastream.DataStreamSink
-
+import io.findify.flink.api._
 import scala.concurrent.duration.Duration
 
 /** Featury Flink API
@@ -43,7 +40,8 @@ object Featury {
       ti: TypeInformation[T],
       ki: TypeInformation[Tenant],
       si: TypeInformation[String],
-      fvi: TypeInformation[FeatureValue]
+      fvi: TypeInformation[FeatureValue],
+      ski: TypeInformation[StateKey]
   ): DataStream[T] =
     events
       .connect(values)
@@ -76,7 +74,7 @@ object Featury {
             override def extractTimestamp(element: Write, recordTimestamp: Long): Long = element.ts.ts
           })
       )
-      .keyingBy(_.key)
+      .keyBy(_.key)
       .process(new FeatureProcessFunction(schema))
   }
 
@@ -139,13 +137,13 @@ object Featury {
     )
 
   def readState(
-      env: ExecutionEnvironment,
+      env: StreamExecutionEnvironment,
       path: Path,
       compress: Compress,
       codec: BulkCodec[State] = BulkCodec.stateProtobufCodec
   )(implicit
       ti: TypeInformation[State]
-  ): DataSet[State] = {
+  ): DataStream[State] = {
     env.readFile(new BulkInputFormat[State](path, codec, compress), path.toString)
   }
 

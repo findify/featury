@@ -23,18 +23,7 @@ case class Schema(
 }
 
 object Schema {
-  case class SchemaYaml(features: List[FeatureConfig])
 
-  def fromYaml(text: String): Either[ConfigParsingError, Schema] = {
-    parser.parse(text) match {
-      case Left(err) => Left(ConfigParsingError(s"cannot decode yaml: $err"))
-      case Right(yaml) =>
-        yaml.as[Schema] match {
-          case Left(err)     => Left(ConfigParsingError(s"cannot decode yaml: $err"))
-          case Right(schema) => Right(schema)
-        }
-    }
-  }
   def apply(conf: FeatureConfig): Schema = apply(List(conf))
   def apply(confs: List[FeatureConfig]): Schema = {
     val configs = for {
@@ -53,5 +42,4 @@ object Schema {
       configs = configs.toMap
     )
   }
-  implicit val schemaDecoder: Decoder[Schema] = deriveDecoder[SchemaYaml].map(s => Schema(s.features))
 }

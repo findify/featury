@@ -4,7 +4,6 @@ import better.files.File
 import io.circe.parser._
 import io.findify.featury.flink.{Featury, FlinkStreamTest}
 import io.findify.featury.flink.util.Compress
-import io.findify.featury.model.json.FeatureValueJson._
 import io.findify.featury.model.{FeatureValue, SString, ScalarValue, Timestamp}
 import io.findify.featury.utils.TestKey
 import io.findify.flinkadt.api._
@@ -44,26 +43,6 @@ class FeatureValuesReadWriteTest extends AnyFlatSpec with Matchers with FlinkStr
       )
       .executeAndCollect(100)
     read shouldBe items
-  }
-
-  it should "write events to files in json" in {
-    val path = File.newTemporaryDirectory("valuesink").deleteOnExit()
-    Featury.writeFeatures(
-      env.fromCollection[FeatureValue](items),
-      new Path(path.toString()),
-      Compress.NoCompression,
-      BulkCodec.featureValueJsonCodec
-    )
-    env.execute()
-    val decoded = for {
-      child <- path.listRecursively.filterNot(_.isDirectory).toList
-      line  <- child.lineIterator.toList
-      value <- decode[FeatureValue](line).toOption
-    } yield {
-      value
-    }
-    decoded should contain theSameElementsAs items
-    path.listRecursively.filterNot(_.isDirectory).toList.forall(_.name.endsWith(".jsonl")) shouldBe true
   }
 
 }

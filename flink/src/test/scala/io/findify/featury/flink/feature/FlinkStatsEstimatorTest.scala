@@ -9,6 +9,7 @@ import io.findify.featury.model.Write.{PutFreqSample, PutStatSample}
 import io.findify.flinkadt.api._
 
 import scala.concurrent.duration._
+import scala.language.higherKinds
 
 class FlinkStatsEstimatorTest extends StatsEstimatorSuite with FlinkStreamTest {
   val k = Key(Tag(config.scope, "x1"), config.name, Tenant("1"))

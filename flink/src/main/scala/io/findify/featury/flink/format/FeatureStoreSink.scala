@@ -1,6 +1,6 @@
 package io.findify.featury.flink.format
 
-import cats.effect.unsafe.implicits.global // yolo
+import cats.effect.unsafe.implicits.global
 import io.findify.featury.model.{FeatureValue, FeatureValueMessage}
 import io.findify.featury.values.FeatureStore
 import org.apache.flink.api.common.state.{ListState, ListStateDescriptor, ValueState, ValueStateDescriptor}
@@ -9,11 +9,12 @@ import org.apache.flink.runtime.state.{FunctionInitializationContext, FunctionSn
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
 import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class FeatureStoreSink(dest: FeatureStore, batchSize: Int)(implicit
     val ti: TypeInformation[FeatureValue],
-    iti: TypeInformation[Int]
+    iti: TypeInformation[Int],
+    lti: TypeInformation[Long]
 ) extends RichSinkFunction[FeatureValue]
     with CheckpointedFunction {
   @transient var buffer: ListState[FeatureValue] = _

@@ -1,6 +1,5 @@
 package io.findify.featury.flink.format
 
-import better.files.File
 import cats.effect.unsafe.implicits.global
 import io.findify.featury.flink.FlinkStreamTest
 import io.findify.featury.model.Key.{FeatureName, Scope, Tag, Tenant}

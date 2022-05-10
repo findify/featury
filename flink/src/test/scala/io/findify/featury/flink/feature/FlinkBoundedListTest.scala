@@ -7,7 +7,7 @@ import io.findify.featury.model.Key.{Tag, Tenant}
 import io.findify.featury.model.Write.Append
 import io.findify.featury.model.{FeatureValue, Key, Schema, Write}
 import io.findify.flinkadt.api._
-
+import scala.language.higherKinds
 import scala.concurrent.duration._
 
 class FlinkBoundedListTest extends BoundedListSuite with FlinkStreamTest {

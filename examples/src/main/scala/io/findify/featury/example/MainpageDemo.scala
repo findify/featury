@@ -13,11 +13,10 @@ import io.findify.featury.model.Write.{Increment, PeriodicIncrement, Put, PutSta
 import io.findify.featury.model.{FeatureValue, Key, SDouble, SString, Schema, Timestamp, Write}
 import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
-import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
-import org.apache.flink.api.scala._
-//import org.apache.flink.api.scala.extensions._
-
+import io.findify.flink.api._
+import io.findify.flinkadt.api._
 import scala.concurrent.duration._
+import scala.language.higherKinds
 
 object MainpageDemo {
   // our original business events

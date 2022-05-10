@@ -17,7 +17,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import io.findify.flinkadt.api._
 import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
-
+import org.apache.flink.api.common.typeinfo.TypeInformation
 import scala.concurrent.duration._
 
 class FeatureJoinTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
@@ -94,7 +94,7 @@ object FeatureJoinTest {
       values: List[FeatureValue] = Nil
   )
 
-  implicit val productJoin = new Join[ProductLine] {
+  implicit val productJoin: Join[ProductLine] = new Join[ProductLine] {
     override def join(self: ProductLine, values: List[FeatureValue]): ProductLine =
       self.copy(values = values ++ self.values)
 

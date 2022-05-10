@@ -9,7 +9,7 @@ import io.findify.featury.model.{Key, PeriodicCounterState, PeriodicCounterValue
 import org.apache.flink.api.common.state.{KeyedStateStore, MapState, MapStateDescriptor, ValueStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class FlinkPeriodicCounter(config: PeriodicCounterConfig, counters: MapState[Long, Long]) extends PeriodicCounter {
   override def put(action: Write.PeriodicIncrement): Unit = {

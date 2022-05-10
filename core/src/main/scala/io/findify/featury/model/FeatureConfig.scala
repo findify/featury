@@ -110,42 +110,4 @@ object FeatureConfig {
   ) extends FeatureConfig
 
   case class ConfigParsingError(msg: String) extends Exception(msg)
-  implicit val featureNameDecoder = Decoder.decodeString.map(FeatureName.apply)
-  implicit val tagDecoder         = deriveDecoder[Tag]
-
-  val durationFormat = "([0-9]+)\\s*([a-zA-z]+)".r
-  def decodeDuration(str: String) = str match {
-    case durationFormat(num, unit) => Try(java.lang.Long.parseLong(num)).map(FiniteDuration.apply(_, unit))
-    case _                         => Failure(ConfigParsingError(s"wrong duration format: ${str}"))
-  }
-  implicit val watchDecoder = deriveDecoder[MonitorValuesConfig]
-
-  implicit val durationDecoder = Decoder.decodeString.emapTry(decodeDuration)
-
-  implicit val statsDecoder         = deriveDecoder[StatsEstimatorConfig]
-  implicit val periodicRangeDecoder = deriveDecoder[PeriodRange]
-  implicit val periodicDecoder      = deriveDecoder[PeriodicCounterConfig]
-  implicit val freqDecoder          = deriveDecoder[FreqEstimatorConfig]
-  implicit val listDecoder          = deriveDecoder[BoundedListConfig]
-  implicit val scalarDecoder        = deriveDecoder[ScalarConfig]
-  implicit val mapDecoder           = deriveDecoder[MapConfig]
-  implicit val counterDecoder       = deriveDecoder[CounterConfig]
-
-  implicit val featureDecoder = Decoder.instance[FeatureConfig](c =>
-    for {
-      tpe <- c.downField("type").as[String]
-      decoded <- tpe match {
-        case "stats"            => statsDecoder.tryDecode(c)
-        case "periodic_counter" => periodicDecoder.tryDecode(c)
-        case "frequency"        => freqDecoder.tryDecode(c)
-        case "list"             => listDecoder.tryDecode(c)
-        case "scalar"           => scalarDecoder.tryDecode(c)
-        case "counter"          => counterDecoder.tryDecode(c)
-        case "map"              => mapDecoder.tryDecode(c)
-        case other              => Left(DecodingFailure(s"feature type $other is not supported", c.history))
-      }
-    } yield {
-      decoded
-    }
-  )
 }
