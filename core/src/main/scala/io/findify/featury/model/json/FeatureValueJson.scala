@@ -1,6 +1,6 @@
 package io.findify.featury.model.json
 
-import io.circe.{Codec, Decoder, DecodingFailure, Encoder}
+import io.circe.{Codec, Decoder, DecodingFailure, Encoder, Json, JsonObject}
 import io.findify.featury.model._
 import io.circe.generic.semiauto._
 import io.findify.featury.model.PeriodicCounterValue.PeriodicValue
@@ -21,27 +21,29 @@ object FeatureValueJson {
   implicit val mapCodec: Codec[MapValue]                              = deriveCodec
 
   implicit val featureValueEncoder: Encoder[FeatureValue] = Encoder.instance {
-    case v: ScalarValue          => scalarCodec.apply(v)
-    case v: CounterValue         => counterCodec.apply(v)
-    case v: NumStatsValue        => numStatsCodec.apply(v)
-    case v: MapValue             => mapCodec.apply(v)
-    case v: PeriodicCounterValue => periodicCounterValueCodec.apply(v)
-    case v: FrequencyValue       => freqCodec.apply(v)
-    case v: BoundedListValue     => boundedListCodec.apply(v)
+    case v: ScalarValue          => scalarCodec.apply(v).deepMerge(tpe("scalar"))
+    case v: CounterValue         => counterCodec.apply(v).deepMerge(tpe("counter"))
+    case v: NumStatsValue        => numStatsCodec.apply(v).deepMerge(tpe("stats"))
+    case v: MapValue             => mapCodec.apply(v).deepMerge(tpe("map"))
+    case v: PeriodicCounterValue => periodicCounterValueCodec.apply(v).deepMerge(tpe("pcounter"))
+    case v: FrequencyValue       => freqCodec.apply(v).deepMerge(tpe("freq"))
+    case v: BoundedListValue     => boundedListCodec.apply(v).deepMerge(tpe("list"))
   }
+
+  def tpe(value: String) = Json.fromJsonObject(JsonObject.fromMap(Map("type" -> Json.fromString(value))))
 
   implicit val featureValueDecoder: Decoder[FeatureValue] = Decoder.instance(c =>
     for {
       tpe <- c.downField("type").as[String]
       decoded <- tpe match {
-        case "freq"             => freqCodec.tryDecode(c)
-        case "scalar"           => scalarCodec.tryDecode(c)
-        case "counter"          => counterCodec.tryDecode(c)
-        case "stats"            => numStatsCodec.tryDecode(c)
-        case "periodic_counter" => periodicCounterValueCodec.tryDecode(c)
-        case "list"             => boundedListCodec.tryDecode(c)
-        case "map"              => mapCodec.tryDecode(c)
-        case other              => Left(DecodingFailure(s"value type $other is not supported", c.history))
+        case "freq"     => freqCodec.tryDecode(c)
+        case "scalar"   => scalarCodec.tryDecode(c)
+        case "counter"  => counterCodec.tryDecode(c)
+        case "stats"    => numStatsCodec.tryDecode(c)
+        case "pcounter" => periodicCounterValueCodec.tryDecode(c)
+        case "list"     => boundedListCodec.tryDecode(c)
+        case "map"      => mapCodec.tryDecode(c)
+        case other      => Left(DecodingFailure(s"value type $other is not supported", c.history))
       }
     } yield {
       decoded
