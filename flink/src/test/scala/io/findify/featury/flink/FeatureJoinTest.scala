@@ -59,7 +59,6 @@ class FeatureJoinTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
       )
 
     val features = Featury.process(writes, schema, 10.seconds)
-
     val joined =
       Featury.join[ProductLine](
         features,

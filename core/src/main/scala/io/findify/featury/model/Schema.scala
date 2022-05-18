@@ -1,8 +1,5 @@
 package io.findify.featury.model
 
-import io.circe.Decoder
-import io.circe.generic.semiauto._
-import io.circe.yaml.parser
 import io.findify.featury.model.FeatureConfig._
 import io.findify.featury.model.Key._
 

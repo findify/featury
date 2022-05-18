@@ -2,7 +2,7 @@ import Deps._
 
 name := "featury"
 
-lazy val featuryVersion = "0.3.0-M12-SNAPSHOT"
+lazy val featuryVersion = "0.3.0-M13-SNAPSHOT"
 
 version := featuryVersion
 
@@ -10,7 +10,17 @@ lazy val shared = Seq(
   scalaVersion := "2.13.8",
   crossScalaVersions := Seq("2.12.15", "2.13.8"),
   version := featuryVersion,
-  organization := "io.findify"
+  organization := "io.findify",
+  Compile / PB.targets := Seq(
+    scalapb.gen() -> (Compile / sourceManaged).value / "scalapb"
+  ),
+  scalacOptions ++= {
+    if (scalaVersion.value.startsWith("3")) {
+      Seq("-Xmax-inlines", "128")
+    } else {
+      Nil
+    }
+  }
 )
 
 lazy val mavenSettings = Seq(

@@ -165,6 +165,7 @@ object MainpageDemo {
         left.copy(values = left.values ++ values)
     }
     // here we see all the joined feature values for each tag
+
     val joined          = Featury.join(features, sessions, join, schema)
     val joinedValues    = joined.executeAndCollect().toList
     val breakpointHere2 = 1

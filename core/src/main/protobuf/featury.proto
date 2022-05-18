@@ -15,7 +15,6 @@ message Key {
     option (scalapb.message).companion_extends = "io.findify.featury.model.KeyCompanionOps";
     option (scalapb.message).extends = "io.findify.featury.model.KeyOps";
     message Scope {
-        option (scalapb.message).extends = "AnyVal";
         required string name = 1;
     }
     message Tag {
@@ -23,11 +22,9 @@ message Key {
         required string value = 2;
     }
     message FeatureName {
-        option (scalapb.message).extends = "AnyVal";
         required string value = 1;
     }
     message Tenant {
-        option (scalapb.message).extends = "AnyVal";
         required string value = 1;
     }
 
