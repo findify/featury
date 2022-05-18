@@ -19,7 +19,7 @@ libraryDependencies ++= Seq(
   "com.github.pureconfig"  %% "pureconfig-core"         % "0.17.1",
   "org.typelevel"          %% "log4cats-core"           % log4catsVersion,
   "org.typelevel"          %% "log4cats-slf4j"          % log4catsVersion,
-  "com.github.blemale"     %% "scaffeine"               % "5.1.2",
+  "com.github.blemale"     %% "scaffeine"               % "5.2.0",
   "org.scala-lang.modules" %% "scala-collection-compat" % "2.7.0"
 )
 
