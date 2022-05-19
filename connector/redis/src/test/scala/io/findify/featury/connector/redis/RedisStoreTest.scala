@@ -9,9 +9,8 @@ import redis.clients.jedis.args.FlushMode
 class RedisStoreTest extends StoreTestSuite[RedisStore] {
   override def beforeAll() = {
     super.beforeAll()
-    val jedis = store.clientPool.getResource
+    val jedis = store.client
     jedis.flushAll(FlushMode.SYNC)
-    store.clientPool.returnResource(jedis)
   }
   override def storeResource =
     Resource.make(IO {

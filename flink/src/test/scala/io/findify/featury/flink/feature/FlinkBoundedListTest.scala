@@ -1,16 +1,15 @@
 package io.findify.featury.flink.feature
 
 import io.findify.featury.features.BoundedListSuite
-import io.findify.featury.flink.{Featury, FlinkStreamTest}
-import io.findify.featury.flink.FlinkStreamTest
+import io.findify.featury.flink.{Featury, FlinkStreamTest, TypeInfoCache}
 import io.findify.featury.model.Key.{Tag, Tenant}
 import io.findify.featury.model.Write.Append
 import io.findify.featury.model.{FeatureValue, Key, Schema, Write}
 import io.findify.flinkadt.api._
-import scala.language.higherKinds
 import scala.concurrent.duration._
 
 class FlinkBoundedListTest extends BoundedListSuite with FlinkStreamTest {
+  import TypeInfoCache._
   val k = Key(Tag(config.scope, "x1"), config.name, Tenant("1"))
 
   override def write(values: List[Append]): Option[FeatureValue] = {

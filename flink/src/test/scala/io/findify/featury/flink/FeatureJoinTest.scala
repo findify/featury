@@ -17,10 +17,10 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import io.findify.flinkadt.api._
 import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
-import org.apache.flink.api.common.typeinfo.TypeInformation
 import scala.concurrent.duration._
 
 class FeatureJoinTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
+  import TypeInfoCache._
   val now = Timestamp.now
 
   it should "join with latest value" in {

@@ -1,7 +1,7 @@
 package io.findify.featury.flink.feature
 
 import io.findify.featury.features.PeriodicCounterSuite
-import io.findify.featury.flink.{Featury, FlinkStreamTest}
+import io.findify.featury.flink.{Featury, FlinkStreamTest, TypeInfoCache}
 import io.findify.featury.model.FeatureConfig.{BoundedListConfig, PeriodicCounterConfig}
 import io.findify.featury.model.{
   BoundedListValue,
@@ -21,6 +21,7 @@ import scala.concurrent.duration._
 import scala.language.higherKinds
 
 class FlinkPeriodicCounterTest extends PeriodicCounterSuite with FlinkStreamTest {
+  import TypeInfoCache._
   val k = Key(Tag(config.scope, "x1"), config.name, Tenant("1"))
 
   override def write(values: List[PeriodicIncrement]): Option[FeatureValue] = {

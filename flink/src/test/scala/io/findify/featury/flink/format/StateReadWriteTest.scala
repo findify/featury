@@ -2,7 +2,7 @@ package io.findify.featury.flink.format
 
 import better.files.File
 import io.findify.featury.flink.util.Compress
-import io.findify.featury.flink.{Featury, FlinkStreamTest}
+import io.findify.featury.flink.{Featury, FlinkStreamTest, TypeInfoCache}
 import io.findify.featury.model._
 import io.findify.featury.utils.TestKey
 import io.findify.flinkadt.api._
@@ -14,7 +14,7 @@ import org.scalatest.matchers.should.Matchers
 import scala.language.higherKinds
 
 class StateReadWriteTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
-
+  import TypeInfoCache._
   val path = File.newTemporaryDirectory("valuesink").deleteOnExit()
   val k    = TestKey(id = "p1", fname = "f1")
   val now  = Timestamp.now

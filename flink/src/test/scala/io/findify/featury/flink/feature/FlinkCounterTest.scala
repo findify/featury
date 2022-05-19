@@ -1,18 +1,16 @@
 package io.findify.featury.flink.feature
 
 import io.findify.featury.features.CounterSuite
-import io.findify.featury.flink.{Featury, FlinkStreamTest}
-import io.findify.featury.model.FeatureConfig.{CounterConfig, ScalarConfig}
+import io.findify.featury.flink.{Featury, FlinkStreamTest, TypeInfoCache}
 import io.findify.featury.model.{CounterValue, FeatureKey, FeatureValue, Key, SString, Schema, Timestamp, Write}
 import io.findify.featury.model.Key.{FeatureName, Scope, Tag, Tenant}
 import io.findify.featury.model.Write.{Append, Increment}
 import io.findify.flinkadt.api._
 
 import scala.concurrent.duration._
-import scala.language.higherKinds
 
 class FlinkCounterTest extends CounterSuite with FlinkStreamTest {
-
+  import TypeInfoCache._
   val k = Key(Tag(config.scope, "x1"), config.name, Tenant("1"))
 
   it should "process increments with refresh" in {

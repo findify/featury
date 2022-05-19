@@ -14,14 +14,14 @@ import io.findify.flinkadt.api._
 import org.apache.flink.api.common.eventtime.WatermarkStrategy
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.functions.KeySelector
-import org.apache.flink.contrib.streaming.state.{EmbeddedRocksDBStateBackend, RocksDBStateBackend}
+import org.apache.flink.contrib.streaming.state.EmbeddedRocksDBStateBackend
 import org.apache.flink.core.fs.Path
-import org.apache.flink.state.api.{OperatorTransformation, Savepoint, SavepointWriter}
+import org.apache.flink.state.api.{OperatorTransformation, SavepointWriter}
 
-import scala.language.higherKinds
 import scala.concurrent.duration._
 
 class StateBootstrapTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
+  import TypeInfoCache._
   val now = Timestamp.now
   val schema = Schema(
     List(

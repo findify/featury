@@ -1,6 +1,5 @@
 package io.findify.featury.flink.format
 
-import cats.effect.unsafe.implicits.global
 import io.findify.featury.flink.format.FeatureStoreSink.FeatureValueWriter
 import io.findify.featury.model.FeatureValue
 import io.findify.featury.values.FeatureStore
@@ -13,11 +12,11 @@ case class FeatureStoreSink(dest: FeatureStore) extends Sink[List[FeatureValue]]
 object FeatureStoreSink {
   case class FeatureValueWriter(dest: FeatureStore) extends SinkWriter[List[FeatureValue]] {
     override def write(element: List[FeatureValue], context: SinkWriter.Context): Unit = {
-      dest.write(element).unsafeRunSync()
+      dest.writeSync(element)
     }
 
     override def flush(endOfInput: Boolean): Unit = {}
 
-    override def close(): Unit = { dest.close().unsafeRunSync() }
+    override def close(): Unit = { dest.closeSync() }
   }
 }

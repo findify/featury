@@ -19,6 +19,7 @@ import scala.concurrent.duration._
 import scala.language.higherKinds
 
 object MainpageDemo {
+  import io.findify.featury.flink.TypeInfoCache._
   // our original business events
   sealed trait Event {
     def ts: Timestamp

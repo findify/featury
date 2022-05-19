@@ -1,7 +1,7 @@
 package io.findify.featury.flink.format
 
 import cats.effect.unsafe.implicits.global
-import io.findify.featury.flink.FlinkStreamTest
+import io.findify.featury.flink.{FlinkStreamTest, TypeInfoCache}
 import io.findify.featury.flink.format.FeatureStoreSinkTest.AggList
 import io.findify.featury.model.Key.{FeatureName, Scope, Tag, Tenant}
 import io.findify.featury.model.{FeatureValue, Key, SString, ScalarValue, Timestamp}
@@ -16,6 +16,7 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow
 import org.apache.flink.util.Collector
 
 class FeatureStoreSinkTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
+  import TypeInfoCache._
   val k   = Key(Tag(Scope("s"), "x1"), FeatureName("f1"), Tenant("1"))
   val now = Timestamp.now
 

@@ -1,7 +1,7 @@
 package io.findify.featury.flink.feature
 
 import io.findify.featury.features.StatsEstimatorSuite
-import io.findify.featury.flink.{Featury, FlinkStreamTest}
+import io.findify.featury.flink.{Featury, FlinkStreamTest, TypeInfoCache}
 import io.findify.featury.model.FeatureConfig.{FreqEstimatorConfig, StatsEstimatorConfig}
 import io.findify.featury.model.{FeatureKey, FeatureValue, FrequencyValue, Key, NumStatsValue, Schema, Write}
 import io.findify.featury.model.Key.{Tag, Tenant}
@@ -12,6 +12,7 @@ import scala.concurrent.duration._
 import scala.language.higherKinds
 
 class FlinkStatsEstimatorTest extends StatsEstimatorSuite with FlinkStreamTest {
+  import TypeInfoCache._
   val k = Key(Tag(config.scope, "x1"), config.name, Tenant("1"))
 
   override def write(values: List[PutStatSample]): Option[FeatureValue] = {

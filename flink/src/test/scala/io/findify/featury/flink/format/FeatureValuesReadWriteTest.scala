@@ -2,7 +2,7 @@ package io.findify.featury.flink.format
 
 import better.files.File
 import io.circe.parser._
-import io.findify.featury.flink.{Featury, FlinkStreamTest}
+import io.findify.featury.flink.{Featury, FlinkStreamTest, TypeInfoCache}
 import io.findify.featury.flink.util.Compress
 import io.findify.featury.model.{FeatureValue, SString, ScalarValue, Timestamp}
 import io.findify.featury.utils.TestKey
@@ -16,6 +16,7 @@ import scala.concurrent.duration._
 import scala.language.higherKinds
 
 class FeatureValuesReadWriteTest extends AnyFlatSpec with Matchers with FlinkStreamTest {
+  import TypeInfoCache._
 
   val k   = TestKey(id = "p1", fname = "f1")
   val now = Timestamp.now
